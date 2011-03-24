@@ -50,7 +50,7 @@ module Rets
         res.read_body(&block)
       end
 
-      # handle cookies
+      handle_cookies(response)
 
       if block_given?
         return response
@@ -60,6 +60,36 @@ module Rets
     end
 
     def handle_response(*todo)
+    end
+
+
+    def handle_cookies(response)
+      if cookies?(response)
+        self.cookies = response.get_fields('set-cookie')
+        debug "Cookies set to #{cookies.inspect}"
+      end
+    end
+
+    def cookies?(response)
+      response['set-cookie']
+    end
+
+    def cookies=(cookies)
+      @cookies ||= {}
+
+      cookies.each do |cookie|
+        cookie.match(/(\S+)=([^;]+);?/)
+
+        @cookies[$1] = $2
+      end
+
+      nil
+    end
+
+    def cookies
+      return if @cookies.nil? or @cookies.empty?
+
+      @cookies.map{ |k,v| "#{k}=#{v}" }.join("; ")
     end
 
 

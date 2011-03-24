@@ -5,6 +5,10 @@ require "rets"
 
 class TestRets < Test::Unit::TestCase
 
+  def setup
+    @client = Rets::Client.new(:login_url => "http://example.com")
+  end
+
   def test_initialize_adds_escaped_username_to_uri
     client = Rets::Client.new(
       :login_url => "http://example.com",
@@ -39,9 +43,7 @@ class TestRets < Test::Unit::TestCase
 
 
   def test_connection_uses_persistent
-    client = Rets::Client.new(:login_url => "http://example.com")
-
-    assert_kind_of Net::HTTP::Persistent, client.connection
+    assert_kind_of Net::HTTP::Persistent, @client.connection
   end
 
   def test_connection_uses_net_http
@@ -54,29 +56,72 @@ class TestRets < Test::Unit::TestCase
 
 
   def test_request
-    client = Rets::Client.new(:login_url => "http://example.com")
-
     post = mock()
     post.expects(:body=).with("fake body")
 
     Net::HTTP::Post.expects(:new).with("/foo", {}).returns(post)
 
-    client.connection.expects(:request).with(client.uri, post)
+    @client.connection.expects(:request).with(@client.uri, post)
 
-    client.request("/foo", "fake body")
+    @client.expects(:handle_cookies)
+    @client.expects(:handle_response)
+
+    @client.request("/foo", "fake body")
+  end
+
+  def test_request_with_block
+    # TODO
   end
 
   def test_request_passes_correct_arguments_to_persistent_connection
-    client = Rets::Client.new(:login_url => "http://example.com")
+    @client.connection.expects(:request).with(@client.uri, instance_of(Net::HTTP::Post))
 
-    client.connection.expects(:request).with(client.uri, instance_of(Net::HTTP::Post))
-    client.request("/foo")
+    @client.stubs(:handle_cookies)
+    @client.stubs(:handle_response)
+
+    @client.request("/foo")
   end
 
   def test_request_passes_correct_arguments_to_net_http_connection
     client = Rets::Client.new(:login_url => "http://example.com", :persistent => false)
 
     client.connection.expects(:request).with(instance_of(Net::HTTP::Post))
+
+    client.stubs(:handle_cookies)
+    client.stubs(:handle_response)
+
     client.request("/foo")
+  end
+
+
+  def test_handle_cookies
+  end
+
+  def test_cookies?
+    assert @client.cookies?({"set-cookie" => "FavoriteFruit=Plum;"})
+    assert !@client.cookies?({})
+  end
+
+  def test_cookies=
+    @client.cookies = ["abc=123; path=/; HttpOnly", "def=456;", "ghi=789"]
+
+    assert_equal(
+      {"abc" => "123", "def" => "456", "ghi" => "789"},
+      @client.instance_variable_get("@cookies")
+    )
+
+    @client.cookies = ["abc=111; blah", "zzz=123"]
+
+    assert_equal(
+      {"abc" => "111", "def" => "456", "ghi" => "789", "zzz" => "123"},
+      @client.instance_variable_get("@cookies")
+    )
+  end
+
+  def test_cookies
+    # Set an array instead of hash for predictable iteration and string construction
+    @client.instance_variable_set("@cookies", [%w(abc 123), %w(def 456)])
+
+    assert_equal "abc=123; def=456", @client.cookies
   end
 end
