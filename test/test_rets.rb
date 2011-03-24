@@ -34,4 +34,18 @@ class TestRets < Test::Unit::TestCase
     client = Rets::Client.new(:login_url => "http://example.com", :persistent => false)
     assert_equal false, client.options[:persistent]
   end
+
+  def test_connection_uses_persistent
+    client = Rets::Client.new(:login_url => "http://example.com")
+
+    assert_kind_of Net::HTTP::Persistent, client.connection
+  end
+
+  def test_connection_uses_net_http
+    client = Rets::Client.new(:login_url => "http://example.com", :persistent => false)
+
+    assert_kind_of Net::HTTP, client.connection
+    assert_equal "example.com", client.connection.address
+    assert_equal 80, client.connection.port
+  end
 end
