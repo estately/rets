@@ -10,12 +10,14 @@ require 'nokogiri'
 module Rets
   VERSION = '0.0.1'
 
-  InvalidRequest = Class.new(ArgumentError)
+  InvalidRequest    = Class.new(ArgumentError)
+  MalformedResponse = Class.new(ArgumentError)
 
   class Client
     DEFAULT_OPTIONS = { :persistent => true }
 
     attr_accessor :uri, :options
+    attr_writer   :capabilities
 
     def initialize(options)
       uri          = URI.parse(options[:login_url])
@@ -33,7 +35,7 @@ module Rets
     # RETS server provides, per http://retsdoc.onconfluence.com/display/rets172/4.10+Capability+URL+List.
     def login
       request(uri.path)
-      # return capabilities
+      capabilities
     end
 
     def search(*todo)
@@ -131,6 +133,45 @@ module Rets
 
       @cookies.map{ |k,v| "#{k}=#{v}" }.join("; ")
     end
+
+
+    # The capabilies as provided by the RETS server during login.
+    #
+    # Currently, only the path in the endpoint URLs is used[1]. Host,
+    # port, other details remaining constant with those provided to
+    # the constructor.
+    #
+    # [1] In fact, sometimes only a path is returned from the server.
+    def capabilities
+      @capabilities || login
+    end
+
+    def capabilities_needed?
+      @capabilities.nil?
+    end
+
+    def capability(name)
+      url = capabilities[name]
+
+      begin
+        capability_uri = URI.parse(url)
+      rescue URI::InvalidURIError => e
+        raise MalformedResponse, "Unable to parse capability URL: #{url.inspect}"
+      end
+
+      capability_uri
+    end
+
+    def extract_capabilities(document)
+      raw_key_values = document.xpath("//RETS/RETS-RESPONSE").text.strip
+
+      # ... :(
+      # Feel free to make this better. It has a test.
+      key_values = raw_key_values.split(/\n/).map{ |r| r.split(/=/, 2).map { |k,v| [k.strip, v].join } }
+
+      Hash[*key_values.flatten]
+    end
+
 
 
     def connection

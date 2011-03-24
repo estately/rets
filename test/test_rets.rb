@@ -110,6 +110,12 @@ class TestRets < Test::Unit::TestCase
     end
   end
 
+  def test_handle_response_handles_rets_valid_response
+    response = stub(:body => RETS_REPLY)
+
+    assert_equal response, @client.handle_response(response)
+  end
+
   def test_handle_response_handles_empty_responses
     response = stub(:body => "")
 
@@ -120,6 +126,41 @@ class TestRets < Test::Unit::TestCase
     response = stub(:body => "<notxml")
 
     assert_equal response, @client.handle_response(response)
+  end
+
+
+  def test_extract_capabilities
+    assert_equal(
+      {"Abc" => "123", "Def" => "ghi=jk"},
+      @client.extract_capabilities(Nokogiri.parse(CAPABILITIES))
+    )
+  end
+
+  def test_capability_returns_parsed_url
+    @client.capabilities = { "Foo" => "http://example.com" }
+
+    assert_equal URI.parse("http://example.com"), @client.capability("Foo")
+  end
+
+  def test_capability_raises_on_malformed_url
+    @client.capabilities = { "Foo" => "http://e$^&#$&xample.com" }
+
+    assert_raises(Rets::MalformedResponse) do
+      @client.capability("Foo")
+    end
+  end
+
+  def test_capabilities_needed?
+    assert @client.capabilities_needed?
+
+    @client.capabilities = {:x => 1}
+
+    assert !@client.capabilities_needed?
+  end
+
+  def test_capabilities_calls_login_when_nil
+    @client.expects(:login)
+    @client.capabilities
   end
 
 
@@ -155,5 +196,22 @@ end
 RETS_ERROR = <<-XML
 <?xml version="1.0"?>
 <RETS ReplyCode="123" ReplyText="Error message">
+</RETS>
+XML
+
+RETS_REPLY = <<-XML
+<?xml version="1.0"?>
+<RETS ReplyCode="0" ReplyText="OK">
+</RETS>
+XML
+
+CAPABILITIES = <<-XML
+<RETS>
+  <RETS-RESPONSE>
+
+    Abc=123
+    Def=ghi=jk
+
+  </RETS-RESPONSE>
 </RETS>
 XML
