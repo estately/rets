@@ -53,6 +53,19 @@ class TestRets < Test::Unit::TestCase
   end
 
 
+  def test_request
+    client = Rets::Client.new(:login_url => "http://example.com")
+
+    post = mock()
+    post.expects(:body=).with("fake body")
+
+    Net::HTTP::Post.expects(:new).with("/foo", {}).returns(post)
+
+    client.connection.expects(:request).with(client.uri, post)
+
+    client.request("/foo", "fake body")
+  end
+
   def test_request_passes_correct_arguments_to_persistent_connection
     client = Rets::Client.new(:login_url => "http://example.com")
 
