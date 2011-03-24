@@ -5,12 +5,14 @@ require 'digest/md5'
 
 require 'rubygems'
 require 'net/http/persistent'
+require 'nokogiri'
 
 module Rets
   VERSION = '0.0.1'
 
-  class Client
+  InvalidRequest = Class.new(ArgumentError)
 
+  class Client
     DEFAULT_OPTIONS = { :persistent => true }
 
     attr_accessor :uri, :options
@@ -52,6 +54,12 @@ module Rets
 
       handle_cookies(response)
 
+      # The provided block will be reading the response body,
+      # so we will not do any further processing here.
+      #
+      # If there is no block, then the body is accessible as
+      # usual in response.body, and we should inspect it in
+      # order to determine the next action.
       if block_given?
         return response
       else
@@ -59,7 +67,39 @@ module Rets
       end
     end
 
-    def handle_response(*todo)
+    def handle_response(response)
+
+      # TODO: detect other types of possible login methods here.
+      if Net::HTTPUnauthorized === response
+        # TODO login with digest should make a request and check the response.
+        # if the response is 401, then raise, else call handle_response.
+        # TODO handle capabilities extraction here also?
+
+        login_with_digest(uri.path, response['www-authenticate'])
+
+      else
+        begin
+          if !response.body.empty?
+            xml = Nokogiri::XML.parse(response.body, nil, nil, Nokogiri::XML::ParseOptions::STRICT)
+
+            reply_text = xml.xpath("//RETS").attr("ReplyText").value
+            reply_code = xml.xpath("//RETS").attr("ReplyCode").value.to_i
+
+            if reply_code.nonzero?
+              raise InvalidRequest, "Got error code #{reply_code} (#{reply_text})."
+            end
+
+            # TODO: investigate adding this extraction as part of login handler
+            self.capabilities = extract_capabilities(xml) if capabilities_needed?
+          end
+
+        rescue Nokogiri::XML::SyntaxError => e
+          debug "Not xml"
+
+        end
+      end
+
+      return response
     end
 
 

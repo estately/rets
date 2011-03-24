@@ -94,8 +94,34 @@ class TestRets < Test::Unit::TestCase
   end
 
 
-  def test_handle_cookies
+  def test_handle_response_instigates_login_process
+    response = Net::HTTPUnauthorized.new("","","")
+
+    @client.expects(:login_with_digest)
+
+    assert_equal response, @client.handle_response(response)
   end
+
+  def test_handle_response_handles_rets_errors
+    response = stub(:body => RETS_ERROR)
+
+    assert_raise(Rets::InvalidRequest) do
+      @client.handle_response(response)
+    end
+  end
+
+  def test_handle_response_handles_empty_responses
+    response = stub(:body => "")
+
+    assert_equal response, @client.handle_response(response)
+  end
+
+  def test_handle_response_handles_non_xml_responses
+    response = stub(:body => "<notxml")
+
+    assert_equal response, @client.handle_response(response)
+  end
+
 
   def test_cookies?
     assert @client.cookies?({"set-cookie" => "FavoriteFruit=Plum;"})
@@ -125,3 +151,9 @@ class TestRets < Test::Unit::TestCase
     assert_equal "abc=123; def=456", @client.cookies
   end
 end
+
+RETS_ERROR = <<-XML
+<?xml version="1.0"?>
+<RETS ReplyCode="123" ReplyText="Error message">
+</RETS>
+XML
