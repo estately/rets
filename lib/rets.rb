@@ -59,11 +59,22 @@ module Rets
       end
     end
 
+    def handle_response(*todo)
+    end
+
 
     def connection
       @connection ||= options[:persistent] ?
         Net::HTTP::Persistent.new :
         Net::HTTP.new(uri.host, uri.port)
+    end
+
+    def build_headers
+      {}
+    end
+
+    def debug(*lines)
+      puts lines if $DEBUG
     end
 
 
