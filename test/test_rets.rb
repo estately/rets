@@ -6,7 +6,7 @@ require "rets"
 class TestRets < Test::Unit::TestCase
 
   def setup
-    @client = Rets::Client.new(:login_url => "http://example.com")
+    @client = Rets::Client.new(:login_url => "http://example.com/login")
   end
 
   def test_initialize_adds_escaped_username_to_uri
@@ -99,7 +99,7 @@ class TestRets < Test::Unit::TestCase
   def test_handle_response_instigates_login_process
     response = Net::HTTPUnauthorized.new("","","")
 
-    @client.expects(:login_with_digest)
+    @client.expects(:handle_unauthorized_response)
 
     assert_equal response, @client.handle_response(response)
   end
@@ -131,6 +131,34 @@ class TestRets < Test::Unit::TestCase
   end
 
 
+  def test_handle_unauthorized_response_sets_capabilities_on_success
+    response = Net::HTTPSuccess.new("","","")
+    response.stubs(:body => CAPABILITIES)
+
+    @client.stubs(:build_auth)
+    @client.expects(:raw_request).with("/login").returns(response)
+
+    @client.handle_unauthorized_response({'www-authenticate' => 'xxx'})
+
+    capabilities = {"Abc" => "123", "Def" => "ghi=jk"}
+
+    assert_equal capabilities, @client.capabilities
+  end
+
+  def test_handle_unauthorized_response_raises_on_auth_failure
+    response = Net::HTTPUnauthorized.new("","","")
+    response.stubs(:body => "")
+
+    @client.stubs(:build_auth)
+    @client.expects(:raw_request).with("/login").returns(response)
+
+    assert_raises(Rets::AuthorizationFailure) do
+      @client.handle_unauthorized_response({'www-authenticate' => 'xxx'})
+    end
+  end
+
+
+
   def test_extract_capabilities
     assert_equal(
       {"Abc" => "123", "Def" => "ghi=jk"},
@@ -150,14 +178,6 @@ class TestRets < Test::Unit::TestCase
     assert_raises(Rets::MalformedResponse) do
       @client.capability("Foo")
     end
-  end
-
-  def test_capabilities_needed?
-    assert @client.capabilities_needed?
-
-    @client.capabilities = {:x => 1}
-
-    assert !@client.capabilities_needed?
   end
 
   def test_capabilities_calls_login_when_nil
@@ -208,7 +228,7 @@ RETS_REPLY = <<-XML
 XML
 
 CAPABILITIES = <<-XML
-<RETS>
+<RETS ReplyCode="0" ReplyText="OK">
   <RETS-RESPONSE>
 
     Abc=123

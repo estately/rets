@@ -10,13 +10,15 @@ require 'nokogiri'
 module Rets
   VERSION = '0.0.1'
 
-  InvalidRequest    = Class.new(ArgumentError)
-  MalformedResponse = Class.new(ArgumentError)
+  AuthorizationFailure = Class.new(ArgumentError)
+  InvalidRequest       = Class.new(ArgumentError)
+  MalformedResponse    = Class.new(ArgumentError)
+
 
   class Client
     DEFAULT_OPTIONS = { :persistent => true }
 
-    attr_accessor :uri, :options
+    attr_accessor :uri, :options, :authorization
     attr_writer   :capabilities
 
     def initialize(options)
@@ -42,7 +44,7 @@ module Rets
       search_uri = capability("Search")
     end
 
-    def request(path, body = nil, headers = build_headers, &reader)
+    def raw_request(path, body = nil, headers = build_headers, &reader)
       debug "posting to #{path}"
 
       post = Net::HTTP::Post.new(path, headers)
@@ -56,28 +58,31 @@ module Rets
 
       handle_cookies(response)
 
-      # The provided block will be reading the response body,
-      # so we will not do any further processing here.
-      #
-      # If there is no block, then the body is accessible as
-      # usual in response.body, and we should inspect it in
-      # order to determine the next action.
-      if block_given?
-        return response
+      return response
+    end
+
+    def request(*args, &block)
+      handle_response(raw_request(*args, &block))
+    end
+
+    def handle_unauthorized_response(response)
+      self.authorization = build_auth(response['www-authenticate'], uri)
+
+      response = raw_request(uri.path)
+
+      if Net::HTTPUnauthorized === response
+        raise AuthorizationFailure, "Authorization failed, check credentials?"
       else
-        return handle_response(response)
+        capabilities = extract_capabilities(Nokogiri.parse(response.body))
+
+        self.capabilities = capabilities
       end
     end
 
     def handle_response(response)
 
-      # TODO: detect other types of possible login methods here.
       if Net::HTTPUnauthorized === response
-        # TODO login with digest should make a request and check the response.
-        # if the response is 401, then raise, else call handle_response.
-        # TODO handle capabilities extraction here also?
-
-        login_with_digest(uri.path, response['www-authenticate'])
+        handle_unauthorized_response(response)
 
       else
         begin
@@ -90,9 +95,6 @@ module Rets
             if reply_code.nonzero?
               raise InvalidRequest, "Got error code #{reply_code} (#{reply_text})."
             end
-
-            # TODO: investigate adding this extraction as part of login handler
-            self.capabilities = extract_capabilities(xml) if capabilities_needed?
           end
 
         rescue Nokogiri::XML::SyntaxError => e
@@ -144,10 +146,6 @@ module Rets
     # [1] In fact, sometimes only a path is returned from the server.
     def capabilities
       @capabilities || login
-    end
-
-    def capabilities_needed?
-      @capabilities.nil?
     end
 
     def capability(name)
