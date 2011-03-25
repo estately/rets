@@ -320,10 +320,13 @@ DIGEST
   end
 
   def test_initialize_with_session_restores_state
-    session = Rets::Session.new
+    session = Rets::Session.new("Digest auth", {"Foo" => "/foo"}, "sessionid=123")
 
-    Rets::Client.any_instance.expects(:session=).with(session)
-    Rets::Client.new(:login_url => "http://example.com", :session => session)
+    client = Rets::Client.new(:login_url => "http://example.com", :session => session)
+
+    assert_equal("Digest auth",     client.authorization)
+    assert_equal({"Foo" => "/foo"}, client.capabilities)
+    assert_equal("sessionid=123",   client.cookies)
   end
 
   def test_initialize_takes_logger
