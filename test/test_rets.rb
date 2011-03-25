@@ -61,7 +61,9 @@ class TestRets < Test::Unit::TestCase
     post = mock()
     post.expects(:body=).with("fake body")
 
-    Net::HTTP::Post.expects(:new).with("/foo", {}).returns(post)
+    headers = @client.build_headers
+
+    Net::HTTP::Post.expects(:new).with("/foo", headers).returns(post)
 
     @client.connection.expects(:request).with(@client.uri, post)
 
@@ -212,6 +214,86 @@ class TestRets < Test::Unit::TestCase
     @client.instance_variable_set("@cookies", [%w(abc 123), %w(def 456)])
 
     assert_equal "abc=123; def=456", @client.cookies
+  end
+
+
+  def test_build_headers_provides_basic_headers
+    assert_equal({
+      "User-Agent"    => "Client/1.0",
+      "Host"          => "example.com:80",
+      "RETS-Version"  => "RETS/1.7.2"},
+      @client.build_headers)
+  end
+
+  def test_build_headers_provides_authorization
+    @client.authorization = "Just trust me"
+
+    assert_equal({
+      "Authorization" => "Just trust me",
+      "User-Agent"    => "Client/1.0",
+      "Host"          => "example.com:80",
+      "RETS-Version"  => "RETS/1.7.2"},
+      @client.build_headers)
+  end
+
+  def test_build_headers_provides_cookies
+    @client.cookies = ["Allowed=totally"]
+
+    assert_equal({
+      "Cookie"        => "Allowed=totally",
+      "User-Agent"    => "Client/1.0",
+      "Host"          => "example.com:80",
+      "RETS-Version"  => "RETS/1.7.2"},
+      @client.build_headers)
+  end
+
+
+  def test_tries_increments_with_each_call
+    assert_equal 0, @client.tries
+    assert_equal 1, @client.tries
+  end
+
+  def test_build_auth
+    www_authenticate =
+      %q(Digest realm="EXAMPLE", nonce="aec306b318feef4c360bc986e06d0a71", opaque="4211001cd29d5a65b3ed99f766a896b0", qop="auth")
+
+    uri = URI.parse("http://bob:secret@example.com/login")
+
+    Digest::MD5.stubs(:hexdigest => "heeheehee")
+
+    expected = <<-DIGEST.gsub(/\n/, "")
+Digest username="bob", realm="EXAMPLE", qop="auth", uri="/login", nonce="aec306b318feef4c360bc986e06d0a71", 
+nc=00000000, cnonce="heeheehee", response="heeheehee", opaque="4211001cd29d5a65b3ed99f766a896b0"
+DIGEST
+
+    assert_equal expected, @client.build_auth(www_authenticate, uri)
+  end
+
+  def test_calculate_digest_with_qop
+    Digest::MD5.expects(:hexdigest).with("bob:example:secret").returns("a1")
+    Digest::MD5.expects(:hexdigest).with("POST:/login").returns("a2")
+
+    Digest::MD5.expects(:hexdigest).with("a1:nonce:00000001:cnonce:qop:a2")
+
+    @client.calculate_digest("bob", "secret", "example", "nonce", "POST", URI.parse("/login"), "qop", "cnonce", 1)
+  end
+
+  def test_calculate_digest_without_qop
+    Digest::MD5.expects(:hexdigest).with("bob:example:secret").returns("a1")
+    Digest::MD5.expects(:hexdigest).with("POST:/login").returns("a2")
+
+    Digest::MD5.expects(:hexdigest).with("a1:nonce:a2").returns("hash")
+
+    assert_equal "hash",
+      @client.calculate_digest("bob", "secret", "example", "nonce", "POST", URI.parse("/login"), nil, "cnonce", 1)
+  end
+
+  def test_calculate_user_agent_digest
+    Digest::MD5.expects(:hexdigest).with("agent:secret").returns("a1")
+    Digest::MD5.expects(:hexdigest).with("a1::session:version").returns("hash")
+
+    assert_equal "hash",
+      @client.calculate_user_agent_digest("agent", "secret", "session", "version")
   end
 end
 
