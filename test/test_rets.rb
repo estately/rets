@@ -296,6 +296,36 @@ DIGEST
       @client.calculate_user_agent_digest("agent", "secret", "session", "version")
   end
 
+
+  def test_session_restores_state
+    session = Rets::Session.new("Digest auth", {"Foo" => "/foo"}, "sessionid=123")
+
+    @client.session = session
+
+    assert_equal("Digest auth",     @client.authorization)
+    assert_equal({"Foo" => "/foo"}, @client.capabilities)
+    assert_equal("sessionid=123",   @client.cookies)
+  end
+
+  def test_session_dumps_state
+    @client.authorization = "Digest auth"
+    @client.capabilities  = {"Foo" => "/foo"}
+    @client.cookies       = "session-id=123"
+
+    session = @client.session
+
+    assert_equal("Digest auth",     session.authorization)
+    assert_equal({"Foo" => "/foo"}, session.capabilities)
+    assert_equal("session-id=123",  session.cookies)
+  end
+
+  def test_initialize_with_session_restores_state
+    session = Rets::Session.new
+
+    Rets::Client.any_instance.expects(:session=).with(session)
+    Rets::Client.new(:login_url => "http://example.com", :session => session)
+  end
+
 end
 
 RETS_ERROR = <<-XML

@@ -1,4 +1,7 @@
 module Rets
+
+  Session = Struct.new(:authorization, :capabilities, :cookies)
+
   class Client
     DEFAULT_OPTIONS = { :persistent => true }
 
@@ -15,6 +18,8 @@ module Rets
 
       self.options = DEFAULT_OPTIONS.merge(options)
       self.uri     = uri
+
+      self.session = options[:session] if options[:session]
     end
 
 
@@ -120,6 +125,17 @@ module Rets
       return if @cookies.nil? or @cookies.empty?
 
       @cookies.map{ |k,v| "#{k}=#{v}" }.join("; ")
+    end
+
+
+    def session=(session)
+      self.authorization = session.authorization
+      self.capabilities  = session.capabilities
+      self.cookies       = session.cookies
+    end
+
+    def session
+      Session.new(authorization, capabilities, cookies)
     end
 
 
