@@ -33,7 +33,9 @@ class TestRets < Test::Unit::TestCase
     assert client.options.include?(:foo)
   end
 
-  def test_initialize_allows_options_to_be_overridden
+  def test_initialize_allows_default_options_to_be_overridden
+    assert Rets::Client::DEFAULT_OPTIONS.include?(:persistent)
+
     client = Rets::Client.new(:login_url => "http://example.com")
     assert_equal true, client.options[:persistent]
 
