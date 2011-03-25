@@ -11,6 +11,9 @@ module Rets
     attr_writer   :capabilities
 
     def initialize(options)
+      @capabilities = nil
+      @cookies      = nil
+
       uri          = URI.parse(options[:login_url])
 
       uri.user     = options.key?(:username) ? CGI.escape(options[:username]) : nil
