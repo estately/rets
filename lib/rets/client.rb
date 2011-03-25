@@ -36,7 +36,7 @@ module Rets
     end
 
     def raw_request(path, body = nil, headers = build_headers, &reader)
-      debug "posting to #{path}"
+      logger.info "posting to #{path}"
 
       post = Net::HTTP::Post.new(path, headers)
       post.body = body.to_s
@@ -89,7 +89,7 @@ module Rets
           end
 
         rescue Nokogiri::XML::SyntaxError => e
-          debug "Not xml"
+          logger.debug "Not xml"
 
         end
       end
@@ -101,7 +101,7 @@ module Rets
     def handle_cookies(response)
       if cookies?(response)
         self.cookies = response.get_fields('set-cookie')
-        debug "Cookies set to #{cookies.inspect}"
+        logger.info "Cookies set to #{cookies.inspect}"
       end
     end
 
@@ -215,8 +215,16 @@ module Rets
       (@tries += 1) - 1
     end
 
-    def debug(*lines)
-      puts lines if $DEBUG
+    def logger
+      options[:logger] || FakeLogger.new
+    end
+
+    class FakeLogger
+      def fatal(*_); end
+      def error(*_); end
+      def warn(*_);  end
+      def info(*_);  end
+      def debug(*_); end
     end
 
   end

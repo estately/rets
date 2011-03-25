@@ -326,6 +326,26 @@ DIGEST
     Rets::Client.new(:login_url => "http://example.com", :session => session)
   end
 
+  def test_initialize_takes_logger
+    logger = Object.new
+
+    client = Rets::Client.new(:login_url => "http://example.com", :logger => logger)
+
+    assert_equal logger, client.logger
+  end
+
+  def test_logger_returns_api_compatible_silent_logger
+    logger = @client.logger
+
+    assert_nothing_raised do
+      logger.fatal "foo"
+      logger.error "foo"
+      logger.warn  "foo"
+      logger.info  "foo"
+      logger.debug "foo"
+    end
+  end
+
 end
 
 RETS_ERROR = <<-XML
