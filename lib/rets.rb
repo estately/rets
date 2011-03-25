@@ -15,8 +15,6 @@ module Rets
   MalformedResponse    = Class.new(ArgumentError)
 
 
-  
-
   # Adapted from dbrain's Net::HTTP::DigestAuth gem, and RETS4R auth
   # in order to support RETS' usage of digest authentication.
   module Authentication
@@ -113,7 +111,7 @@ module Rets
       connection_args = [Net::HTTP::Persistent === connection ? uri : nil, post].compact
 
       response = connection.request(*connection_args) do |res|
-        res.read_body(&block)
+        res.read_body(&reader)
       end
 
       handle_cookies(response)

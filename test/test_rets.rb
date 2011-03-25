@@ -295,6 +295,7 @@ DIGEST
     assert_equal "hash",
       @client.calculate_user_agent_digest("agent", "secret", "session", "version")
   end
+
 end
 
 RETS_ERROR = <<-XML
