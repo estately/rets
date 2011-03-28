@@ -1,3 +1,85 @@
 #!/usr/bin/env ruby
 
-abort "you need to write me"
+require "optparse"
+
+require "rubygems"
+require "rets"
+
+class RetsCli
+  def self.parse(args)
+    url = args.shift
+
+    abort "Need login URL" unless url
+
+    actions = %w(metadata search)
+    options = {:login_url => url}
+
+    opts = OptionParser.new do |opts|
+      opts.banner = "Usage: #{File.basename($0)} [options] [query]"
+
+      opts.separator ""
+      opts.separator "Specific options:"
+
+      opts.on("-U", "--username USERNAME", "The username to authenticate with.") do |username|
+        options[:username] = username
+      end
+
+      opts.on("-P", "--password [PASSWORD]", "The password to authenticate with.","Prompts if no argument is provided.") do |password|
+        options[:password] = password #or prompt # TODO
+      end
+
+      opts.on("-A", "--agent AGENT", "User-Agent header to provide.") do |agent|
+        options[:agent] = agent
+      end
+
+      opts.on("-c", "--capabilities", "Print capabilities of the RETS server.") do |capabilities|
+        options[:capabilities] = capabilities
+      end
+
+      opts.on("-a", "--action ACTION", actions, "Action to perform (#{actions.join(",")}).") do |action|
+        options[:action] = action
+      end
+
+      opts.on("-v", "--verbose", "Be verbose.") do |verbose|
+        logger = Class.new do
+          def method_missing(method, *a, &b)
+            puts a
+          end
+        end
+
+        options[:logger] = logger.new
+      end
+
+      opts.separator ""
+      opts.separator "Common options:"
+
+      opts.on_tail("-h", "--help", "Show this message") do
+        puts opts
+        exit
+      end
+
+      opts.on_tail("--version", "Show version") do
+        puts Rets::VERSION
+        exit
+      end
+
+    end
+
+    begin
+      opts.parse!(args)
+    rescue OptionParser::InvalidArgument => e
+      abort e.message
+    end
+
+    options
+  end
+
+end
+
+options = RetsCli.parse(ARGV)
+query   = ARGV.first
+
+p options
+client = Rets::Client.new(options)
+
+p client.metadata
