@@ -65,7 +65,7 @@ class TestRets < Test::Unit::TestCase
 
     Net::HTTP::Post.expects(:new).with("/foo", headers).returns(post)
 
-    @client.connection.expects(:request).with(@client.uri, post)
+    @client.connection.expects(:request).with(@client.uri, post).returns(stub(:body))
 
     @client.expects(:handle_cookies)
     @client.expects(:handle_response)
@@ -78,7 +78,7 @@ class TestRets < Test::Unit::TestCase
   end
 
   def test_request_passes_correct_arguments_to_persistent_connection
-    @client.connection.expects(:request).with(@client.uri, instance_of(Net::HTTP::Post))
+    @client.connection.expects(:request).with(@client.uri, instance_of(Net::HTTP::Post)).returns(stub(:body))
 
     @client.stubs(:handle_cookies)
     @client.stubs(:handle_response)
@@ -89,7 +89,7 @@ class TestRets < Test::Unit::TestCase
   def test_request_passes_correct_arguments_to_net_http_connection
     client = Rets::Client.new(:login_url => "http://example.com", :persistent => false)
 
-    client.connection.expects(:request).with(instance_of(Net::HTTP::Post))
+    client.connection.expects(:request).with(instance_of(Net::HTTP::Post)).returns(stub(:body))
 
     client.stubs(:handle_cookies)
     client.stubs(:handle_response)
@@ -337,7 +337,7 @@ DIGEST
     assert_equal logger, client.logger
   end
 
-  def test_logger_returns_api_compatible_silent_logger
+  def test_default_logger_returns_api_compatible_silent_logger
     logger = @client.logger
 
     assert_nothing_raised do

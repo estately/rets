@@ -44,6 +44,9 @@ module Rets
       post = Net::HTTP::Post.new(path, headers)
       post.body = body.to_s
 
+      logger.debug headers.inspect
+      logger.debug body.to_s
+
       connection_args = [Net::HTTP::Persistent === connection ? uri : nil, post].compact
 
       response = connection.request(*connection_args) do |res|
@@ -51,6 +54,9 @@ module Rets
       end
 
       handle_cookies(response)
+
+      logger.debug response.class
+      logger.debug response.body
 
       return response
     end
