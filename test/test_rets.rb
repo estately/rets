@@ -352,17 +352,29 @@ DIGEST
   # Compact Parser
 
   def test_parse_document_raises_on_invalid_delimiter
-    # When there is a delimiter tag, and it contains bad data
+    assert_raises(Rets::Parser::Compact::InvalidDelimiter) do
+      Rets::Parser::Compact.parse_document(INVALID_DELIMETER)
+    end
   end
 
   def test_parse_document_uses_default_delimiter_when_none_provided
-    # When there is no delimiter tag
+    #  we assert that the delimeter character getting to parse is a tab
+    #  even though COMPACT defines no delimiter tag
+    Rets::Parser::Compact.expects(:parse).with("A\tB", "1\t2", "\t")
+    Rets::Parser::Compact.expects(:parse).with("A\tB", "4\t5", "\t")
+    Rets::Parser::Compact.parse_document(COMPACT)
   end
 
   def test_parse_document_delegates_to_parse
+    result = Rets::Parser::Compact.parse_document(COMPACT)
+
+    assert_equal [[%w(A 1), %w(B 2)], [%w(A 4), %w(B 5)]], result
   end
 
   def test_parse_returns_key_value_pairs
+    result = Rets::Parser::Compact.parse("A\tB", "1\t2")
+
+    assert_equal [%w(A 1), %w(B 2)], result
   end
 
   # Metadata module
@@ -438,6 +450,26 @@ CAPABILITIES = <<-XML
 
   </RETS-RESPONSE>
 </RETS>
+XML
+
+# 44 is the ASCII code for comma; an invalid delimiter.
+INVALID_DELIMETER = <<-XML
+<?xml version="1.0"?>
+<METADATA-RESOURCE Version="01.72.10306" Date="2011-03-15T19:51:22">
+  <DELIMITER>44</DELIMITER>
+  <COLUMNS>A\tB</COLUMNS>
+  <DATA>1\t2</DATA>
+  <DATA>4\t5</DATA>
+</METADATA>
+XML
+
+COMPACT = <<-XML
+<?xml version="1.0"?>
+<METADATA-RESOURCE Version="01.72.10306" Date="2011-03-15T19:51:22">
+  <COLUMNS>A\tB</COLUMNS>
+  <DATA>1\t2</DATA>
+  <DATA>4\t5</DATA>
+</METADATA>
 XML
 
 METADATA_UNKNOWN = <<-XML
