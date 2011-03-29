@@ -73,7 +73,8 @@ module Rets
     end
 
 
-    # Returns an array of classes representing the underlying metadata.
+    # Returns a container class that best represents the metadata
+    # stored in the document provided.
     def self.build(doc)
       # ... type could be RESOURCE or LOOKUP_TYPE ... :(
       tag  = doc.at("/RETS/*").name   # METADATA-RESOURCE
