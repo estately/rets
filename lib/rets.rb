@@ -17,5 +17,6 @@ end
 
 require 'rets/authentication'
 require 'rets/metadata'
+require 'rets/parser'
 
 require 'rets/client'
