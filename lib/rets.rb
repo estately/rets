@@ -16,4 +16,6 @@ module Rets
 end
 
 require 'rets/authentication'
+require 'rets/metadata'
+
 require 'rets/client'
