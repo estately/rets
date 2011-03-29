@@ -1,4 +1,5 @@
 module Rets
+  METADATA_TYPES = %w(SYSTEM RESOURCE CLASS TABLE LOOKUP LOOKUP_TYPE OBJECT)
 
   Session = Struct.new(:authorization, :capabilities, :cookies)
 
@@ -36,6 +37,33 @@ module Rets
 
     def search(*todo)
       search_uri = capability("Search")
+    end
+
+    def metadata
+      key_values = METADATA_TYPES.map do |type|
+        [type.downcase.to_sym, Metadata.build(metadata_type(type))]
+      end
+
+      Hash[*key_values.flatten]
+    end
+
+    def metadata_type(type)
+      metadata_uri = capability("GetMetadata")
+
+      body = build_key_values(
+        "Format" => "COMPACT",
+        "Type"   => "METADATA-#{type}",
+        "ID"     => "0"
+      )
+
+      headers = build_headers.merge(
+        "Content-Type"   => "application/x-www-form-urlencoded",
+        "Content-Length" => body.size.to_s
+      )
+
+      response = request(metadata_uri.path, body, headers)
+
+      Nokogiri.parse(response.body)
     end
 
     def raw_request(path, body = nil, headers = build_headers, &reader)

@@ -1,10 +1,41 @@
 module Rets
   module Metadata
     class Container
-      attr_accessor :date, :version, :rows
+      attr_accessor :doc, :date, :version
 
-      def initialize(date, version)
-        self.rows = []
+      def initialize(doc)
+        self.doc     = doc
+
+        self.date    = extract_date(doc)
+        self.version = extract_version(doc)
+      end
+
+      def extract_date(doc)
+        doc.at("/RETS/#{tag}").attr("Date")
+      end
+
+      def extract_version(doc)
+        doc.at("/RETS/#{tag}").attr("Version")
+      end
+
+      def tag
+        doc.at("/RETS/*").name
+      end
+    end
+
+    class RowContainer < Container
+
+      attr_accessor :rows
+
+      def initialize(doc)
+        super
+
+        columns = doc.at("/RETS/#{tag}/COLUMNS").text
+        datas   = doc.xpath("/RETS/#{tag}/DATA")
+
+        self.rows = datas.map do |data|
+          Hash[*Parser::Compact.parse(columns, data.text).flatten]
+        end
       end
 
       # Delegate to rows.
@@ -20,61 +51,42 @@ module Rets
       end
     end
 
+    class ResourceContainer < RowContainer
+    end
+
+    class ClassContainer < RowContainer
+    end
+
+    class TableContainer < RowContainer
+    end
+
+    class LookupContainer < RowContainer
+    end
+
+    class LookupTypeContainer < RowContainer
+    end
+
+    class ObjectContainer < RowContainer
+    end
+
+    class SystemContainer < Container
+    end
+
+
     # Returns an array of classes representing the underlying metadata.
     def self.build(doc)
       # ... type could be RESOURCE or LOOKUP_TYPE ... :(
       tag  = doc.at("/RETS/*").name   # METADATA-RESOURCE
       type = tag.sub(/^METADATA-/, "") # RESOURCE
 
-      # instantiate type, and pass doc in?
-
-      columns = doc.at("/RETS/#{tag}/COLUMNS").text
-      datas   = doc.xpath("/RETS/#{tag}/DATA")
+      class_name = type.capitalize.gsub(/_(\w)/) { $1.upcase }
 
       # TODO: check constant exists first
-      klass   = const_get(type.capitalize.gsub(/_(\w)/) { $1.upcase } )
+      container_class = const_get("#{class_name}Container")
 
-      date    = doc.at("/RETS/#{tag}").attr("Date")
-      version = doc.at("/RETS/#{tag}").attr("Version")
-
-      container = Container.new(date, version)
-
-      # Returns array of Resources, or LookupTypes etc.
-      datas.each do |data|
-        container.rows << klass.new(columns, data.text)
-      end
-
-      container
+      container_class.new(doc)
     end
 
-    class Base
-
-      def initialize(columns, data)
-        @key_values = nil
-
-        parse!(columns, data)
-      end
-
-      def parse!(columns, data)
-        @key_values = Hash[*Parser::Compact.parse(columns, data).flatten]
-      end
-
-      def [](x)
-        @key_values[x]
-      end
-    end
-
-    class Resource < Base
-    end
-
-    class Class < Base
-    end
-
-    class System < Base
-    end
-
-    class Unknown < Base
-    end
   end
 end
 

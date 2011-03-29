@@ -349,6 +349,65 @@ DIGEST
     end
   end
 
+  # Compact Parser
+
+  def test_parse_document_raises_on_invalid_delimiter
+    # When there is a delimiter tag, and it contains bad data
+  end
+
+  def test_parse_document_uses_default_delimiter_when_none_provided
+    # When there is no delimiter tag
+  end
+
+  def test_parse_document_delegates_to_parse
+  end
+
+  def test_parse_returns_key_value_pairs
+  end
+
+  # Metadata module
+
+  def test_metadata_build_uses_row_containers_for_resource
+    doc = Nokogiri.parse(METADATA_RESOURCE)
+
+    resource_container = Rets::Metadata.build(doc)
+
+    assert_kind_of Rets::Metadata::ResourceContainer, resource_container
+
+    assert_equal 13, resource_container.size
+
+    resource = resource_container.first
+
+    assert_equal "ActiveAgent", resource["StandardName"]
+  end
+
+  def test_metadata_build_uses_system_container_for_system
+    doc = Nokogiri.parse(METADATA_SYSTEM)
+
+    system_container = Rets::Metadata.build(doc)
+
+    assert_kind_of Rets::Metadata::SystemContainer, system_container
+
+    assert_equal doc, system_container.doc
+  end
+
+  def test_metadata_build_uses_base_container_for_unknown_metadata_types
+  end
+
+  # Metadata on Client
+
+  def test_metadata_returns_hash_of_metadata_types
+    Rets::METADATA_TYPES.each do |type|
+      @client.expects(:metadata_type).with(type)
+    end
+
+    Rets::Metadata.stubs(:build)
+
+    expected_keys = Rets::METADATA_TYPES.map { |t| t.downcase.to_sym }.sort_by(&:to_s)
+
+    assert_equal expected_keys, @client.metadata.keys.sort_by(&:to_s)
+  end
+
 end
 
 RETS_ERROR = <<-XML
@@ -371,5 +430,36 @@ CAPABILITIES = <<-XML
     Def=ghi=jk
 
   </RETS-RESPONSE>
+</RETS>
+XML
+
+METADATA_SYSTEM = <<-XML
+<?xml version="1.0"?>
+<RETS ReplyCode="0" ReplyText="Operation successful.">
+<METADATA-SYSTEM Version="01.72.10306" Date="2011-03-15T19:51:22">
+<SYSTEM />
+<COMMENTS />
+</METADATA-SYSTEM>
+XML
+
+METADATA_RESOURCE = <<-XML
+<?xml version="1.0"?>
+<RETS ReplyCode="0" ReplyText="Operation successful.">
+<METADATA-RESOURCE Version="01.72.10306" Date="2011-03-15T19:51:22">
+<COLUMNS>	ResourceID	StandardName	VisibleName	Description	KeyField	ClassCount	ClassVersion	ClassDate	ObjectVersion	ObjectDate	SearchHelpVersion	SearchHelpDate	EditMaskVersion	EditMaskDate	LookupVersion	LookupDate	UpdateHelpVersion	UpdateHelpDate	ValidationExpressionVersion	ValidationExpressionDate	ValidationLookupVersionValidationLookupDate	ValidationExternalVersion	ValidationExternalDate	</COLUMNS>
+<DATA>	ActiveAgent	ActiveAgent	Active Agent Search	Contains information about active agents.	MemberNumber	1	01.72.10304	2011-03-03T00:29:23	01.72.10000	2010-08-16T15:08:20	01.72.10305	2011-03-09T21:33:41			01.72.10284	2011-02-24T06:56:43		</DATA>
+<DATA>	Agent	Agent	Agent Search	Contains information about all agents.	MemberNumber	1	01.72.10303	2011-03-03T00:29:23	01.72.10000	2010-08-16T15:08:20	01.72.10305	2011-03-09T21:33:41			01.72.10284	2011-02-24T06:56:43						</DATA>
+<DATA>	History	History	History Search	Contains information about accumulated changes to each listing.	TransactionRid	1	01.72.10185	2010-12-02T02:02:58	01.72.10000	2010-08-16T15:08:20	01.72.10000	2010-08-16T22:08:30			01.72.10000	2010-08-16T15:08:20			</DATA>
+<DATA>	MemberAssociation		Member Association	Contains MLS member Association information.	MemberAssociationKey	1	01.72.10277	2011-02-23T19:11:10			01.72.10214	2011-01-06T16:41:05	01.72.10220	2011-01-06T16:41:06						</DATA>
+<DATA>	Office	Office	Office Search	Contains information about broker offices.	OfficeNumber	1	01.72.10302	2011-03-03T00:29:23	01.72.10000	2010-08-16T15:08:20	01.72.10305	2011-03-09T21:33:41		01.72.10284	2011-02-24T06:56:43						</DATA>
+<DATA>	OfficeAssociation		Office Association	Contains MLS office Association information.	OfficeAssociationKey	1	01.72.10306	2011-03-15T19:51:22			01.72.10245	2011-01-06T16:41:08	01.72.10251	2011-01-06T16:41:08						</DATA>
+<DATA>	OpenHouse	OpenHouse	Open House Search	Contains information about public open house activities.	OpenHouseRid	1	01.72.10185	2010-12-02T02:02:58	01.72.10000	2010-08-16T15:08:20	01.72.10134	2010-11-12T13:57:32			01.72.10000	2010-08-16T15:08:20									</DATA>
+<DATA>	Property	Property	Property Search	Contains information about listed properties.	ListingRid	8	01.72.10288	2011-02-24T06:59:11	01.72.10000	2010-08-16T15:08:20	01.72.10289	2011-02-24T06:59:19			01.72.10290	2011-03-01T11:06:31			</DATA>
+<DATA>	PropertyDeleted		Deleted Property Search	Contains information about deleted properties.	ListingRid	1	01.72.10185	2010-12-02T02:02:58	01.72.10000	2010-08-16T15:08:20	01.72.10000	2010-08-16T22:08:30			01.72.10000	2010-08-16T22:08:34			</DATA>
+<DATA>	PropertyWithheld		Withheld Property Search	Contains information about withheld properties.	ListingRid	8	01.72.10201	2011-01-05T19:34:36	01.72.10000	2010-08-16T15:08:20	01.72.10200	2011-01-05T19:34:34			01.72.10000	2010-08-16T22:08:34	</DATA>
+<DATA>	Prospect	Prospect	Prospect Search	Contains information about sales or listing propects.	ProspectRid	1	01.72.10185	2010-12-02T02:02:58	01.72.10000	2010-08-16T15:08:20	01.72.10000	2010-08-16T15:08:20			01.72.10000	2010-08-16T15:08:20		</DATA>
+<DATA>	Tour	Tour	Tour Search	Contains information about private tour activities.	TourRid	1	01.72.10185	2010-12-02T02:02:58	01.72.10000	2010-08-16T15:08:20	01.72.10000	2010-08-16T22:08:30		01.72.10000	2010-08-16T15:08:20						</DATA>
+<DATA>	VirtualMedia		Virtual Media	Contains information about virtual media for MLS listings.	VirtualMediaRid	1	01.72.10126	2010-11-12T13:47:41			01.72.10127	2010-11-12T13:47:41		01.72.10086	2010-11-10T09:59:11						</DATA>
+</METADATA-RESOURCE>
 </RETS>
 XML
