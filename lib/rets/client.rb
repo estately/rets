@@ -3,6 +3,38 @@ module Rets
 
   Session = Struct.new(:authorization, :capabilities, :cookies)
 
+  module Parser
+    class Compact
+      TAB = 9.chr
+
+      InvalidDelimiter = Class.new(ArgumentError)
+
+      def self.parse_document(xml)
+        doc = Nokogiri.parse(xml.to_s)
+        delimiter = doc.at("//DELIMITER")[:value]
+
+        if delimiter.empty?
+          raise InvalidDelimiter, "Empty delimiter found, unable to parse."
+        else
+          delimiter = delimiter.to_i.chr
+        end
+
+        rows = doc.xpath("//DATA")
+        columns = doc.at("//COLUMNS").text
+
+        rows.map do |data|
+          parse(columns, data.text, delimiter)
+        end
+      end
+
+      def self.parse(columns, data, delimiter = TAB)
+        column_names = columns.split(delimiter)
+
+        column_names.zip(data.split(delimiter))
+      end
+    end
+  end
+
   class Client
     DEFAULT_OPTIONS = { :persistent => true }
 
