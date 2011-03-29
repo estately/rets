@@ -277,6 +277,11 @@ module Rets
       headers
     end
 
+    def build_key_values(data)
+      data.map{|k,v| "#{CGI.escape(k.to_s)}=#{CGI.escape(v.to_s)}" }.join("&")
+    end
+
+
 
     def tries
       @tries ||= 0
