@@ -372,7 +372,7 @@ DIGEST
 
     resource_container = Rets::Metadata.build(doc)
 
-    assert_kind_of Rets::Metadata::ResourceContainer, resource_container
+    assert_instance_of Rets::Metadata::ResourceContainer, resource_container
 
     assert_equal 13, resource_container.size
 
@@ -386,12 +386,19 @@ DIGEST
 
     system_container = Rets::Metadata.build(doc)
 
-    assert_kind_of Rets::Metadata::SystemContainer, system_container
+    assert_instance_of Rets::Metadata::SystemContainer, system_container
 
     assert_equal doc, system_container.doc
   end
 
   def test_metadata_build_uses_base_container_for_unknown_metadata_types
+    doc = Nokogiri.parse(METADATA_UNKNOWN)
+
+    unknown_container = Rets::Metadata.build(doc)
+
+    assert_instance_of Rets::Metadata::Container, unknown_container
+
+    assert_equal doc, unknown_container.doc
   end
 
   # Metadata on Client
@@ -431,6 +438,14 @@ CAPABILITIES = <<-XML
 
   </RETS-RESPONSE>
 </RETS>
+XML
+
+METADATA_UNKNOWN = <<-XML
+<?xml version="1.0"?>
+<RETS ReplyCode="0" ReplyText="Operation successful.">
+<METADATA-FOO Version="01.72.10306" Date="2011-03-15T19:51:22">
+<UNKNOWN />
+</METADATA-FOO>
 XML
 
 METADATA_SYSTEM = <<-XML

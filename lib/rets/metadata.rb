@@ -80,10 +80,9 @@ module Rets
       type = tag.sub(/^METADATA-/, "") # RESOURCE
 
       class_name = type.capitalize.gsub(/_(\w)/) { $1.upcase }
+      container_name = "#{class_name}Container"
 
-      # TODO: check constant exists first
-      container_class = const_get("#{class_name}Container")
-
+      container_class = constants.include?(container_name) ? const_get(container_name) : Container
       container_class.new(doc)
     end
 
