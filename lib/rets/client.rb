@@ -37,12 +37,20 @@ module Rets
 
     # Finds records.
     #
-    # Quantity: :first or :all
-    # opts:
-    #   :resource the resource to search for.
-    #   :class    the class of the resource to search for.
-    #   :query    the DMQL2 query string to execute.
-    #   :limit    the number of records to request from the server.
+    # [quantity]  Return the first record, or an array of records.
+    #             Uses a symbol <tt>:first</tt> or <tt>:all</tt>, respectively.
+    #
+    # [opts]  A hash of arguments used to construct the search query,
+    #         using the following keys:
+    #
+    # <tt>:search_type</tt>::  Required. The resource to search for.
+    # <tt>:class</tt>::        Required. The class of the resource to search for.
+    # <tt>:query</tt>::        Required. The DMQL2 query string to execute.
+    # <tt>:limit</tt>::        The number of records to request from the server.
+    #
+    # Any other keys are converted to the RETS query format, and passed
+    # to the server as part of the query. For instance, the key <tt>:offset</tt>
+    # will be sent as +Offset+.
     #
     def find(quantity, opts = {})
       case quantity
