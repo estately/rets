@@ -30,11 +30,8 @@ module Rets
       def initialize(doc)
         super
 
-        columns = doc.at("/RETS/#{tag}/COLUMNS").text
-        datas   = doc.xpath("/RETS/#{tag}/DATA")
-
-        self.rows = datas.map do |data|
-          Hash[*Parser::Compact.parse(columns, data.text).flatten]
+        self.rows = Parser::Compact.parse_document(doc).map do |row|
+          Hash[*row.flatten]
         end
       end
 

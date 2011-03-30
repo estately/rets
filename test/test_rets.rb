@@ -441,6 +441,14 @@ DIGEST
     assert_equal [[%w(A 1), %w(B 2)], [%w(A 4), %w(B 5)]], result
   end
 
+  def test_parser_ignores_leading_tabs
+    result = Rets::Parser::Compact.parse_document(METADATA_OBJECT)
+
+    result.each do |row|
+      assert !row.any? { |k,v| k.to_s.size == 0 }, "Should not contain empty keys"
+    end
+  end
+
   def test_parse_returns_key_value_pairs
     result = Rets::Parser::Compact.parse("A\tB", "1\t2")
 
@@ -580,3 +588,5 @@ METADATA_RESOURCE = <<-XML
 </METADATA-RESOURCE>
 </RETS>
 XML
+
+METADATA_OBJECT = "<RETS ReplyCode=\"0\" ReplyText=\"V2.6.0 728: Success\">\r\n<METADATA-OBJECT Resource=\"Property\" Version=\"1.12.24\" Date=\"Wed, 1 Dec 2010 00:00:00 GMT\">\r\n<COLUMNS>\tMetadataEntryID\tObjectType\tStandardName\tMimeType\tVisibleName\tDescription\tObjectTimeStamp\tObjectCount\t</COLUMNS>\r\n<DATA>\t50045650619\tMedium\tMedium\timage/jpeg\tMedium\tA 320 x 240 Size Photo\tLastPhotoDate\tTotalPhotoCount\t</DATA>\r\n<DATA>\t20101753230\tDocumentPDF\tDocumentPDF\tapplication/pdf\tDocumentPDF\tDocumentPDF\t\t\t</DATA>\r\n<DATA>\t50045650620\tPhoto\tPhoto\timage/jpeg\tPhoto\tA 640 x 480 Size Photo\tLastPhotoDate\tTotalPhotoCount\t</DATA>\r\n<DATA>\t50045650621\tThumbnail\tThumbnail\timage/jpeg\tThumbnail\tA 128 x 96 Size Photo\tLastPhotoDate\tTotalPhotoCount\t</DATA>\r\n</METADATA-OBJECT>\r\n</RETS>\r\n"

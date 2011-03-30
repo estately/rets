@@ -15,11 +15,11 @@ module Rets
           raise InvalidDelimiter, "Empty or invalid delimiter found, unable to parse."
         end
 
-        columns = doc.at("//COLUMNS").text
+        columns = doc.at("//COLUMNS").text.lstrip
         rows    = doc.xpath("//DATA")
 
         rows.map do |data|
-          self.parse(columns, data.text, delimiter)
+          self.parse(columns, data.text.lstrip, delimiter)
         end
       end
 
