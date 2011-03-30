@@ -110,7 +110,7 @@ class TestRets < Test::Unit::TestCase
     response = Net::HTTPSuccess.new("", "", "")
     response.stubs(:body => RETS_ERROR)
 
-    assert_raise(Rets::InvalidRequest) do
+    assert_raise Rets::InvalidRequest do
       @client.handle_response(response)
     end
   end
@@ -166,7 +166,7 @@ class TestRets < Test::Unit::TestCase
     @client.stubs(:build_auth)
     @client.expects(:raw_request).with("/login").returns(response)
 
-    assert_raises(Rets::AuthorizationFailure) do
+    assert_raise Rets::AuthorizationFailure do
       @client.handle_unauthorized_response({'www-authenticate' => 'xxx'})
     end
   end
@@ -189,7 +189,7 @@ class TestRets < Test::Unit::TestCase
   def test_capability_raises_on_malformed_url
     @client.capabilities = { "Foo" => "http://e$^&#$&xample.com" }
 
-    assert_raises(Rets::MalformedResponse) do
+    assert_raise Rets::MalformedResponse do
       @client.capability("Foo")
     end
   end
@@ -375,7 +375,7 @@ DIGEST
   end
 
   def test_find_raises_on_unknown_quantity
-    assert_raises ArgumentError do
+    assert_raise ArgumentError do
       @client.find(:incorrect, :foo => :bar)
     end
   end
@@ -422,7 +422,7 @@ DIGEST
   # Compact Parser
 
   def test_parse_document_raises_on_invalid_delimiter
-    assert_raises(Rets::Parser::Compact::InvalidDelimiter) do
+    assert_raise Rets::Parser::Compact::InvalidDelimiter do
       Rets::Parser::Compact.parse_document(INVALID_DELIMETER)
     end
   end
