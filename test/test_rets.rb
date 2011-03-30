@@ -361,6 +361,64 @@ DIGEST
     end
   end
 
+
+  def test_find_first_calls_find_every_with_limit_one
+    @client.expects(:find_every).with(:limit => 1, :foo => :bar).returns([1,2,3])
+
+    assert_equal 1, @client.find(:first, :foo => :bar, :limit => 5), "User-specified limit should be ignored"
+  end
+
+  def test_find_all_calls_find_every
+    @client.expects(:find_every).with(:limit => 5, :foo => :bar).returns([1,2,3])
+
+    assert_equal [1,2,3], @client.find(:all, :limit => 5, :foo => :bar)
+  end
+
+  def test_find_raises_on_unknown_quantity
+    assert_raises ArgumentError do
+      @client.find(:incorrect, :foo => :bar)
+    end
+  end
+
+  def test_find_provides_default_values
+    @client.expects(:build_key_values).
+      with("QueryType" => "DMQL2", "Format" => "COMPACT", "Query" => "x", "Foo" => "bar").
+      returns("xxx")
+
+    @client.stubs(:capability => URI.parse("/example"))
+    @client.stubs(:request_with_compact_response)
+
+    @client.find(:all, :query => "x", :foo => "bar")
+  end
+
+  def test_find_allows_defaults_to_be_overridden
+    @client.expects(:build_key_values).
+      with("QueryType" => "DMQL3000", "Format" => "COMPACT", "Query" => "x", "Foo" => "bar").
+      returns("xxx")
+
+    @client.stubs(:capability => URI.parse("/example"))
+    @client.stubs(:request_with_compact_response)
+
+    @client.find(:all, :query => "x", :foo => "bar", :query_type => "DMQL3000")
+  end
+
+  def test_find
+    @client.stubs(:capability => URI.parse("/example"))
+
+    @client.expects(:request_with_compact_response).
+      with("/example", instance_of(String), instance_of(Hash)).
+      returns([["foo", "bar"]])
+
+    results = @client.find(:all, :resource => "Property", :class => "Res", :query => "x", :foo => "bar")
+
+    assert_equal [["foo", "bar"]], results
+  end
+
+  def test_fixup_keys
+    assert_equal({ "Foo" => "bar" },    @client.fixup_keys(:foo => "bar"))
+    assert_equal({ "FooFoo" => "bar" }, @client.fixup_keys(:foo_foo => "bar"))
+  end
+
   # Compact Parser
 
   def test_parse_document_raises_on_invalid_delimiter

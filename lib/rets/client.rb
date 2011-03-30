@@ -35,8 +35,55 @@ module Rets
       capabilities
     end
 
-    def search(*todo)
+    # Finds records.
+    #
+    # Quantity: :first or :all
+    # opts:
+    #   :resource the resource to search for.
+    #   :class    the class of the resource to search for.
+    #   :query    the DMQL2 query string to execute.
+    #   :limit    the number of records to request from the server.
+    #
+    def find(quantity, opts = {})
+      case quantity
+        when :first  then find_every(opts.merge(:limit => 1)).first
+        when :all    then find_every(opts)
+        else raise ArgumentError, "First argument must be :first or :all"
+      end
+    end
+
+    alias search find
+
+    def find_every(opts = {})
       search_uri = capability("Search")
+
+      opts = fixup_keys(opts)
+
+      defaults = {"QueryType" => "DMQL2", "Format" => "COMPACT"}
+
+      query = defaults.merge(opts)
+
+      body = build_key_values(query)
+
+      headers = build_headers.merge(
+        "Content-Type"   => "application/x-www-form-urlencoded",
+        "Content-Length" => body.size.to_s
+      )
+
+      request_with_compact_response(search_uri.path, body, headers)
+    end
+
+    # Changes keys to be camel cased, per the RETS standard for queries.
+    def fixup_keys(hash)
+      fixed_hash = {}
+
+      hash.each do |key, value|
+        camel_cased_key = key.to_s.capitalize.gsub(/_(\w)/) { $1.upcase }
+
+        fixed_hash[camel_cased_key] = value
+      end
+
+      fixed_hash
     end
 
     def metadata
@@ -91,6 +138,12 @@ module Rets
 
     def request(*args, &block)
       handle_response(raw_request(*args, &block))
+    end
+
+    def request_with_compact_response(path, body, headers)
+      response = request(path, body, headers)
+
+      Parser::Compact.parse response.body
     end
 
     def handle_unauthorized_response(response)
