@@ -109,10 +109,10 @@ module Rets
 
     def handle_response(response)
 
-      if Net::HTTPUnauthorized === response
+      if Net::HTTPUnauthorized === response # 401
         handle_unauthorized_response(response)
 
-      else
+      elsif Net::HTTPSuccess === response # 2xx
         begin
           if !response.body.empty?
             xml = Nokogiri::XML.parse(response.body, nil, nil, Nokogiri::XML::ParseOptions::STRICT)
@@ -129,6 +129,9 @@ module Rets
           logger.debug "Not xml"
 
         end
+
+      else
+        raise UnknownResponse, "Unable to handle response #{response.class}"
       end
 
       return response

@@ -107,7 +107,8 @@ class TestRets < Test::Unit::TestCase
   end
 
   def test_handle_response_handles_rets_errors
-    response = stub(:body => RETS_ERROR)
+    response = Net::HTTPSuccess.new("", "", "")
+    response.stubs(:body => RETS_ERROR)
 
     assert_raise(Rets::InvalidRequest) do
       @client.handle_response(response)
@@ -115,21 +116,32 @@ class TestRets < Test::Unit::TestCase
   end
 
   def test_handle_response_handles_rets_valid_response
-    response = stub(:body => RETS_REPLY)
+    response = Net::HTTPSuccess.new("", "", "")
+    response.stubs(:body => RETS_REPLY)
 
     assert_equal response, @client.handle_response(response)
   end
 
   def test_handle_response_handles_empty_responses
-    response = stub(:body => "")
+    response = Net::HTTPSuccess.new("", "", "")
+    response.stubs(:body => "")
 
     assert_equal response, @client.handle_response(response)
   end
 
   def test_handle_response_handles_non_xml_responses
-    response = stub(:body => "<notxml")
+    response = Net::HTTPSuccess.new("", "", "")
+    response.stubs(:body => "<notxml")
 
     assert_equal response, @client.handle_response(response)
+  end
+
+  def test_handle_response_raises_on_unknown_response_code
+    response = Net::HTTPServerError.new("", "", "")
+
+    assert_raise Rets::UnknownResponse do
+      assert_equal response, @client.handle_response(response)
+    end
   end
 
 

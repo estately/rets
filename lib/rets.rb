@@ -13,6 +13,7 @@ module Rets
   AuthorizationFailure = Class.new(ArgumentError)
   InvalidRequest       = Class.new(ArgumentError)
   MalformedResponse    = Class.new(ArgumentError)
+  UnknownResponse      = Class.new(ArgumentError)
 end
 
 require 'rets/authentication'
