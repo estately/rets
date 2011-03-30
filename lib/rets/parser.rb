@@ -9,14 +9,14 @@ module Rets
         doc = Nokogiri.parse(xml.to_s)
 
         delimiter = doc.at("//DELIMITER")
-        delimiter = delimiter ? delimiter.text.to_i.chr : TAB
+        delimiter = delimiter ? delimiter.attr(:value).to_i.chr : TAB
 
         if delimiter.empty? || delimiter == ","
-          raise InvalidDelimiter, "Empty delimiter found, unable to parse."
+          raise InvalidDelimiter, "Empty or invalid delimiter found, unable to parse."
         end
 
-        rows = doc.xpath("//DATA")
         columns = doc.at("//COLUMNS").text
+        rows    = doc.xpath("//DATA")
 
         rows.map do |data|
           self.parse(columns, data.text, delimiter)

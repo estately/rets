@@ -143,7 +143,7 @@ module Rets
     def request_with_compact_response(path, body, headers)
       response = request(path, body, headers)
 
-      Parser::Compact.parse response.body
+      Parser::Compact.parse_document response.body
     end
 
     def handle_unauthorized_response(response)
