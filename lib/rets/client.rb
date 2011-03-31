@@ -14,6 +14,7 @@ module Rets
     def initialize(options)
       @capabilities = nil
       @cookies      = nil
+      @metadata     = nil
 
       uri          = URI.parse(options[:login_url])
 
@@ -164,11 +165,15 @@ module Rets
     end
 
     def metadata
-      key_values = METADATA_TYPES.map do |type|
-        [type.downcase.to_sym, Metadata.build(metadata_type(type))]
+      return @metadata if @metadata
+
+      @metadata = {}
+
+      METADATA_TYPES.each do |type|
+        @metadata[type.downcase.to_sym] = Metadata.build(metadata_type(type))
       end
 
-      Hash[*key_values.flatten]
+      @metadata
     end
 
     def metadata_type(type)
