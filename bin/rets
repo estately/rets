@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 
 require "optparse"
+require "pp"
 
 require "rubygems"
 require "rets"
@@ -11,7 +12,7 @@ class RetsCli
 
     abort "Need login URL" unless url
 
-    actions = %w(metadata search)
+    actions = %w(metadata search object)
     options = {:login_url => url}
 
     opts = OptionParser.new do |opts|
@@ -38,6 +39,11 @@ class RetsCli
 
       opts.on("-a", "--action ACTION", actions, "Action to perform (#{actions.join(",")}).") do |action|
         options[:action] = action
+      end
+
+      opts.on("-m", "--metadata [FORMAT]", %w(tree long short), "Print metadata.", "Format is short, long or tree.", "defaults to short.") do |format|
+        options[:action] = "metadata"
+        options[:metadata_format] = format || "short"
       end
 
       opts.on("-v", "--verbose", "Be verbose.") do |verbose|
@@ -79,7 +85,148 @@ end
 options = RetsCli.parse(ARGV)
 query   = ARGV.first
 
-p options
 client = Rets::Client.new(options)
 
-p client.metadata
+COUNT = Struct.new(:exclude, :include, :only).new(0,1,2)
+
+if options[:capabilities]
+  pp client.capabilities
+end
+
+case options[:action]
+  when "metadata" then
+    metadata = client.metadata
+
+    if options[:metadata_format] != "tree"
+      preferred_fields = %w(ClassName SystemName ResourceID StandardName VisibleName MetadataEntryID KeyField)
+
+
+      # All types except system
+      types = Rets::METADATA_TYPES.map { |t| t.downcase.to_sym } - [:system]
+
+      types.each do |type|
+        # if RowContainer ...
+        rows = metadata[type]
+
+        puts type.to_s.capitalize
+        puts "="*40
+
+        print_key_value = lambda do |k,v|
+          key   = "#{k}:".ljust(35)
+          value = "#{v}".ljust(35)
+
+          puts [key, value].join
+        end
+
+        rows.each do |row|
+          top, rest = row.partition { |k,v| preferred_fields.include?(k) }
+
+          top.each(&print_key_value)
+
+          rest.sort_by{|k,v|k}.each(&print_key_value) if options[:metadata_format] == "long"
+
+          puts
+        end
+
+        puts
+      end
+
+    # Tree format
+    else
+
+      resource_containers = metadata[:resource] # => [ResourceContainer, ...]
+      class_containers    = metadata[:class]    # => [ClassContainer, ...]
+      table_containers    = metadata[:table]
+
+      lookup_containers      = metadata[:lookup]
+      lookup_type_containers = metadata[:lookup_type]
+
+      resource_containers.each do |resource_container|
+
+        resource_container.resources.each do |resource|
+          puts "Resource: #{resource_id = resource["ResourceID"]}; KeyField: #{resource["KeyField"]}"
+
+          class_container = class_containers.detect { |c| c.resource == resource_id }
+
+          class_container.classes.each do |clazz|
+            puts "  Class: #{class_name = clazz["ClassName"]}"
+
+            table_container = table_containers.detect { |t| t.resource == resource_id && t.class == class_name }
+
+            table_container.tables.each do |table|
+              table_desc = "    Table: #{table["SystemName"]}"
+
+              if table["LookupName"].strip.empty?
+                table_desc += " #{table["DataType"]}"
+              else
+                table_desc += " references #{table["LookupName"]}"
+              end
+
+              puts table_desc
+            end
+
+            puts
+          end
+
+          # Lookups
+
+          resource_lookup_containers = lookup_containers.select { |lc| lc.resource == resource_id }
+
+          resource_lookup_containers.each do |lookup_container|
+
+            lookup_container.lookups.each do |lookup|
+
+              puts "  Lookup: #{resource_id}:#{lookup_name = lookup["LookupName"]}"
+
+              resource_lookup_type_containers = lookup_type_containers.select { |ltc| ltc.resource == resource_id && ltc.lookup == lookup_name }
+
+              resource_lookup_type_containers.each do |lookup_type_container|
+
+                lookup_type_container.lookup_types.each do |lookup_type|
+                  puts "    Lookup Type: #{lookup_type["LongValue"]} -> #{lookup_type["Value"]}"
+                end
+              end
+            end
+          end
+          puts
+
+        end
+      end
+    end
+
+  when "search" then
+    p client.find(:all,
+                  :search_type => "Property",
+                  :class       => "RES",
+                  :query       => "(ListingStatus=|10000069142)",
+                  :count       => COUNT.include,
+                  :limit       => 5).first
+
+  when "object" then
+
+    def write_objects(parts)
+      parts.each do |part|
+        cid = part.headers["content-id"].to_i
+        oid = part.headers["object-id"].to_i
+
+        File.open("tmp/#{cid}-#{oid}", "wb") do |f|
+          puts f.path
+
+          f.write part.body
+        end
+      end
+    end
+
+    parts = client.all_objects(
+      :resource    => "Property",
+      :resource_id => 90020062739, # id from KeyField for a given property
+      :object_type => "Photo"
+    )
+
+    parts.each { |pt| p pt.headers }
+
+    write_objects(parts)
+
+end
+
+
