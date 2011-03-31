@@ -543,13 +543,17 @@ DIGEST
   def test_metadata_build_uses_row_containers_for_resource
     doc = Nokogiri.parse(METADATA_RESOURCE)
 
-    resource_container = Rets::Metadata.build(doc)
+    containers = Rets::Metadata.build(doc)
+
+    assert_equal 1, containers.size
+
+    resource_container = containers.first
 
     assert_instance_of Rets::Metadata::ResourceContainer, resource_container
 
-    assert_equal 13, resource_container.size
+    assert_equal 13, resource_container.resources.size
 
-    resource = resource_container.first
+    resource = resource_container.resources.first
 
     assert_equal "ActiveAgent", resource["StandardName"]
   end
@@ -557,21 +561,25 @@ DIGEST
   def test_metadata_build_uses_system_container_for_system
     doc = Nokogiri.parse(METADATA_SYSTEM)
 
-    system_container = Rets::Metadata.build(doc)
+    containers = Rets::Metadata.build(doc)
 
-    assert_instance_of Rets::Metadata::SystemContainer, system_container
+    assert_equal 1, containers.size
 
-    assert_equal doc, system_container.doc
+    assert_instance_of Rets::Metadata::SystemContainer, containers.first
   end
 
   def test_metadata_build_uses_base_container_for_unknown_metadata_types
     doc = Nokogiri.parse(METADATA_UNKNOWN)
 
-    unknown_container = Rets::Metadata.build(doc)
+    containers = Rets::Metadata.build(doc)
 
-    assert_instance_of Rets::Metadata::Container, unknown_container
+    assert_equal 1, containers.size
 
-    assert_equal doc, unknown_container.doc
+    assert_instance_of Rets::Metadata::Container, containers.first
+  end
+
+  def test_metadata_uses
+    #TODO
   end
 
   # Metadata on Client
