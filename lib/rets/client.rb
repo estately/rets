@@ -81,6 +81,75 @@ module Rets
       request_with_compact_response(search_uri.path, body, headers)
     end
 
+    # Returns an array of all objects associated with the given resource.
+    def all_objects(opts = {})
+      objects("*", opts)
+    end
+
+    # Returns an array of specified objects.
+    def objects(object_ids, opts = {})
+      response = case object_ids
+        when String then fetch_object(object_ids, opts)
+        when Array  then fetch_object(object_ids.join(","), opts)
+        else raise ArgumentError, "todo"
+      end
+
+      create_parts_from_response(response)
+    end
+
+    def create_parts_from_response(response)
+      content_type = response["content-type"]
+
+      if content_type.include?("multipart")
+        boundary = content_type.scan(/boundary="(.*?)"/).to_s
+
+        parts = Parser::Multipart.parse(response.body, boundary)
+
+        logger.debug "Found #{parts.size} parts"
+
+        return parts
+      else
+        # fake a multipart for interface compatibility
+        headers = {}
+        response.each { |k,v| headers[k] = v }
+
+        part = Parser::Multipart::Part.new(headers, response.body)
+
+        return [part]
+      end
+    end
+
+    # Returns a single object.
+    #
+    # resource     RETS resource as defined in the resource metadata.
+    # object_type  an object type defined in the object metadata.
+    # resource_id  the KeyField value of the given resource instance.
+    # object_id    can be "*", or a comma delimited string of one or more integers.
+    def object(object_id, opts = {})
+      response = fetch_object(object_id, opts)
+
+      response.body
+    end
+
+    def fetch_object(object_id, opts = {})
+      object_uri = capability("GetObject")
+
+      body = build_key_values(
+        "Resource" => opts[:resource],
+        "Type"     => opts[:object_type],
+        "ID"       => "#{opts[:resource_id]}:#{object_id}",
+        "Location" => 0
+      )
+
+      headers = build_headers.merge(
+        "Accept"         => "image/jpeg, image/png;q=0.5, image/gif;q=0.1",
+        "Content-Type"   => "application/x-www-form-urlencoded",
+        "Content-Length" => body.size.to_s
+      )
+
+      request(object_uri.path, body, headers)
+    end
+
     # Changes keys to be camel cased, per the RETS standard for queries.
     def fixup_keys(hash)
       fixed_hash = {}

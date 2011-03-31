@@ -419,6 +419,73 @@ DIGEST
     assert_equal({ "FooFoo" => "bar" }, @client.fixup_keys(:foo_foo => "bar"))
   end
 
+  def test_all_objects_calls_objects
+    @client.expects(:objects).with("*", :foo => :bar)
+
+    @client.all_objects(:foo => :bar)
+  end
+
+  def test_objects_handles_string_argument
+    @client.expects(:fetch_object).with("*", :foo => :bar)
+    @client.stubs(:create_parts_from_response)
+
+    @client.objects("*", :foo => :bar)
+  end
+
+  def test_objects_handle_array_argument
+    @client.expects(:fetch_object).with("1,2", :foo => :bar)
+    @client.stubs(:create_parts_from_response)
+
+    @client.objects([1,2], :foo => :bar)
+  end
+
+  def test_objects_raises_on_other_arguments
+    assert_raise ArgumentError do
+      @client.objects(Object.new, :foo => :bar)
+    end
+  end
+
+  def test_create_parts_from_response_returns_multiple_parts_when_multipart_response
+    response = {"content-type" => 'multipart; boundary="--simple boundary"'}
+    response.stubs(:body => MULITPART_RESPONSE)
+
+    Rets::Parser::Multipart.expects(:parse).
+      with(MULITPART_RESPONSE, "--simple boundary").
+      returns([])
+
+    @client.create_parts_from_response(response)
+  end
+
+  def test_create_parts_from_response_returns_a_single_part_when_not_multipart_response
+    response = {"content-type" => "text/plain"}
+    response.stubs(:body => "fakebody")
+
+    parts = @client.create_parts_from_response(response)
+
+    assert_equal 1, parts.size
+
+    part = parts.first
+
+    assert_equal response,   part.headers
+    assert_equal "fakebody", part.body
+  end
+
+  def test_object_calls_fetch_object
+    response = stub(:body => "foo")
+
+    @client.expects(:fetch_object).with("1", :foo => :bar).returns(response)
+
+    assert_equal "foo", @client.object("1", :foo => :bar)
+  end
+
+  def test_fetch_object
+    # TODO
+  end
+
+  # Multipart Parser
+
+  # TODO
+
   # Compact Parser
 
   def test_parse_document_raises_on_invalid_delimiter
@@ -590,3 +657,23 @@ METADATA_RESOURCE = <<-XML
 XML
 
 METADATA_OBJECT = "<RETS ReplyCode=\"0\" ReplyText=\"V2.6.0 728: Success\">\r\n<METADATA-OBJECT Resource=\"Property\" Version=\"1.12.24\" Date=\"Wed, 1 Dec 2010 00:00:00 GMT\">\r\n<COLUMNS>\tMetadataEntryID\tObjectType\tStandardName\tMimeType\tVisibleName\tDescription\tObjectTimeStamp\tObjectCount\t</COLUMNS>\r\n<DATA>\t50045650619\tMedium\tMedium\timage/jpeg\tMedium\tA 320 x 240 Size Photo\tLastPhotoDate\tTotalPhotoCount\t</DATA>\r\n<DATA>\t20101753230\tDocumentPDF\tDocumentPDF\tapplication/pdf\tDocumentPDF\tDocumentPDF\t\t\t</DATA>\r\n<DATA>\t50045650620\tPhoto\tPhoto\timage/jpeg\tPhoto\tA 640 x 480 Size Photo\tLastPhotoDate\tTotalPhotoCount\t</DATA>\r\n<DATA>\t50045650621\tThumbnail\tThumbnail\timage/jpeg\tThumbnail\tA 128 x 96 Size Photo\tLastPhotoDate\tTotalPhotoCount\t</DATA>\r\n</METADATA-OBJECT>\r\n</RETS>\r\n"
+
+MULITPART_RESPONSE = [
+  "--simple boundary",
+  "Content-Type: image/jpeg",
+  "Content-Length: 10",
+  "Content-ID: 90020062739",
+  "Object-ID: 1",
+  "",
+  "xxxxxxxx",
+  "--simple boundary",
+  "Content-Type: image/jpeg",
+  "Content-Length: 10",
+  "Content-ID: 90020062739",
+  "Object-ID: 2",
+  "",
+  "yyyyyyyy",
+  "--simple boundary",
+  ""
+].join("\r\n")
+
