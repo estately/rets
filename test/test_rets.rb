@@ -596,6 +596,14 @@ DIGEST
     assert_equal expected_keys, @client.metadata.keys.sort_by(&:to_s)
   end
 
+  def test_metadata_caches
+    hash = {}
+
+    @client.instance_variable_set("@metadata", hash)
+
+    assert_same hash, @client.metadata, "Should be memoized"
+  end
+
 end
 
 RETS_ERROR = <<-XML
