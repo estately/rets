@@ -342,6 +342,7 @@ DIGEST
     metadata = {}
 
     client = Rets::Client.new(:login_url => "http://example.com", :metadata => metadata)
+    client.stubs(:metadata_current? => true)
 
     assert_same metadata, client.metadata
   end
@@ -502,9 +503,38 @@ DIGEST
   def test_metadata_caches
     hash = {}
 
+    @client.stubs(:metadata_current? => true)
     @client.instance_variable_set("@metadata", hash)
 
     assert_same hash, @client.metadata, "Should be memoized"
   end
+
+  def test_metadata_current_version
+    capabilities = { "MetadataTimeStamp" => "123456789", "MetadataVersion" => "1.2.3" }
+    system_metadata = Struct.new(:date, :version).new("123456789", "1.2.2")
+
+    @client.stubs(:capabilities => capabilities)
+
+    assert !@client.metadata_current?(system_metadata)
+  end
+
+  def test_metadata_current_timestamp
+    capabilities = { "MetadataTimeStamp" => "123456789", "MetadataVersion" => "1.2.3" }
+    system_metadata = Struct.new(:date, :version).new("1234567", "1.2.3")
+
+    @client.stubs(:capabilities => capabilities)
+
+    assert !@client.metadata_current?(system_metadata)
+  end
+
+  def test_metadata_current
+    capabilities = { "MetadataTimeStamp" => "123456789", "MetadataVersion" => "1.2.3" }
+    system_metadata = Struct.new(:date, :version).new("123456789", "1.2.3")
+
+    @client.stubs(:capabilities => capabilities)
+
+    assert @client.metadata_current?(system_metadata)
+  end
+
 
 end

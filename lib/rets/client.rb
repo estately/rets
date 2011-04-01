@@ -165,12 +165,22 @@ module Rets
       fixed_hash
     end
 
+    def metadata_current?(current_metadata)
+      remote_metadata_timestamp = capabilities["MetadataTimeStamp"]
+      our_metadata_timestamp    = current_metadata.date
+
+      remote_metadata_version   = capabilities["MetadataVersion"]
+      our_metadata_version      = current_metadata.version
+
+      (remote_metadata_version == our_metadata_version) && (remote_metadata_timestamp == our_metadata_timestamp)
+    end
+
     def metadata=(metadata)
       @metadata = metadata
     end
 
     def metadata
-      return @metadata if @metadata
+      return @metadata if @metadata && metadata_current?(@metadata)
 
       @metadata = {}
 
