@@ -8,18 +8,15 @@ require "rets"
 
 class RetsCli
   def self.parse(args)
-    url = args.shift
-
-    abort "Need login URL" unless url
 
     actions = %w(metadata search object)
-    options = {:login_url => url}
+    options = {}
 
     opts = OptionParser.new do |opts|
-      opts.banner = "Usage: #{File.basename($0)} [options] [query]"
+      opts.banner = "Usage: #{File.basename($0)} URL [options] [query]"
 
       opts.separator ""
-      opts.separator "Specific options:"
+      opts.separator "Authentication options:"
 
       opts.on("-U", "--username USERNAME", "The username to authenticate with.") do |username|
         options[:username] = username
@@ -32,6 +29,9 @@ class RetsCli
       opts.on("-A", "--agent AGENT", "User-Agent header to provide.") do |agent|
         options[:agent] = agent
       end
+
+      opts.separator ""
+      opts.separator "Actions:"
 
       opts.on("-c", "--capabilities", "Print capabilities of the RETS server.") do |capabilities|
         options[:capabilities] = capabilities
@@ -46,7 +46,10 @@ class RetsCli
         options[:metadata_format] = format || "short"
       end
 
-      opts.on("-v", "--verbose", "Be verbose.") do |verbose|
+      opts.separator ""
+      opts.separator "Misc options:"
+
+      opts.on_tail("-v", "--verbose", "Be verbose.") do |verbose|
         logger = Class.new do
           def method_missing(method, *a, &b)
             puts a
@@ -55,9 +58,6 @@ class RetsCli
 
         options[:logger] = logger.new
       end
-
-      opts.separator ""
-      opts.separator "Common options:"
 
       opts.on_tail("-h", "--help", "Show this message") do
         puts opts
@@ -72,7 +72,7 @@ class RetsCli
     end
 
     begin
-      opts.parse!(args)
+      opts.parse!(args.empty? ? ["-h"] : args)
     rescue OptionParser::InvalidArgument => e
       abort e.message
     end
@@ -83,9 +83,10 @@ class RetsCli
 end
 
 options = RetsCli.parse(ARGV)
-query   = ARGV.first
+url     = ARGV[0] or abort "Need login URL"
+query   = ARGV[1]
 
-client = Rets::Client.new(options)
+client = Rets::Client.new(options.merge(:login_url => url))
 
 COUNT = Struct.new(:exclude, :include, :only).new(0,1,2)
 
