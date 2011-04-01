@@ -4,4 +4,9 @@ README.md
 Rakefile
 bin/rets
 lib/rets.rb
+lib/rets/authentication.rb
+lib/rets/client.rb
+lib/rets/metadata.rb
+lib/rets/parser/compact.rb
+lib/rets/parser/multipart.rb
 test/test_rets.rb
