@@ -151,7 +151,7 @@ class TestClient < Test::Unit::TestCase
 
     @client.handle_unauthorized_response({'www-authenticate' => 'xxx'})
 
-    capabilities = {"Abc" => "123", "Def" => "ghi=jk"}
+    capabilities = {"abc" => "123", "def" => "ghi=jk"}
 
     assert_equal capabilities, @client.capabilities
   end
@@ -172,22 +172,22 @@ class TestClient < Test::Unit::TestCase
 
   def test_extract_capabilities
     assert_equal(
-      {"Abc" => "123", "Def" => "ghi=jk"},
+      {"abc" => "123", "def" => "ghi=jk"},
       @client.extract_capabilities(Nokogiri.parse(CAPABILITIES))
     )
   end
 
-  def test_capability_returns_parsed_url
-    @client.capabilities = { "Foo" => "http://example.com" }
+  def test_capability_url_returns_parsed_url
+    @client.capabilities = { "foo" => "http://example.com" }
 
-    assert_equal URI.parse("http://example.com"), @client.capability("Foo")
+    assert_equal URI.parse("http://example.com"), @client.capability_url("foo")
   end
 
-  def test_capability_raises_on_malformed_url
-    @client.capabilities = { "Foo" => "http://e$^&#$&xample.com" }
+  def test_capability_url_raises_on_malformed_url
+    @client.capabilities = { "foo" => "http://e$^&#$&xample.com" }
 
     assert_raise Rets::MalformedResponse do
-      @client.capability("Foo")
+      @client.capability_url("foo")
     end
   end
 
@@ -391,7 +391,7 @@ DIGEST
       with("QueryType" => "DMQL2", "Format" => "COMPACT", "Query" => "x", "Foo" => "bar").
       returns("xxx")
 
-    @client.stubs(:capability => URI.parse("/example"))
+    @client.stubs(:capability_url => URI.parse("/example"))
     @client.stubs(:request_with_compact_response)
 
     @client.find(:all, :query => "x", :foo => "bar")
@@ -402,14 +402,14 @@ DIGEST
       with("QueryType" => "DMQL3000", "Format" => "COMPACT", "Query" => "x", "Foo" => "bar").
       returns("xxx")
 
-    @client.stubs(:capability => URI.parse("/example"))
+    @client.stubs(:capability_url => URI.parse("/example"))
     @client.stubs(:request_with_compact_response)
 
     @client.find(:all, :query => "x", :foo => "bar", :query_type => "DMQL3000")
   end
 
   def test_find
-    @client.stubs(:capability => URI.parse("/example"))
+    @client.stubs(:capability_url => URI.parse("/example"))
 
     @client.expects(:request_with_compact_response).
       with("/example", instance_of(String), instance_of(Hash)).

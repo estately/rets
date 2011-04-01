@@ -65,7 +65,7 @@ module Rets
     alias search find
 
     def find_every(opts = {})
-      search_uri = capability("Search")
+      search_uri = capability_url("search")
 
       opts = fixup_keys(opts)
 
@@ -134,7 +134,7 @@ module Rets
     end
 
     def fetch_object(object_id, opts = {})
-      object_uri = capability("GetObject")
+      object_uri = capability_url("GetObject")
 
       body = build_key_values(
         "Resource" => opts[:resource],
@@ -192,7 +192,7 @@ module Rets
     end
 
     def metadata_type(type)
-      metadata_uri = capability("GetMetadata")
+      metadata_uri = capability_url("GetMetadata")
 
       body = build_key_values(
         "Format" => "COMPACT",
@@ -340,7 +340,7 @@ module Rets
       @capabilities || login
     end
 
-    def capability(name)
+    def capability_url(name)
       url = capabilities[name]
 
       begin
@@ -357,7 +357,7 @@ module Rets
 
       # ... :(
       # Feel free to make this better. It has a test.
-      key_values = raw_key_values.split(/\n/).map{ |r| r.split(/=/, 2).map { |k,v| [k.strip, v].join } }
+      key_values = raw_key_values.split(/\n/).map{ |r| r.split(/=/, 2).map { |k,v| [k.strip.downcase, v].join } }
 
       Hash[*key_values.flatten]
     end
