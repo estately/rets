@@ -166,10 +166,10 @@ module Rets
     end
 
     def metadata_current?(current_metadata)
-      remote_metadata_timestamp = capabilities["MetadataTimeStamp"]
+      remote_metadata_timestamp = capabilities["metadatatimestamp"]
       our_metadata_timestamp    = current_metadata.date
 
-      remote_metadata_version   = capabilities["MetadataVersion"]
+      remote_metadata_version   = capabilities["metadataversion"]
       our_metadata_version      = current_metadata.version
 
       (remote_metadata_version == our_metadata_version) && (remote_metadata_timestamp == our_metadata_timestamp)
