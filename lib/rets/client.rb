@@ -65,7 +65,7 @@ module Rets
     alias search find
 
     def find_every(opts = {})
-      search_uri = capability_url("search")
+      search_uri = capability_url("Search")
 
       opts = fixup_keys(opts)
 
@@ -166,10 +166,10 @@ module Rets
     end
 
     def metadata_current?(current_metadata)
-      remote_metadata_timestamp = capabilities["metadatatimestamp"]
+      remote_metadata_timestamp = capabilities["MetadataTimestamp"]
       our_metadata_timestamp    = current_metadata.date
 
-      remote_metadata_version   = capabilities["metadataversion"]
+      remote_metadata_version   = capabilities["MetadataVersion"]
       our_metadata_version      = current_metadata.version
 
       (remote_metadata_version == our_metadata_version) && (remote_metadata_timestamp == our_metadata_timestamp)
@@ -355,11 +355,15 @@ module Rets
     def extract_capabilities(document)
       raw_key_values = document.xpath("//RETS/RETS-RESPONSE").text.strip
 
+      h = Hash.new{|h,k| h.key?(k.downcase) ? h[k.downcase] : nil }
+
       # ... :(
       # Feel free to make this better. It has a test.
-      key_values = raw_key_values.split(/\n/).map{ |r| r.split(/=/, 2).map { |k,v| [k.strip.downcase, v].join } }
+      raw_key_values.split(/\n/).
+        map  { |r| r.split(/=/, 2) }.
+        each { |k,v| h[k.strip.downcase] = v }
 
-      Hash[*key_values.flatten]
+      h
     end
 
 

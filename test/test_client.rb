@@ -510,7 +510,7 @@ DIGEST
   end
 
   def test_metadata_current_version
-    capabilities = { "metadatatimestamp" => "123456789", "metadataversion" => "1.2.3" }
+    capabilities = { "MetadataTimestamp" => "123456789", "MetadataVersion" => "1.2.3" }
     system_metadata = Struct.new(:date, :version).new("123456789", "1.2.2")
 
     @client.stubs(:capabilities => capabilities)
@@ -519,7 +519,7 @@ DIGEST
   end
 
   def test_metadata_current_timestamp
-    capabilities = { "metadatatimestamp" => "123456789", "metadataversion" => "1.2.3" }
+    capabilities = { "MetadataTimestamp" => "123456789", "MetadataVersion" => "1.2.3" }
     system_metadata = Struct.new(:date, :version).new("1234567", "1.2.3")
 
     @client.stubs(:capabilities => capabilities)
@@ -528,7 +528,7 @@ DIGEST
   end
 
   def test_metadata_current
-    capabilities = { "metadatatimestamp" => "123456789", "metadataversion" => "1.2.3" }
+    capabilities = { "MetadataTimestamp" => "123456789", "MetadataVersion" => "1.2.3" }
     system_metadata = Struct.new(:date, :version).new("123456789", "1.2.3")
 
     @client.stubs(:capabilities => capabilities)
