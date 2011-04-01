@@ -338,6 +338,14 @@ DIGEST
     assert_equal("sessionid=123",   client.cookies)
   end
 
+  def test_initialize_with_metadata
+    metadata = {}
+
+    client = Rets::Client.new(:login_url => "http://example.com", :metadata => metadata)
+
+    assert_same metadata, client.metadata
+  end
+
   def test_initialize_takes_logger
     logger = Object.new
 

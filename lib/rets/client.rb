@@ -24,7 +24,8 @@ module Rets
       self.options = DEFAULT_OPTIONS.merge(options)
       self.uri     = uri
 
-      self.session = options[:session] if options[:session]
+      self.session  = options[:session]  if options[:session]
+      self.metadata = options[:metadata] if options[:metadata]
     end
 
 
@@ -162,6 +163,10 @@ module Rets
       end
 
       fixed_hash
+    end
+
+    def metadata=(metadata)
+      @metadata = metadata
     end
 
     def metadata
