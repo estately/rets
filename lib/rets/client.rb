@@ -92,7 +92,7 @@ module Rets
       response = case object_ids
         when String then fetch_object(object_ids, opts)
         when Array  then fetch_object(object_ids.join(","), opts)
-        else raise ArgumentError, "todo"
+        else raise ArgumentError, "Expected instance of String or Array, but got #{object_ids.inspect}."
       end
 
       create_parts_from_response(response)
