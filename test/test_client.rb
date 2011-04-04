@@ -339,7 +339,7 @@ DIGEST
   end
 
   def test_initialize_with_metadata
-    metadata = {}
+    metadata = {:system => []}
 
     client = Rets::Client.new(:login_url => "http://example.com", :metadata => metadata)
     client.stubs(:metadata_current? => true)
@@ -501,7 +501,7 @@ DIGEST
   end
 
   def test_metadata_caches
-    hash = {}
+    hash = {:system => []}
 
     @client.stubs(:metadata_current? => true)
     @client.instance_variable_set("@metadata", hash)
@@ -536,5 +536,26 @@ DIGEST
     assert @client.metadata_current?(system_metadata)
   end
 
+  def test_metadata_current_ignores_missing_timestamp
+    # missing timestamp - this happens in violation of the spec.
+    capabilities = { "MetadataVersion" => "1.2.3" }
+
+    system_metadata = Struct.new(:date, :version).new("123456789", "1.2.3")
+
+    @client.stubs(:capabilities => capabilities)
+
+    assert @client.metadata_current?(system_metadata)
+  end
+
+  def test_metadata_current_ignores_missing_version
+    # missing timestamp - this happens in violation of the spec.
+    capabilities = { "MetadataTimestamp" => "123456789" }
+
+    system_metadata = Struct.new(:date, :version).new("123456789", "1.2.3")
+
+    @client.stubs(:capabilities => capabilities)
+
+    assert @client.metadata_current?(system_metadata)
+  end
 
 end
