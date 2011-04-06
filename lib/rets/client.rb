@@ -80,8 +80,23 @@ module Rets
         "Content-Length" => body.size.to_s
       )
 
-      request_with_compact_response(search_uri.path, body, headers)
+      result = request_with_compact_response(search_uri.path, body, headers)
+
+      # TODO opts[:resolve] ? transform(result, :resource => opts[:resource]) : result
     end
+
+    def decorate_results(results, rets_class)
+      results.map do |result|
+        decorate_result(result, rets_class)
+      end
+    end
+
+    def decorate_result(result, rets_class)
+      result.map do |key, value|
+        [key, rets_class.find_table(key).resolve(value.to_s)]
+      end
+    end
+
 
     # Returns an array of all objects associated with the given resource.
     def all_objects(opts = {})
