@@ -9,4 +9,9 @@ lib/rets/client.rb
 lib/rets/metadata.rb
 lib/rets/parser/compact.rb
 lib/rets/parser/multipart.rb
-test/test_rets.rb
+test/fixtures.rb
+test/helper.rb
+test/test_client.rb
+test/test_metadata.rb
+test/test_parser_compact.rb
+test/test_parser_multipart.rb
