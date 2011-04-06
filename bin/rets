@@ -10,7 +10,7 @@ class RetsCli
   def self.parse(args)
 
     actions = %w(metadata search object)
-    options = {}
+    options = {:count => 5}
 
     opts = OptionParser.new do |opts|
       opts.banner = "Usage: #{File.basename($0)} URL [options] [query]"
@@ -33,7 +33,7 @@ class RetsCli
       opts.separator ""
       opts.separator "Actions:"
 
-      opts.on("-c", "--capabilities", "Print capabilities of the RETS server.") do |capabilities|
+      opts.on("-p", "--capabilities", "Print capabilities of the RETS server.") do |capabilities|
         options[:capabilities] = capabilities
       end
 
@@ -41,9 +41,24 @@ class RetsCli
         options[:action] = action
       end
 
-      opts.on("-m", "--metadata [FORMAT]", %w(tree long short), "Print metadata.", "Format is short, long or tree.", "defaults to short.") do |format|
+      opts.on("-m", "--metadata [FORMAT]", %w(tree long short), "Print metadata.", "Format is short, long or tree.", "Defaults to short.") do |format|
         options[:action] = "metadata"
         options[:metadata_format] = format || "short"
+      end
+
+      opts.separator ""
+      opts.separator "Search action options:"
+
+      opts.on("-r", "--resource NAME", "Name of resource to search for.") do |name|
+        options[:resource] = name
+      end
+
+      opts.on("-c", "--class NAME", "Name of class to search for.") do |name|
+        options[:class] = name
+      end
+
+      opts.on("-n", "--number LIMIT", Integer, "Return LIMIT results. Defaults to 5.") do |limit|
+        options[:limit] = limit
       end
 
       opts.separator ""
@@ -140,12 +155,12 @@ case options[:action]
     end
 
   when "search" then
-    p client.find(:all,
-                  :search_type => "Property",
-                  :class       => "RES",
-                  :query       => "(ListingStatus=|10000069142)",
-                  :count       => COUNT.include,
-                  :limit       => 5).first
+    pp client.find(:all,
+                  :search_type => options[:resource],
+                  :class       => options[:class],
+                  :query       => query,
+                  :count       => COUNT.exclude,
+                  :limit       => options[:limit])
 
   when "object" then
 
