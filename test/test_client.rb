@@ -408,16 +408,34 @@ DIGEST
     @client.find(:all, :query => "x", :foo => "bar", :query_type => "DMQL3000")
   end
 
-  def test_find
+  def test_find_returns_undecorated_results
     @client.stubs(:capability_url => URI.parse("/example"))
 
     @client.expects(:request_with_compact_response).
       with("/example", instance_of(String), instance_of(Hash)).
       returns([["foo", "bar"]])
 
-    results = @client.find(:all, :resource => "Property", :class => "Res", :query => "x", :foo => "bar")
+    results = @client.find(:all, :search_type => "Property", :class => "Res", :query => "x", :foo => "bar")
 
     assert_equal [["foo", "bar"]], results
+  end
+
+  def test_find_returns_decorated_results
+    @client.stubs(:capability_url => URI.parse("/example"))
+
+    @client.expects(:request_with_compact_response).
+      with("/example", instance_of(String), instance_of(Hash)).
+      returns([["foo", "bar"]])
+
+    fake_rets_class = stub(:rets_class)
+    fake_result = stub(:result)
+
+    @client.expects(:find_rets_class).with("Property", "Res").returns(fake_rets_class)
+    @client.expects(:decorate_results).with([["foo", "bar"]], fake_rets_class).returns(fake_result)
+
+    results = @client.find(:all, :search_type => "Property", :class => "Res", :query => "x", :foo => "bar", :resolve => true)
+
+    assert_equal fake_result, results
   end
 
   def test_fixup_keys

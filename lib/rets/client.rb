@@ -49,6 +49,8 @@ module Rets
     # <tt>:class</tt>::        Required. The class of the resource to search for.
     # <tt>:query</tt>::        Required. The DMQL2 query string to execute.
     # <tt>:limit</tt>::        The number of records to request from the server.
+    # <tt>:resolve</tt>::      Provide resolved values that use metadata instead
+    #                          of raw system values.
     #
     # Any other keys are converted to the RETS query format, and passed
     # to the server as part of the query. For instance, the key <tt>:offset</tt>
@@ -67,11 +69,13 @@ module Rets
     def find_every(opts = {})
       search_uri = capability_url("Search")
 
-      opts = fixup_keys(opts)
+      resolve = opts.delete(:resolve)
+
+      extras = fixup_keys(opts)
 
       defaults = {"QueryType" => "DMQL2", "Format" => "COMPACT"}
 
-      query = defaults.merge(opts)
+      query = defaults.merge(extras)
 
       body = build_key_values(query)
 
@@ -80,9 +84,19 @@ module Rets
         "Content-Length" => body.size.to_s
       )
 
-      result = request_with_compact_response(search_uri.path, body, headers)
+      results = request_with_compact_response(search_uri.path, body, headers)
 
-      # TODO opts[:resolve] ? transform(result, :resource => opts[:resource]) : result
+      if resolve
+        rets_class = find_rets_class(opts[:search_type], opts[:class])
+        decorate_results(results, rets_class)
+      else
+        results
+      end
+    end
+
+    def find_rets_class(resource_name, rets_class_name)
+      metadata_tree = Rets::Metadata.build_tree(metadata)
+      rets_class = metadata_tree[resource_name].find_rets_class(rets_class_name)
     end
 
     def decorate_results(results, rets_class)
