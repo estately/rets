@@ -94,11 +94,9 @@ module Rets
       end
 
       def print_tree
-        puts "#{long_value} -> #{value}"
+        puts "      #{long_value} -> #{value}"
       end
     end
-
-
 
     class RetsClass
       attr_accessor :tables

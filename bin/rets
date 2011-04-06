@@ -134,65 +134,9 @@ case options[:action]
 
     # Tree format
     else
+      tree = Rets::Metadata.build_tree(metadata)
 
-      resource_containers = metadata[:resource] # => [ResourceContainer, ...]
-      class_containers    = metadata[:class]    # => [ClassContainer, ...]
-      table_containers    = metadata[:table]
-
-      lookup_containers      = metadata[:lookup]
-      lookup_type_containers = metadata[:lookup_type]
-
-      resource_containers.each do |resource_container|
-
-        resource_container.resources.each do |resource|
-          puts "Resource: #{resource_id = resource["ResourceID"]}; KeyField: #{resource["KeyField"]}"
-
-          class_container = class_containers.detect { |c| c.resource == resource_id }
-
-          class_container.classes.each do |clazz|
-            puts "  Class: #{class_name = clazz["ClassName"]}"
-
-            table_container = table_containers.detect { |t| t.resource == resource_id && t.class == class_name }
-
-            table_container.tables.each do |table|
-              table_desc = "    Table: #{table["SystemName"]}"
-
-              if table["LookupName"].strip.empty?
-                table_desc += " #{table["DataType"]}"
-              else
-                table_desc += " references #{table["LookupName"]}"
-              end
-
-              puts table_desc
-            end
-
-            puts
-          end
-
-          # Lookups
-
-          resource_lookup_containers = lookup_containers.select { |lc| lc.resource == resource_id }
-
-          resource_lookup_containers.each do |lookup_container|
-
-            lookup_container.lookups.each do |lookup|
-
-              puts "  Lookup: #{resource_id}:#{lookup_name = lookup["LookupName"]}"
-
-              resource_lookup_type_containers = lookup_type_containers.select { |ltc| ltc.resource == resource_id && ltc.lookup == lookup_name }
-
-              resource_lookup_type_containers.each do |lookup_type_container|
-
-                lookup_type_container.lookup_types.each do |lookup_type|
-                  puts "    Lookup Type: #{lookup_type["LongValue"]} -> #{lookup_type["Value"]}"
-                end
-              end
-            end
-          end
-          puts
-
-        end
-      end
+      tree.values.each &:print_tree
     end
 
   when "search" then
