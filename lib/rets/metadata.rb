@@ -1,6 +1,10 @@
 module Rets
   module Metadata
 
+    ######################################
+    # OO representation and construction.
+    #
+
     # Resource
     #  |
     # Class
@@ -204,7 +208,7 @@ module Rets
     end
 
     def self.build_tree(metadata)
-      resource_containers = metadata[:resource] # => [ResourceContainer, ...]
+      resource_containers = metadata[:resource]
 
       resources = {}
 
@@ -221,6 +225,12 @@ module Rets
 
 
     #########################
+    # Basic representation of the underlying metadata. This models
+    # the structure of RETS metadata closely. The OO-representation
+    # uses this structure for its construction. External usage of
+    # this API should be discouraged in favor of the richer OO
+    # representation.
+    #
 
     class Container
       attr_accessor :fragment
