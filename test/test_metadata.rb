@@ -81,18 +81,23 @@ class TestMetadata < Test::Unit::TestCase
 
     Rets::Metadata::RetsClass.expects(:build).with(rets_class_fragment, resource, metadata).returns(rets_class)
     Rets::Metadata::Resource.expects(:find_rets_classes).with(metadata, resource).returns([rets_class_fragment])
+
     classes = Rets::Metadata::Resource.build_classes(resource, metadata)
     assert([rets_class], classes)
   end
 
   def test_resource_build
     fragment = { "ResourceID" => "test" }
+
     lookup_types = stub(:lookup_types)
     classes = stub(:classes)
     metadata = stub(:metadata)
+
     Rets::Metadata::Resource.stubs(:build_lookup_tree => lookup_types)
     Rets::Metadata::Resource.stubs(:build_classes => classes)
+
     resource = Rets::Metadata::Resource.build(fragment, metadata)
+
     assert_equal(lookup_types, resource.lookup_types)
     assert_equal(classes, resource.rets_classes)
   end
@@ -100,7 +105,9 @@ class TestMetadata < Test::Unit::TestCase
   def test_resource_find_lookup_containers
     resource = stub(:id => "id")
     metadata = { :lookup => [stub(:resource => "id"), stub(:resource => "id"), stub(:resource => "a")] }
+
     lookup_containers = Rets::Metadata::Resource.find_lookup_containers(metadata, resource)
+
     assert_equal(2, lookup_containers.size)
     assert_equal(["id", "id"], lookup_containers.map(&:resource))
   end
@@ -113,7 +120,9 @@ class TestMetadata < Test::Unit::TestCase
                                   stub(:resource => "a",  :lookup => "look"),
                                   stub(:resource => "a",  :lookup => "not_look")
                                  ]}
+
     lookup_type_containers = Rets::Metadata::Resource.find_lookup_type_containers(metadata, resource, "look")
+
     assert_equal(2, lookup_type_containers.size)
     assert_equal(["id", "id"], lookup_type_containers.map(&:resource))
   end
@@ -121,26 +130,27 @@ class TestMetadata < Test::Unit::TestCase
   def test_resource_find_rets_classes
     resource = stub(:id => "id")
     rets_classes = stub(:rets_classes)
+
     metadata = { :class => [stub(:resource => "id", :classes => rets_classes),
                             stub(:resource => "id", :classes => rets_classes),
                             stub(:resource => "a")]}
+
     assert_equal(rets_classes, Rets::Metadata::Resource.find_rets_classes(metadata, resource))
   end
 
   def test_resource_find_rets_class
     resource = Rets::Metadata::Resource.new({})
     value = mock(:name => "test")
+
     resource.expects(:rets_classes).returns([value])
     assert_equal(value, resource.find_rets_class("test"))
   end
 
   def test_lookup_type_initialize
-    fragment = { "Value" => 'a',
-                 "ShortValue" => 'b',
-                 "LongValue" => 'c'
-               }
+    fragment = { "Value" => 'a', "ShortValue" => 'b', "LongValue" => 'c' }
 
     lookup_type = Rets::Metadata::LookupType.new(fragment)
+
     assert_equal('a', lookup_type.value)
     assert_equal('b', lookup_type.short_value)
     assert_equal('c', lookup_type.long_value)
@@ -149,6 +159,7 @@ class TestMetadata < Test::Unit::TestCase
   def test_rets_class_find_table
     rets_class = Rets::Metadata::RetsClass.new({}, "resource")
     value = mock(:name => "test")
+
     rets_class.expects(:tables).returns([value])
     assert_equal(value, rets_class.find_table("test"))
   end
@@ -157,7 +168,9 @@ class TestMetadata < Test::Unit::TestCase
     resource = mock(:id => "a")
     rets_class = mock(:name => "b")
     table = mock(:resource => "a", :class => "b")
+
     metadata = { :table => [table] }
+
     assert_equal(table, Rets::Metadata::RetsClass.find_table_container(metadata, resource, rets_class))
   end
 
@@ -169,7 +182,9 @@ class TestMetadata < Test::Unit::TestCase
 
     Rets::Metadata::TableFactory.expects(:build).with(table_fragment, resource).returns(table)
     Rets::Metadata::RetsClass.expects(:find_table_container).returns(table_container)
+
     rets_class = Rets::Metadata::RetsClass.build({}, resource, "")
+
     assert_equal(rets_class.tables, [table])
   end
 
@@ -196,11 +211,10 @@ class TestMetadata < Test::Unit::TestCase
   end
 
   def test_lookup_table_initialize
-    fragment = { "SystemName" => "A",
-                 "Interpretation" => "B",
-                 "LookupName" => "C"
-               }
+    fragment = { "SystemName" => "A", "Interpretation" => "B", "LookupName" => "C" }
+
     lookup_table = Rets::Metadata::LookupTable.new(fragment, "Foo")
+
     assert_equal("Foo", lookup_table.resource)
     assert_equal("A", lookup_table.name)
     assert_equal("C", lookup_table.lookup_name)
@@ -237,9 +251,7 @@ class TestMetadata < Test::Unit::TestCase
   end
 
   def test_table_initialize
-    fragment = { "DataType" => "A",
-                 "SystemName" => "B"
-               }
+    fragment = { "DataType" => "A", "SystemName" => "B" }
 
     table = Rets::Metadata::Table.new(fragment)
     assert_equal("A", table.type)
