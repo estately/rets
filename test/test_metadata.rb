@@ -68,39 +68,57 @@ class TestMetadata < Test::Unit::TestCase
     assert @root.current?(current_timestamp, current_version)
   end
 
+  def test_metadata_root_metadata_types_constructs_a_list_of_types_from_sources
+    Nokogiri.stubs(:parse => "source")
+    @root.stubs(:build_containers => "containers")
+    @root.stubs(:sources => {"x" => "k"})
+    assert_equal({"x" => "containers"}, @root.metadata_types)
+  end
+
+  def test_metadata_root_build_tree_constructs_a_list_of_resources
+    resource_fragment = stub(:row)
+    resource_container = stub(:rows => [resource_fragment])
+    metadata_types = { :resource => [resource_container] }
+    resource = stub(:id => "x")
+    Rets::Metadata::Resource.stubs(:build => resource)
+
+    @root.stubs(:metadata_types => metadata_types)
+
+    assert_equal(Hash[*[ resource.id, resource]], @root.build_tree)
+  end
 
   def test_metadata_root_build_uses_row_containers_for_resource
     doc = Nokogiri.parse(METADATA_RESOURCE)
 
-    containers = @root.build(doc)
+    containers = @root.build_containers(doc)
 
     assert_equal 1, containers.size
 
     resource_container = containers.first
 
-    assert_instance_of Rets::Metadata::Containers::ResourceContainer, resource_container
+    assert_instance_of Rets::Metadata::Containers::RowContainer, resource_container
 
-    assert_equal 13, resource_container.resources.size
+    assert_equal 13, resource_container.rows.size
 
-    resource = resource_container.resources.first
+    resource = resource_container.rows.first
 
     assert_equal "ActiveAgent", resource["StandardName"]
   end
 
-  def test_metadata_root_build_uses_system_container_for_system
+  def test_metadata_root_build_uses_container_for_system
     doc = Nokogiri.parse(METADATA_SYSTEM)
 
-    containers = @root.build(doc)
+    containers = @root.build_containers(doc)
 
     assert_equal 1, containers.size
 
-    assert_instance_of Rets::Metadata::Containers::SystemContainer, containers.first
+    assert_instance_of Rets::Metadata::Containers::Container, containers.first
   end
 
-  def test_metadata_root_build_uses_base_container_for_unknown_metadata_types
+  def test_metadata_root_build_uses_container_for_unknown_metadata_types
     doc = Nokogiri.parse(METADATA_UNKNOWN)
 
-    containers = @root.build(doc)
+    containers = @root.build_containers(doc)
 
     assert_equal 1, containers.size
 
