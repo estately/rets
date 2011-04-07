@@ -7,6 +7,12 @@ lib/rets.rb
 lib/rets/authentication.rb
 lib/rets/client.rb
 lib/rets/metadata.rb
+lib/rets/metadata/containers.rb
+lib/rets/metadata/lookup_type.rb
+lib/rets/metadata/resource.rb
+lib/rets/metadata/rets_class.rb
+lib/rets/metadata/root.rb
+lib/rets/metadata/table.rb
 lib/rets/parser/compact.rb
 lib/rets/parser/multipart.rb
 test/fixtures.rb
