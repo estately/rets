@@ -1,6 +1,4 @@
 module Rets
-  METADATA_TYPES = %w(SYSTEM RESOURCE CLASS TABLE LOOKUP LOOKUP_TYPE OBJECT)
-
   Session = Struct.new(:authorization, :capabilities, :cookies)
 
   class Client
@@ -9,7 +7,7 @@ module Rets
     include Authentication
 
     attr_accessor :uri, :options, :authorization
-    attr_writer   :capabilities
+    attr_writer   :capabilities, :metadata
 
     def initialize(options)
       @capabilities = nil
@@ -95,8 +93,7 @@ module Rets
     end
 
     def find_rets_class(resource_name, rets_class_name)
-      metadata_tree = Rets::Metadata.build_tree(metadata)
-      rets_class = metadata_tree[resource_name].find_rets_class(rets_class_name)
+      metadata.build_tree[resource_name].find_rets_class(rets_class_name)
     end
 
     def decorate_results(results, rets_class)
@@ -194,34 +191,27 @@ module Rets
       fixed_hash
     end
 
-    def metadata_current?(system_metadata)
-      remote_metadata_timestamp = capabilities["MetadataTimestamp"]
-      our_metadata_timestamp    = system_metadata.date
-
-      remote_metadata_version   = capabilities["MetadataVersion"]
-      our_metadata_version      = system_metadata.version
-
-      (remote_metadata_version ? remote_metadata_version == our_metadata_version : true) &&
-        (remote_metadata_timestamp ? remote_metadata_timestamp == our_metadata_timestamp : true)
-    end
-
-    def metadata=(metadata)
-      @metadata = metadata
-    end
-
     def metadata
-      return @metadata if @metadata && metadata_current?(@metadata[:system].first)
+      return @metadata if @metadata && @metadata.current?(capabilities["MetadataTimestamp"], capabilities["MetadataVersion"])
 
-      @metadata = {}
+      metadata_fetcher = lambda { |type| retrieve_metadata_type(type) }
 
-      METADATA_TYPES.each do |type|
-        @metadata[type.downcase.to_sym] = Metadata.build(metadata_type(type))
-      end
-
-      @metadata
+      @metadata = Metadata::Root.new(&metadata_fetcher)
     end
 
-    def metadata_type(type)
+    #def metadata_xxx
+    #  return @metadata if @metadata && metadata_current?(@metadata[:system].first)
+
+    #  @metadata = {}
+
+    #  METADATA_TYPES.each do |type|
+    #    @metadata[type.downcase.to_sym] = Metadata.build(metadata_type(type))
+    #  end
+
+    #  @metadata
+    #end
+
+    def retrieve_metadata_type(type)
       metadata_uri = capability_url("GetMetadata")
 
       body = build_key_values(
@@ -237,7 +227,7 @@ module Rets
 
       response = request(metadata_uri.path, body, headers)
 
-      Nokogiri.parse(response.body)
+      response.body
     end
 
     def raw_request(path, body = nil, headers = build_headers, &reader)

@@ -1,16 +1,84 @@
 require "helper"
 
 class TestMetadata < Test::Unit::TestCase
-  def test_metadata_build_uses_row_containers_for_resource
+  def setup
+    @root = Rets::Metadata::Root.new
+  end
+
+  def test_metadata_root_fetch_sources_returns_hash_of_metadata_types
+    types = []
+    fake_fetcher = lambda do |type|
+      types << type
+    end
+
+    @root.fetch_sources(&fake_fetcher)
+
+    assert_equal(Rets::Metadata::TYPES, types)
+  end
+
+  def test_metadata_root_current_version
+    @root.stubs(:version).returns("1.2.2")
+    @root.stubs(:date).returns("1")
+
+    current_timestamp = "1"
+    current_version = "1.2.3"
+
+    assert !@root.current?(current_timestamp, current_version)
+  end
+
+  def test_metadata_root_current_timestamp
+    @root.stubs(:version).returns("1.2.2")
+    @root.stubs(:date).returns("1")
+
+    current_timestamp = "2"
+    current_version = "1.2.2"
+
+    assert !@root.current?(current_timestamp, current_version)
+  end
+
+  def test_metadata_root_current
+    @root.stubs(:version).returns("1.2.2")
+    @root.stubs(:date).returns("1")
+
+    current_timestamp = "1"
+    current_version = "1.2.2"
+
+    assert @root.current?(current_timestamp, current_version)
+  end
+
+  # missing timestamp - this happens in violation of the spec.
+  def test_metadata_root_current_ignores_missing_timestamp
+    @root.stubs(:version).returns("1.2.2")
+    @root.stubs(:date).returns("1")
+
+    current_timestamp = nil
+    current_version = "1.2.2"
+
+    assert @root.current?(current_timestamp, current_version)
+  end
+
+  # missing version - this happens in violation of the spec.
+  def test_metadata_root_current_ignores_missing_version
+    @root.stubs(:version).returns("1.2.2")
+    @root.stubs(:date).returns("1")
+
+    current_timestamp = "1"
+    current_version = nil
+
+    assert @root.current?(current_timestamp, current_version)
+  end
+
+
+  def test_metadata_root_build_uses_row_containers_for_resource
     doc = Nokogiri.parse(METADATA_RESOURCE)
 
-    containers = Rets::Metadata.build(doc)
+    containers = @root.build(doc)
 
     assert_equal 1, containers.size
 
     resource_container = containers.first
 
-    assert_instance_of Rets::Metadata::ResourceContainer, resource_container
+    assert_instance_of Rets::Metadata::Containers::ResourceContainer, resource_container
 
     assert_equal 13, resource_container.resources.size
 
@@ -19,24 +87,24 @@ class TestMetadata < Test::Unit::TestCase
     assert_equal "ActiveAgent", resource["StandardName"]
   end
 
-  def test_metadata_build_uses_system_container_for_system
+  def test_metadata_root_build_uses_system_container_for_system
     doc = Nokogiri.parse(METADATA_SYSTEM)
 
-    containers = Rets::Metadata.build(doc)
+    containers = @root.build(doc)
 
     assert_equal 1, containers.size
 
-    assert_instance_of Rets::Metadata::SystemContainer, containers.first
+    assert_instance_of Rets::Metadata::Containers::SystemContainer, containers.first
   end
 
-  def test_metadata_build_uses_base_container_for_unknown_metadata_types
+  def test_metadata_root_build_uses_base_container_for_unknown_metadata_types
     doc = Nokogiri.parse(METADATA_UNKNOWN)
 
-    containers = Rets::Metadata.build(doc)
+    containers = @root.build(doc)
 
     assert_equal 1, containers.size
 
-    assert_instance_of Rets::Metadata::Container, containers.first
+    assert_instance_of Rets::Metadata::Containers::Container, containers.first
   end
 
   def test_metadata_uses
