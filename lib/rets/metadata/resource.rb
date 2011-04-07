@@ -1,19 +1,5 @@
 module Rets
   module Metadata
-    ######################################
-    # OO representation and construction.
-    #
-
-    # Resource
-    #  |
-    # Class
-    #  |
-    #  `-- Table
-    #  |
-    #  `-- LookupTable
-    #        |
-    #        `-- LookupType
-    #
     class Resource
       attr_accessor :rets_classes
       attr_accessor :lookup_types

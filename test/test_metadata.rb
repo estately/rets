@@ -13,7 +13,7 @@ class TestMetadata < Test::Unit::TestCase
 
     @root.fetch_sources(&fake_fetcher)
 
-    assert_equal(Rets::Metadata::TYPES, types)
+    assert_equal(Rets::Metadata::METADATA_TYPES, types)
   end
 
   def test_metadata_root_current_version

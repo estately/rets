@@ -1,26 +1,69 @@
 module Rets
   module Metadata
-    TYPES = %w(SYSTEM RESOURCE CLASS TABLE LOOKUP LOOKUP_TYPE OBJECT)
+    METADATA_TYPES = %w(SYSTEM RESOURCE CLASS TABLE LOOKUP LOOKUP_TYPE OBJECT)
 
+    # It's useful when dealing with the Rets standard to represent their
+    # relatively flat namespace of interweived components as a Tree. With
+    # a collection of resources at the top, and their various, classes,
+    # tables, lookups, and lookup types underneath.
+    #
+    # It looks something like ...
+    #
+    #    Resource
+    #     |
+    #    Class
+    #     |
+    #     `-- Table
+    #     |
+    #     `-- Lookups
+    #           |
+    #           `-- LookupType
+    #
+    # For our purposes it was helpful to denormalize some of the more deeply
+    # nested branches. In particular by relating Lookups to LookupTypes, and
+    # Tables to lookups with can simplify this diagram.
+    #
+    #
+    #    Resource
+    #     |
+    #    Class
+    #     |
+    #     `-- Table
+    #          |
+    #          `-- Lookups
+    #
+    # By associating Tables and lookups when we parse this structure. It allows
+    # us to seemlessly map Lookup values to their Long or Short value forms.
     class Root
-      attr_writer :types
+      # Metadata_types is the low level parsed representation of the raw xml
+      # sources. Just one level up, they contain Containers, consisting of
+      # SystemContainers or RowContainers
+      attr_writer :metadata_types
+
+      # the tree is the high level represenation of the metadata heiarchy
+      # it begins with root. Stored as a list of Metadata::Resources
       attr_accessor :tree
+
+      # Sources are the raw xml documents fetched for each metadata type
+      # they are stored as a hash with the type names as their keys
+      # and the raw xml as the values
       attr_accessor :sources
 
-      # fetcher is a proc that inverts control to the client
-      # to retrieve metadata types
+      # fetcher is a proc that inverts control to the client to retrieve metadata
+      # types
       def initialize(&fetcher)
         @tree = nil
-        @types = nil # TODO think up a better name ... containers?
+        @metadata_types = nil # TODO think up a better name ... containers?
         @sources = nil
 
+        # allow Root's to be built with no fetcher. Makes for easy testing
         return unless block_given?
 
         fetch_sources(&fetcher)
       end
 
       def fetch_sources(&fetcher)
-        self.sources = Hash[*TYPES.map {|type| [type, fetcher.call(type)] }.flatten]
+        self.sources = Hash[*METADATA_TYPES.map {|type| [type, fetcher.call(type)] }.flatten]
       end
 
       def dump
@@ -32,29 +75,32 @@ module Rets
       end
 
       def version
-        types[:system].version
+        metadata_types[:system].version
       end
 
       def date
-        types[:system].date
+        metadata_types[:system].date
       end
 
+      # Wether there exists a more up to date version of the metadata to fetch
+      # is dependant on either a timestamp indicating when the most recent
+      # version was published, or a version number. These values may or may
+      # not exist on any given rets server.
       def current?(current_timestamp, current_version)
         (current_version ? current_version == version : true) &&
           (current_timestamp ? current_timestamp == date : true)
       end
 
-      def build_tree(metadata)
+      def build_tree
         return @tree if @tree
 
         tree = {}
 
-        resource_containers = types[:resource]
+        resource_containers = metadata_types[:resource]
 
         resource_containers.each do |resource_container|
-
-          resource_container.resources.each do |resource_fragment|
-            resource = Resource.build(resource_fragment, metadata)
+          resource_container.rows.each do |resource_fragment|
+            resource = Resource.build(resource_fragment, metadata_types)
             tree[resource.id] = resource
           end
         end
@@ -62,19 +108,17 @@ module Rets
         @tree = tree
       end
 
-      def types
-        return @types if @types
+      def metadata_types
+        return @metadata_types if @metadata_types
 
-        types = {}
-
-        sources.each {|name, source| types[name] = build(Nokogiri.parse(source)) }
-
-        @types = types
+        raise "Sources must be fetched before metadata_types can be computed" unless sources
+        types = sources.map {|name, source| [name, build_containers(Nokogiri.parse(source))] }
+        @metadata_types = Hash[*types.flatten]
       end
 
       # Returns an array of container classes that represents
       # the metadata stored in the document provided.
-      def build(doc)
+      def build_containers(doc)
         # find all tags that match /RETS/METADATA-*
         fragments = doc.xpath("/RETS/*[starts-with(name(), 'METADATA-')]")
 
