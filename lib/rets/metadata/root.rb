@@ -132,12 +132,10 @@ module Rets
         type = tag.sub(/^METADATA-/, "") # RESOURCE
 
         class_name = type.capitalize.gsub(/_(\w)/) { $1.upcase }
+        container_name = "#{class_name}Container"
 
-        if Containers::ROW_CONTAINER_TYPES.include?(class_name)
-          Containers::RowContainer.new(fragment)
-        else
-          Containers::Container.new(fragment)
-        end
+        container_class = Containers.constants.include?(container_name) ? Containers.const_get(container_name) : Containers::Container
+        container_class.new(fragment)
       end
     end
   end

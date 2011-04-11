@@ -8,8 +8,6 @@ module Rets
     # representation.
     #
     module Containers
-      ROW_CONTAINER_TYPES = %w(Resource Class Table Lookup LookupType Object)
-
       class Container
         attr_accessor :fragment
 
@@ -45,6 +43,44 @@ module Rets
             Hash[*row.flatten]
           end
         end
+
+      end
+
+      class ResourceContainer < RowContainer
+        alias resources rows
+      end
+
+      class ClassContainer < RowContainer
+        uses :resource
+
+        alias classes rows
+      end
+
+      class TableContainer < RowContainer
+        uses :resource, :class
+
+        alias tables rows
+      end
+
+      class LookupContainer < RowContainer
+        uses :resource
+
+        alias lookups rows
+      end
+
+      class LookupTypeContainer < RowContainer
+        uses :resource, :lookup
+
+        alias lookup_types rows
+      end
+
+      class ObjectContainer < RowContainer
+        uses :resource
+
+        alias objects rows
+      end
+
+      class SystemContainer < Container
       end
     end
   end
