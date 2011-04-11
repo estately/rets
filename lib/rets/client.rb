@@ -439,11 +439,11 @@ module Rets
     end
 
     class FakeLogger
-      def fatal(*_); end
-      def error(*_); end
-      def warn(*_);  end
-      def info(*_);  end
-      def debug(*_); end
+      def fatal(*); end
+      def error(*); end
+      def warn(*);  end
+      def info(*);  end
+      def debug(*); end
     end
 
   end
