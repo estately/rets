@@ -502,7 +502,23 @@ DIGEST
   end
 
   def test_fetch_object
-    # TODO
+    @client.expects(:capability_url).with("GetObject").returns(URI.parse("/obj"))
+
+    @client.expects(:build_key_values => "fakebody").with(
+      "Resource" => "Property",
+      "Type"     => "Image",
+      "ID"       => "123:*",
+      "Location" => 0
+    )
+
+    @client.expects(:request).with("/obj", "fakebody",
+      has_entries(
+        "Accept"         => "image/jpeg, image/png;q=0.5, image/gif;q=0.1",
+        "Content-Type"   => "application/x-www-form-urlencoded",
+        "Content-Length" => "8")
+      )
+
+    @client.fetch_object("*", :resource => "Property", :object_type => "Image", :resource_id => "123")
   end
 
   def test_metadata_caches
