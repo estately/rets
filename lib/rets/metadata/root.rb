@@ -75,11 +75,11 @@ module Rets
       end
 
       def version
-        metadata_types[:system].version
+        metadata_types[:system].first.version
       end
 
       def date
-        metadata_types[:system].date
+        metadata_types[:system].first.date
       end
 
       # Wether there exists a more up to date version of the metadata to fetch

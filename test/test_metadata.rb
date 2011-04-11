@@ -16,6 +16,16 @@ class TestMetadata < Test::Unit::TestCase
     assert_equal(Rets::Metadata::METADATA_TYPES, types)
   end
 
+  def test_metadata_root_version
+    @root.instance_variable_set("@metadata_types", {:system => [stub(:version => "1")]})
+    assert_equal "1", @root.version
+  end
+
+  def test_metadata_root_date
+    @root.instance_variable_set("@metadata_types", {:system => [stub(:date => "1")]})
+    assert_equal "1", @root.date
+  end
+
   def test_metadata_root_current_version
     @root.stubs(:version).returns("1.2.2")
     @root.stubs(:date).returns("1")
