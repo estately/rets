@@ -66,12 +66,12 @@ module Rets
         self.sources = Hash[*METADATA_TYPES.map {|type| [type, fetcher.call(type)] }.flatten]
       end
 
-      def dump
-        Marshal.dump(sources)
+      def marshal_dump
+        sources
       end
 
-      def load(sources)
-        self.sources = Marshal.load(sources)
+      def marshal_load(sources)
+        self.sources = sources
       end
 
       def version

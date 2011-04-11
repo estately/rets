@@ -348,4 +348,20 @@ class TestMetadata < Test::Unit::TestCase
     assert_equal ["Foo"], table.resolve("Foo")
   end
 
+  def test_root_can_be_serialized
+    sources = { :x => "a" }
+
+    @root.sources = sources
+
+    assert_equal sources, @root.marshal_dump
+  end
+
+  def test_root_can_be_unserialized
+    sources = { :x => "a" }
+
+    @root.marshal_load(sources)
+
+    assert_equal sources, @root.sources
+  end
+
 end
