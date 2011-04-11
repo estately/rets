@@ -79,42 +79,32 @@ class TestMetadata < Test::Unit::TestCase
   end
 
 
-  def test_metadata_root_build_uses_row_containers_for_resource
-    doc = Nokogiri.parse(METADATA_RESOURCE)
+  def test_metadata_root_build_container_uses_row_containers_for_resource
+    doc = Nokogiri.parse(METADATA_RESOURCE).xpath("//METADATA-RESOURCE").first
 
-    containers = @root.build(doc)
+    container = @root.build_container(doc)
 
-    assert_equal 1, containers.size
+    assert_instance_of Rets::Metadata::Containers::ResourceContainer, container
 
-    resource_container = containers.first
+    assert_equal 13, container.resources.size
 
-    assert_instance_of Rets::Metadata::Containers::ResourceContainer, resource_container
-
-    assert_equal 13, resource_container.resources.size
-
-    resource = resource_container.resources.first
+    resource = container.resources.first
 
     assert_equal "ActiveAgent", resource["StandardName"]
   end
 
-  def test_metadata_root_build_uses_system_container_for_system
-    doc = Nokogiri.parse(METADATA_SYSTEM)
+  def test_metadata_root_build_container_uses_system_container_for_system
+    doc = Nokogiri.parse(METADATA_SYSTEM).xpath("//METADATA-SYSTEM").first
 
-    containers = @root.build(doc)
-
-    assert_equal 1, containers.size
-
-    assert_instance_of Rets::Metadata::Containers::SystemContainer, containers.first
+    container = @root.build_container(doc)
+    assert_instance_of Rets::Metadata::Containers::SystemContainer, container
   end
 
-  def test_metadata_root_build_uses_base_container_for_unknown_metadata_types
-    doc = Nokogiri.parse(METADATA_UNKNOWN)
+  def test_metadata_root_build_container_uses_base_container_for_unknown_metadata_types
+    doc = Nokogiri.parse(METADATA_UNKNOWN).xpath("//METADATA-FOO").first
 
-    containers = @root.build(doc)
-
-    assert_equal 1, containers.size
-
-    assert_instance_of Rets::Metadata::Containers::Container, containers.first
+    container = @root.build_container(doc)
+    assert_instance_of Rets::Metadata::Containers::Container, container
   end
 
   def test_metadata_uses
