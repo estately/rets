@@ -16,6 +16,21 @@ class TestMetadata < Test::Unit::TestCase
     assert_equal(Rets::Metadata::METADATA_TYPES, types)
   end
 
+  def test_metadata_root_intialized_with_block
+    external = false
+    Rets::Metadata::Root.new { |source| external = true }
+    assert external
+  end
+
+  def test_metadata_root_build_tree
+    resource = stub(:id => "X")
+    Rets::Metadata::Resource.stubs(:build => resource)
+    resource_fragment = stub(:resource_fragment)
+    resource_container = stub(:rows => [resource_fragment])
+    @root.stubs(:metadata_types => { :resource => [resource_container] })
+    assert_equal({"X" => resource}, @root.build_tree)
+  end
+
   def test_metadata_root_version
     @root.instance_variable_set("@metadata_types", {:system => [stub(:version => "1")]})
     assert_equal "1", @root.version
@@ -81,6 +96,7 @@ class TestMetadata < Test::Unit::TestCase
   def test_metadata_root_metadata_types_constructs_a_hash_of_metadata_types_from_sources
     test_sources = { "X" => "Y", "Z" => "W" }
     @root.stubs(:sources => test_sources, :build_containers => "Y--")
+    @root.metadata_types = nil
     Nokogiri.stubs(:parse => "Y-")
     assert_equal({:x => "Y--", :z => "Y--"}, @root.metadata_types)
   end
