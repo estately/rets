@@ -85,6 +85,15 @@ class TestMetadata < Test::Unit::TestCase
     assert_equal({:x => "Y--", :z => "Y--"}, @root.metadata_types)
   end
 
+  def test_metadata_root_build_containers_selects_correct_tags
+    doc = "<RETS><METADATA-FOO></METADATA-FOO><MET-FOO></MET-FOO><METADATA-BAR /></RETS>"
+
+    @root.expects(:build_container).with { |fragment| fragment.name == "METADATA-FOO" }
+    @root.expects(:build_container).with { |fragment| fragment.name == "METADATA-BAR" }
+
+    @root.build_containers(Nokogiri.parse(doc))
+  end
+
   def test_metadata_root_build_container_uses_row_containers_for_resource
     doc = Nokogiri.parse(METADATA_RESOURCE).xpath("//METADATA-RESOURCE").first
 

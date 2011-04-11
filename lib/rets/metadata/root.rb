@@ -134,9 +134,7 @@ module Rets
         # find all tags that match /RETS/METADATA-*
         fragments = doc.xpath("/RETS/*[starts-with(name(), 'METADATA-')]")
 
-        fragments.map do |fragment|
-          build_container(fragment)
-        end
+        fragments.map { |fragment| build_container(fragment) }
       end
 
       def build_container(fragment)
