@@ -54,7 +54,7 @@ module Rets
       def initialize(&fetcher)
         @tree = nil
         @metadata_types = nil # TODO think up a better name ... containers?
-        @sources = nil
+        @sources = {}
 
         # allow Root's to be built with no fetcher. Makes for easy testing
         return unless block_given?
@@ -119,11 +119,11 @@ module Rets
       def metadata_types
         return @metadata_types if @metadata_types
 
-        raise "Sources must be fetched before metadata_types can be computed" unless sources
-
         h = {}
 
-        sources.each {|name, source| h[name.downcase.to_sym] = build_containers(Nokogiri.parse(source)) }
+        sources.each do |name, source|
+          h[name.downcase.to_sym] = build_containers(Nokogiri.parse(source))
+        end
 
         @metadata_types = h
       end

@@ -78,6 +78,12 @@ class TestMetadata < Test::Unit::TestCase
     assert @root.current?(current_timestamp, current_version)
   end
 
+  def test_metadata_root_metadata_types_constructs_a_hash_of_metadata_types_from_sources
+    test_sources = { "X" => "Y", "Z" => "W" }
+    @root.stubs(:sources => test_sources, :build_containers => "Y--")
+    Nokogiri.stubs(:parse => "Y-")
+    assert_equal({:x => "Y--", :z => "Y--"}, @root.metadata_types)
+  end
 
   def test_metadata_root_build_container_uses_row_containers_for_resource
     doc = Nokogiri.parse(METADATA_RESOURCE).xpath("//METADATA-RESOURCE").first
