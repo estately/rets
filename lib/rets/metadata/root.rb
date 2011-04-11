@@ -92,8 +92,6 @@ module Rets
       end
 
       def build_tree
-        return @tree if @tree
-
         tree = {}
 
         resource_containers = metadata_types[:resource]
@@ -105,15 +103,29 @@ module Rets
           end
         end
 
-        @tree = tree
+        tree
+      end
+
+      def tree
+        @tree ||= build_tree
+      end
+
+      def print_tree
+        tree.each do |name, value|
+          value.print_tree
+        end
       end
 
       def metadata_types
         return @metadata_types if @metadata_types
 
         raise "Sources must be fetched before metadata_types can be computed" unless sources
-        types = sources.map {|name, source| [name, build_containers(Nokogiri.parse(source))] }
-        @metadata_types = Hash[*types.flatten]
+
+        h = {}
+
+        sources.each {|name, source| h[name.downcase.to_sym] = build_containers(Nokogiri.parse(source)) }
+
+        @metadata_types = h
       end
 
       # Returns an array of container classes that represents

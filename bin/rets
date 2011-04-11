@@ -149,9 +149,7 @@ case options[:action]
 
     # Tree format
     else
-      tree = Rets::Metadata.build_tree(metadata)
-
-      tree.values.each &:print_tree
+      metadata.print_tree
     end
 
   when "search" then
