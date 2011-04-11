@@ -42,7 +42,7 @@ module Rets
 
       # the tree is the high level represenation of the metadata heiarchy
       # it begins with root. Stored as a list of Metadata::Resources
-      attr_accessor :tree
+      attr_writer :tree
 
       # Sources are the raw xml documents fetched for each metadata type
       # they are stored as a hash with the type names as their keys
