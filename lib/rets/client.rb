@@ -199,18 +199,6 @@ module Rets
       @metadata = Metadata::Root.new(&metadata_fetcher)
     end
 
-    #def metadata_xxx
-    #  return @metadata if @metadata && metadata_current?(@metadata[:system].first)
-
-    #  @metadata = {}
-
-    #  METADATA_TYPES.each do |type|
-    #    @metadata[type.downcase.to_sym] = Metadata.build(metadata_type(type))
-    #  end
-
-    #  @metadata
-    #end
-
     def retrieve_metadata_type(type)
       metadata_uri = capability_url("GetMetadata")
 
