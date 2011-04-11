@@ -18,8 +18,12 @@ module Rets
       def self.build(rets_class_fragment, resource, metadata)
         rets_class = new(rets_class_fragment, resource)
 
-        find_table_container(metadata, resource, rets_class).tables.each do |table_fragment|
-          rets_class.tables << TableFactory.build(table_fragment, resource)
+        table_container = find_table_container(metadata, resource, rets_class)
+
+        if table_container
+          table_container.tables.each do |table_fragment|
+            rets_class.tables << TableFactory.build(table_fragment, resource)
+          end
         end
 
         rets_class

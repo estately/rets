@@ -254,7 +254,6 @@ class TestMetadata < Test::Unit::TestCase
     assert_equal('b', lookup_type.short_value)
     assert_equal('c', lookup_type.long_value)
   end
-
   def test_rets_class_find_table
     rets_class = Rets::Metadata::RetsClass.new({}, "resource")
     value = mock(:name => "test")
@@ -286,6 +285,14 @@ class TestMetadata < Test::Unit::TestCase
 
     assert_equal(rets_class.tables, [table])
   end
+
+  def test_rets_class_build_when_find_table_container_returns_nil
+    new_rets_class = stub(:new_rets_class)
+    Rets::Metadata::RetsClass.stubs(:new => new_rets_class)
+    Rets::Metadata::RetsClass.stubs(:find_table_container => nil)
+    Rets::Metadata::RetsClass.build({}, "", "")
+  end
+
 
   def test_rets_class_initialize
     fragment = { "ClassName" => "A" }
