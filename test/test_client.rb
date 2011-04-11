@@ -529,4 +529,21 @@ DIGEST
     assert_same metadata, @client.metadata, "Should be memoized"
   end
 
+  def test_retrieve_metadata_type
+    @client.expects(:capability_url).with("GetMetadata").returns(URI.parse("/meta"))
+
+    @client.expects(:build_key_values => "fakebody").with(
+      "Format" => "COMPACT",
+      "Type"   => "METADATA-FOO",
+      "ID"     => "0"
+    )
+
+    @client.expects(:request => stub(:body => "response")).with("/meta", "fakebody", has_entries(
+      "Content-Type"   => "application/x-www-form-urlencoded",
+      "Content-Length" => "8"
+    ))
+
+    assert_equal "response", @client.retrieve_metadata_type("FOO")
+  end
+
 end
