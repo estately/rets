@@ -25,7 +25,10 @@ module Rets
 
       def self.parse(columns, data, delimiter = TAB)
         column_names = columns.split(delimiter)
-        column_names.zip(data.split(delimiter))
+
+        key_values = column_names.zip(data.split(delimiter))
+
+        key_values.map { |key, value| [key, value.to_s] }
       end
     end
   end

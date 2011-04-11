@@ -34,4 +34,12 @@ class TestParserCompact < Test::Unit::TestCase
 
     assert_equal [%w(A 1), %w(B 2)], result
   end
+
+  # RMLS does this. :|
+  def test_remaining_columns_produce_empty_string_values
+    columns = "A B C D"
+    data    = "1 2"
+
+    assert_equal [%w(A 1), %w(B 2), ["C", ""], ["D", ""]], Rets::Parser::Compact.parse(columns, data, " ")
+  end
 end
