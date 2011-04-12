@@ -236,6 +236,7 @@ module Rets
       handle_cookies(response)
 
       logger.debug response.class
+      logger.debug response.to_hash.inspect
       logger.debug response.body
 
       return response

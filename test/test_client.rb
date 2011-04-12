@@ -62,7 +62,7 @@ class TestClient < Test::Unit::TestCase
 
     Net::HTTP::Post.expects(:new).with("/foo", headers).returns(post)
 
-    @client.connection.expects(:request).with(@client.uri, post).returns(stub(:body))
+    @client.connection.expects(:request).with(@client.uri, post).returns(stub_everything)
 
     @client.expects(:handle_cookies)
     @client.expects(:handle_response)
@@ -75,7 +75,7 @@ class TestClient < Test::Unit::TestCase
   end
 
   def test_request_passes_correct_arguments_to_persistent_connection
-    @client.connection.expects(:request).with(@client.uri, instance_of(Net::HTTP::Post)).returns(stub(:body))
+    @client.connection.expects(:request).with(@client.uri, instance_of(Net::HTTP::Post)).returns(stub_everything)
 
     @client.stubs(:handle_cookies)
     @client.stubs(:handle_response)
@@ -86,7 +86,7 @@ class TestClient < Test::Unit::TestCase
   def test_request_passes_correct_arguments_to_net_http_connection
     client = Rets::Client.new(:login_url => "http://example.com", :persistent => false)
 
-    client.connection.expects(:request).with(instance_of(Net::HTTP::Post)).returns(stub(:body))
+    client.connection.expects(:request).with(instance_of(Net::HTTP::Post)).returns(stub_everything)
 
     client.stubs(:handle_cookies)
     client.stubs(:handle_response)
