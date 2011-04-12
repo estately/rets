@@ -44,7 +44,9 @@ module Rets
     end
 
     def calculate_user_agent_digest(user_agent, user_agent_password, session_id, version)
-      a1 = Digest::MD5.hexdigest "#{user_agent}:#{user_agent_password}"
+      product, _ = user_agent.split("/")
+
+      a1 = Digest::MD5.hexdigest "#{product}:#{user_agent_password}"
 
       Digest::MD5.hexdigest "#{a1}::#{session_id}:#{version}"
     end

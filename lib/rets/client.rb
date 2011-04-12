@@ -405,7 +405,7 @@ module Rets
       if options[:ua_password]
         headers.merge!(
           "RETS-UA-Authorization" => build_user_agent_auth(
-            user_agent, options[:ua_password], cookie("RETS-Session-ID"), rets_version))
+            user_agent, options[:ua_password], "", rets_version))
       end
 
       headers
