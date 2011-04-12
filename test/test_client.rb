@@ -258,8 +258,8 @@ class TestClient < Test::Unit::TestCase
 
 
   def test_tries_increments_with_each_call
-    assert_equal 0, @client.tries
     assert_equal 1, @client.tries
+    assert_equal 2, @client.tries
   end
 
   def test_build_auth
