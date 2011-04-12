@@ -101,3 +101,42 @@ MULITPART_RESPONSE = [
   ""
 ].join("\r\n")
 
+
+SAMPLE_COMPACT = <<XML
+<RETS ReplyCode="0" ReplyText="Operation successful.">
+<METADATA-TABLE Resource="ActiveAgent" Class="MEMB" Version="01.72.10236" Date="2011-03-03T00:29:23">
+<COLUMNS>	MetadataEntryID	SystemName	StandardName	LongName	DBName	ShortName	MaximumLength	DataType	Precision	Searchable	Interpretation	Alignment	UseSeparator	EditMaskID	LookupName	MaxSelect	Units	Index	Minimum	Maximum	Default	Required	SearchHelpID	Unique	ModTimeStamp	ForeignKeyName	ForeignField	InKeyindex	</COLUMNS>
+<DATA>	7	City		City	City	City	11	Character	0	1		Left	0			0		0	0	0	0	0	City	0	0	1	MemberNumber	0	</DATA>
+<DATA>	9	ContactAddlPhoneType1		Contact Additional Phone Type 1	AddlPhTyp1	Contact Addl Ph Type 1	1	Character	0	1	Lookup	Left	0		ContactAddlPhoneType	0		0	0	0	0	0	ContactAddlPhoneType	0	0	1	MemberNumber	0	</DATA>
+<DATA>	11	ContactAddlPhoneType2		Contact Additional Phone Type 2	AddlPhTyp2	Contact Addl Ph Type 2	1	Character	0	1	Lookup	Left	0		ContactAddlPhoneType	0		0	0	0	0	0	ContactAddlPhoneType	0	0	1	MemberNumber	0	</DATA>
+<DATA>	13	ContactAddlPhoneType3		Contact Additional Phone Type 3	AddlPhTyp3	Contact Addl Ph Type 3	1	Character	0	1	Lookup	Left	0		ContactAddlPhoneType	0		0	0	0	0	0	ContactAddlPhoneType	0	0	1	MemberNumber	0	</DATA>
+<DATA>	15	ContactPhoneAreaCode1		Contact Phone Area Code 1	ContPhAC1	Contact Phone AC 1	3	Character	0	1		Left	0			0		0	0	0	0	0	ContactPhoneAreaCode	0	0	1	MemberNumber	0	</DATA>
+<DATA>	17	ContactPhoneAreaCode2		Contact Phone Area Code 2	ContPhAC2	Contact Phone AC 2	3	Character	0	1		Left	0			0		0	0	0	0	0	ContactPhoneAreaCode	0	0	1	MemberNumber	0	</DATA>
+<DATA>	19	ContactPhoneAreaCode3		Contact Phone Area Code 3	ContPhAC3	Contact Phone AC 3	3	Character	0	1		Left	0			0		0	0	0	0	0	ContactPhoneAreaCode	0	0	1	MemberNumber	0	</DATA>
+</METADATA-TABLE>
+</RETS>
+XML
+
+SAMPLE_COMPACT_2 = <<XML
+<?xml version="1.0" encoding="utf-8"?>
+<RETS ReplyCode="0" ReplyText="Success">
+  <METADATA-TABLE Class="15" Date="2010-10-28T05:41:31Z" Resource="Office" Version="26.27.62891">
+    <COLUMNS>	ModTimeStamp	MetadataEntryID	SystemName	StandardName	LongName	DBName	ShortName	MaximumLength	DataType	Precision	Searchable	Interpretation	Alignment	UseSeparator	EditMaskID	LookupName	MaxSelect	Units	Index	Minimum	Maximum	Default	Required	SearchHelpID	Unique	ForeignKeyName	ForeignField	InKeyIndex	</COLUMNS>
+    <DATA>		sysid15	sysid		sysid	sysid	sysid	10	Int	0	1			0			0		1			0	0		1			1	</DATA>
+    <DATA>		15n1155	OfficePhone_f1155	OfficePhone	Phone	Offic_1155	Phone	50	Character	0	1			0			0		0			0	0		0			0	</DATA>
+    <DATA>		15n1158	AccessFlag_f1158		Office Status	Acces_1158	Status	50	Character	0	1			0			0		0			0	0		0			0	</DATA>
+    <DATA>		15n1163	MODIFIED_f1163		Modified	MODIF_1163	Modified	20	DateTime	0	1			0			0		0			0	0		0			0	</DATA>
+    <DATA>		15n1165	DESREALTOR_f1165		DesRealtor	DESRE_1165	DesRealtor	75	Character	0	1			0			0		0			0	0		0			0	</DATA>
+    <DATA>		15n1166	DESREALTORUID_f1166		Designated Realtor Uid	DESRE_1166	RealtorUid	20	Character	0	1			0			0		0			0	0		0			0	</DATA>
+    <DATA>		15n1167	INT_NO_f1167		Internet Syndication (Y/N)	INT_N_1167	Int.Syn.	1	Character	0	1	Lookup		0		YESNO	1		0			0	0		0			0	</DATA>
+    <DATA>		15n1168	STATE_f1168		State	STATE_1168	State	50	Character	0	1	Lookup		0		1_523	1		0			0	0		0			0	</DATA>
+    <DATA>		15n1169	CITY_f1169		City	CITY_1169	City	50	Character	0	1			0			0		0			0	0		0			0	</DATA>
+    <DATA>		15n1170	IDX_NO_f1170		IDX (Y/N)	IDX_N_1170	IDX	1	Character	0	1			0			0		0			0	0		0			0	</DATA>
+    <DATA>		15n1172	ZipCode_f1172		Zip	ZipCo_1172	Zip	50	Character	0	1			0			0		0			0	0		0			0	</DATA>
+    <DATA>		15n1177	ADDRESS1_f1177		Address Line 1	ADDRE_1177	Address1	50	Character	0	1			0			0		0			0	0		0			0	</DATA>
+    <DATA>		15n1182	MLSYN_f1182		MLS Y/N	MLSYN_1182	MLSYN	1	Character	0	1			0			0		0			0	0		0			0	</DATA>
+    <DATA>		15n1184	OFFICENAME_f1184	Name	Office Name	OFFIC_1184	Office Name	50	Character	0	1			0			0		0			0	0		0			0	</DATA>
+    <DATA>		15n1193	OfficeCode_f1193	OfficeID	Office Code	Offic_1193	Office Code	12	Character	0	1			0			0		0			0	0		0			1	</DATA>
+  </METADATA-TABLE>
+</RETS>
+XML

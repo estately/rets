@@ -6,7 +6,10 @@ module Rets
       end
 
       def self.enum?(table_fragment)
-        !table_fragment["LookupName"].strip.empty?
+        lookup_value   = table_fragment["LookupName"].strip
+        interpretation = table_fragment["Interpretation"].strip
+
+        interpretation =~ /Lookup/ && !lookup_value.empty?
       end
     end
 
