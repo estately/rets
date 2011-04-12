@@ -417,7 +417,7 @@ module Rets
 
 
     def tries
-      @tries ||= 0
+      @tries ||= 1
 
       (@tries += 1) - 1
     end
