@@ -67,6 +67,8 @@ class TestClient < Test::Unit::TestCase
     @client.expects(:handle_cookies)
     @client.expects(:handle_response)
 
+    @client.stubs(:format_headers)
+
     @client.request("/foo", "fake body")
   end
 
@@ -79,6 +81,7 @@ class TestClient < Test::Unit::TestCase
 
     @client.stubs(:handle_cookies)
     @client.stubs(:handle_response)
+    @client.stubs(:format_headers)
 
     @client.request("/foo")
   end
@@ -90,6 +93,7 @@ class TestClient < Test::Unit::TestCase
 
     client.stubs(:handle_cookies)
     client.stubs(:handle_response)
+    client.stubs(:format_headers)
 
     client.request("/foo")
   end
