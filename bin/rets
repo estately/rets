@@ -30,6 +30,10 @@ class RetsCli
         options[:agent] = agent
       end
 
+      opts.on("-B", "--agent-password [PASSWORD]", "User-Agent password to provide.") do |ua_password|
+        options[:ua_password] = ua_password
+      end
+
       opts.separator ""
       opts.separator "Actions:"
 
