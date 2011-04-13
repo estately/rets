@@ -2,11 +2,11 @@ module Rets
   # Adapted from dbrain's Net::HTTP::DigestAuth gem, and RETS4R auth
   # in order to support RETS' usage of digest authentication.
   module Authentication
-    def build_auth(www_authenticate, uri, nc = 0, method = "POST")
+    def build_auth(digest_authenticate, uri, nc = 0, method = "POST")
       user     = CGI.unescape uri.user
       password = CGI.unescape uri.password
 
-      www_authenticate =~ /^(\w+) (.*)/
+      digest_authenticate =~ /^(\w+) (.*)/
 
       params = {}
       $2.gsub(/(\w+)="(.*?)"/) { params[$1] = $2 }

@@ -144,12 +144,12 @@ class TestClient < Test::Unit::TestCase
 
   def test_handle_unauthorized_response_sets_capabilities_on_success
     response = Net::HTTPSuccess.new("","","")
-    response.stubs(:body => CAPABILITIES)
+    response.stubs(:body => CAPABILITIES, :get_fields => ["xxx"])
 
     @client.stubs(:build_auth)
     @client.expects(:raw_request).with("/login").returns(response)
 
-    @client.handle_unauthorized_response({'www-authenticate' => 'xxx'})
+    @client.handle_unauthorized_response(response)
 
     capabilities = {"abc" => "123", "def" => "ghi=jk"}
 
@@ -158,13 +158,13 @@ class TestClient < Test::Unit::TestCase
 
   def test_handle_unauthorized_response_raises_on_auth_failure
     response = Net::HTTPUnauthorized.new("","","")
-    response.stubs(:body => "")
+    response.stubs(:body => "", :get_fields => ["xxx"])
 
     @client.stubs(:build_auth)
     @client.expects(:raw_request).with("/login").returns(response)
 
     assert_raise Rets::AuthorizationFailure do
-      @client.handle_unauthorized_response({'www-authenticate' => 'xxx'})
+      @client.handle_unauthorized_response(response)
     end
   end
 

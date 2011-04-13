@@ -252,8 +252,13 @@ module Rets
       Parser::Compact.parse_document response.body
     end
 
+    def extract_digest_header(response)
+      authenticate_headers = response.get_fields("www-authenticate")
+      authenticate_headers.detect {|h| h =~ /Digest/}
+    end
+
     def handle_unauthorized_response(response)
-      self.authorization = build_auth(response['www-authenticate'], uri, tries)
+      self.authorization = build_auth(extract_digest_header(response), uri, tries)
 
       response = raw_request(uri.path)
 
