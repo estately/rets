@@ -224,7 +224,8 @@ module Rets
       post = Net::HTTP::Post.new(path, headers)
       post.body = body.to_s
 
-      logger.debug headers.inspect
+      logger.debug ""
+      logger.debug format_headers(headers)
       logger.debug body.to_s
 
       connection_args = [Net::HTTP::Persistent === connection ? uri : nil, post].compact
@@ -235,8 +236,11 @@ module Rets
 
       handle_cookies(response)
 
-      logger.debug response.class
-      logger.debug response.to_hash.inspect
+      logger.debug "Response: (#{response.class})"
+      logger.debug ""
+      logger.debug format_headers(response.to_hash)
+      logger.debug ""
+      logger.debug "Body:"
       logger.debug response.body
 
       return response
@@ -438,6 +442,22 @@ module Rets
       def warn(*);  end
       def info(*);  end
       def debug(*); end
+    end
+
+    def format_headers(headers)
+      out = []
+
+      headers.each do |name, value|
+        if Array === value
+          value.each do |v|
+            out << "#{name}: #{v}"
+          end
+        else
+          out << "#{name}: #{value}"
+        end
+      end
+
+      out.join("\n")
     end
 
   end
