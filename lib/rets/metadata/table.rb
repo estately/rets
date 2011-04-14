@@ -67,10 +67,16 @@ module Rets
       def resolve(value)
         return [] if value.empty?
 
-        if multi?
-          value.split(",").map {|v| lookup_type(v).long_value }
-        else
-          [lookup_type(value).long_value]
+        values = multi? ? value.split(","): [value]
+
+        values.map do |value|
+          lookup_type = lookup_type(value)
+
+          resolved_value = lookup_type ? lookup_type.long_value : nil
+
+          warn("Discarding unmappable value of #{value.inspect}") if resolved_value.nil?
+
+          resolved_value
         end
       end
     end

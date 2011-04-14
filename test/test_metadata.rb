@@ -358,6 +358,33 @@ class TestMetadata < Test::Unit::TestCase
     assert_equal ["Aaa", "Bbb"], lookup_table.resolve("A,B")
   end
 
+  # This scenario is unfortunately common.
+  def test_lookup_table_resolve_returns_nil_when_lookup_type_is_not_present_for_multi_value
+    fragment = { "Interpretation" => "LookupMulti" }
+
+    lookup_table = Rets::Metadata::LookupTable.new(fragment, nil)
+
+    lookup_table.expects(:lookup_type).with("A").returns(mock(:long_value => "Aaa"))
+    lookup_table.expects(:lookup_type).with("B").returns(nil)
+
+    lookup_table.expects(:warn).with("Discarding unmappable value of #{"B".inspect}")
+
+    assert_equal ["Aaa", nil], lookup_table.resolve("A,B")
+  end
+
+  # This scenario is unfortunately common.
+  def test_lookup_table_resolve_returns_nil_when_lookup_type_is_not_present_for_single_value
+    fragment = { "Interpretation" => "SomethingElse" }
+
+    lookup_table = Rets::Metadata::LookupTable.new(fragment, nil)
+
+    lookup_table.expects(:lookup_type).with("A").returns(nil)
+
+    lookup_table.expects(:warn).with("Discarding unmappable value of #{"A".inspect}")
+
+    assert_equal [nil], lookup_table.resolve("A")
+  end
+
   def test_table_initialize
     fragment = { "DataType" => "A", "SystemName" => "B" }
 
