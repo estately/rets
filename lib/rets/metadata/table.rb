@@ -70,6 +70,10 @@ module Rets
         values = multi? ? value.split(","): [value]
 
         values.map do |value|
+
+	  #Remove surrounding quotes
+	  value  = value.scan(/^["']?(.*?)["']?$/).to_s
+
           lookup_type = lookup_type(value)
 
           resolved_value = lookup_type ? lookup_type.long_value : nil
