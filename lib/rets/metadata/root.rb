@@ -92,14 +92,14 @@ module Rets
       end
 
       def build_tree
-        tree = {}
+        tree = Hash.new { |h, k| h.key?(k.downcase) ? h[k.downcase] : nil }
 
         resource_containers = metadata_types[:resource]
 
         resource_containers.each do |resource_container|
           resource_container.rows.each do |resource_fragment|
             resource = Resource.build(resource_fragment, metadata_types)
-            tree[resource.id] = resource
+            tree[resource.id.downcase] = resource
           end
         end
 

@@ -28,7 +28,8 @@ class TestMetadata < Test::Unit::TestCase
     resource_fragment = stub(:resource_fragment)
     resource_container = stub(:rows => [resource_fragment])
     @root.stubs(:metadata_types => { :resource => [resource_container] })
-    assert_equal({"X" => resource}, @root.build_tree)
+    assert_equal({"x" => resource}, @root.build_tree)
+    assert_equal(resource, @root.build_tree["X"])
   end
 
   def test_metadata_root_version
