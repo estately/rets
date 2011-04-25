@@ -34,12 +34,12 @@ module Rets
         raise ArgumentError, "Delimiter must be a regular expression" unless Regexp === delimiter
 
         column_names = columns.split(delimiter)
+        data_values = data.split(delimiter, INCLUDE_NULL_FIELDS)
 
-        key_values = column_names.zip(data.split(delimiter, INCLUDE_NULL_FIELDS))
+        zipped_key_values = column_names.zip(data_values).map { |k, v| [k, v.to_s] }
 
-        key_values.
-          reject { |key, value| key.empty? && value.to_s.empty? }.
-          map    { |key, value| [key, value.to_s] }
+        hash = Hash[*zipped_key_values.flatten]
+        hash.reject { |key, value| key.empty? && value.to_s.empty? }
       end
     end
   end

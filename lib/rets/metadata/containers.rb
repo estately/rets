@@ -38,10 +38,7 @@ module Rets
 
         def initialize(doc)
           super
-
-          self.rows = Parser::Compact.parse_document(doc).map do |row|
-            Hash[*row.flatten]
-          end
+          self.rows = Parser::Compact.parse_document(doc)
         end
 
       end
