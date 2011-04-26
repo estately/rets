@@ -103,8 +103,8 @@ module Rets
     end
 
     def decorate_result(result, rets_class)
-      result.map do |key, value|
-        [key, rets_class.find_table(key).resolve(value.to_s)]
+      result.each do |key, value|
+        result[key] = rets_class.find_table(key).resolve(value.to_s)
       end
     end
 
