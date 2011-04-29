@@ -85,7 +85,7 @@ module Rets
 
           resolved_value = lookup_type ? lookup_type.long_value : nil
 
-          debug("Discarding unmappable value of #{value.inspect}") if resolved_value.nil?
+          warn("Discarding unmappable value of #{value.inspect}") if resolved_value.nil? && $VERBOSE
 
           resolved_value
         end
