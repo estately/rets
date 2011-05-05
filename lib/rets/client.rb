@@ -269,9 +269,7 @@ module Rets
       if Net::HTTPUnauthorized === response
         raise AuthorizationFailure, "Authorization failed, check credentials?"
       else
-        capabilities = extract_capabilities(Nokogiri.parse(response.body))
-
-        self.capabilities = capabilities
+        self.capabilities = extract_capabilities(Nokogiri.parse(response.body))
       end
     end
 
