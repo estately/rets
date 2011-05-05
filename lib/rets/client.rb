@@ -369,7 +369,7 @@ module Rets
     end
 
     def extract_capabilities(document)
-      raw_key_values = document.xpath("//RETS/RETS-RESPONSE").text.strip
+      raw_key_values = document.xpath("/RETS/RETS-RESPONSE").text.strip
 
       h = Hash.new{|h,k| h.key?(k.downcase) ? h[k.downcase] : nil }
 
