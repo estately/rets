@@ -285,8 +285,8 @@ module Rets
           if !response.body.empty?
             xml = Nokogiri::XML.parse(response.body, nil, nil, Nokogiri::XML::ParseOptions::STRICT)
 
-            reply_text = xml.xpath("//RETS").attr("ReplyText").value
-            reply_code = xml.xpath("//RETS").attr("ReplyCode").value.to_i
+            reply_text = xml.xpath("/RETS").attr("ReplyText").value
+            reply_code = xml.xpath("/RETS").attr("ReplyCode").value.to_i
 
             if reply_code.nonzero?
               raise InvalidRequest, "Got error code #{reply_code} (#{reply_text})."
