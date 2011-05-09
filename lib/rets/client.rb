@@ -6,7 +6,7 @@ module Rets
 
     include Authentication
 
-    attr_accessor :uri, :options, :authorization
+    attr_accessor :uri, :options, :authorization, :logger
     attr_writer   :capabilities, :metadata
 
     def initialize(options)
@@ -21,6 +21,8 @@ module Rets
 
       self.options = DEFAULT_OPTIONS.merge(options)
       self.uri     = uri
+
+      self.logger = options[:logger] || FakeLogger.new
 
       self.session  = options[:session]  if options[:session]
       self.metadata = options[:metadata] if options[:metadata]
@@ -428,10 +430,6 @@ module Rets
       @tries ||= 1
 
       (@tries += 1) - 1
-    end
-
-    def logger
-      options[:logger] || FakeLogger.new
     end
 
     class FakeLogger
