@@ -25,7 +25,7 @@ module Rets
       self.logger = options[:logger] || FakeLogger.new
 
       self.session  = options[:session]  if options[:session]
-      self.metadata = options[:metadata] if options[:metadata]
+      @cached_metadata = options[:metadata] if options[:metadata]
     end
 
 
@@ -194,11 +194,14 @@ module Rets
     end
 
     def metadata
-      return @metadata if @metadata && @metadata.current?(capabilities["MetadataTimestamp"], capabilities["MetadataVersion"])
+      return @metadata if @metadata
 
-      metadata_fetcher = lambda { |type| retrieve_metadata_type(type) }
-
-      @metadata = Metadata::Root.new(&metadata_fetcher)
+      if @cached_metadata.current?(capabilities["MetadataTimestamp"], capabilities["MetadataVersion"])
+        self.metadata = @cached_metadata
+      else
+        metadata_fetcher = lambda { |type| retrieve_metadata_type(type) }
+        self.metadata = Metadata::Root.new(&metadata_fetcher)
+      end
     end
 
     def retrieve_metadata_type(type)

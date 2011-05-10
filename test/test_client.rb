@@ -342,7 +342,22 @@ DIGEST
     assert_equal("sessionid=123",   client.cookies)
   end
 
-  def test_initialize_with_metadata
+  def test_initialize_with_old_metadata_cached_gets_new_metadata_ONCE
+  end
+
+  def test_initialize_with_old_metadata_cached_gets_new_metadata
+    metadata = stub(:current? => false)
+    new_metadata = stub(:current? => false)
+    client = Rets::Client.new(:login_url => "http://example.com", :metadata => metadata)
+    client.stubs(:capabilities => {})
+    Rets::Metadata::Root.expects(:new => new_metadata).once
+
+    assert_same new_metadata, client.metadata
+    # This second call ensures the expectations on Root are met
+    client.metadata
+  end
+
+  def test_initialize_with_current_metadata_cached_return_cached_metadata
     metadata = stub(:current? => true)
     client = Rets::Client.new(:login_url => "http://example.com", :metadata => metadata)
     client.stubs(:capabilities => {})
