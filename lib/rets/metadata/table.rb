@@ -34,9 +34,7 @@ module Rets
       end
 
       def resolve(value)
-        return [] if value.empty?
-
-        [value]
+        value.to_s.strip
       end
     end
 
@@ -72,11 +70,14 @@ module Rets
       end
 
       def resolve(value)
-        return [] if value.empty?
+        if value.empty?
+          return [] if multi?
+          return value.to_s.strip
+        end
 
         values = multi? ? value.split(","): [value]
 
-        values.map do |value|
+        values = values.map do |value|
 
           #Remove surrounding quotes
           value  = value.scan(/^["']?(.*?)["']?$/).to_s
@@ -89,6 +90,8 @@ module Rets
 
           resolved_value
         end
+
+        multi? ? values.map {|value| value.to_s.strip } : values.first.to_s.strip
       end
     end
   end

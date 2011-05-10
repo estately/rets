@@ -42,24 +42,34 @@ class TestMetadata < Test::Unit::TestCase
     assert_equal "1", @root.date
   end
 
-  def test_metadata_root_current_version
+  def test_metadata_root_different_version
     @root.stubs(:version).returns("1.2.2")
     @root.stubs(:date).returns("1")
 
-    current_timestamp = "1"
     current_version = "1.2.3"
+    current_timestamp = "1"
 
     assert !@root.current?(current_timestamp, current_version)
   end
 
-  def test_metadata_root_current_timestamp
+  def test_metadata_root_same_version
     @root.stubs(:version).returns("1.2.2")
     @root.stubs(:date).returns("1")
 
-    current_timestamp = "2"
     current_version = "1.2.2"
+    current_timestamp = "2"
 
-    assert !@root.current?(current_timestamp, current_version)
+    assert @root.current?(current_timestamp, current_version)
+  end
+
+  def test_metadata_root_no_version_same_timestamp
+    @root.stubs(:version).returns("")
+    @root.stubs(:date).returns("1")
+
+    current_version = "1.2.3"
+    current_timestamp = "1"
+
+    assert @root.current?(current_timestamp, current_version)
   end
 
   def test_metadata_root_current
@@ -330,22 +340,21 @@ class TestMetadata < Test::Unit::TestCase
     assert_equal("B", lookup_table.interpretation)
   end
 
-  def test_lookup_table_resolve_returns_empty_array_when_value_is_empty
-    fragment = { "Interpretation" => "SomethingElse" }
+  def test_lookup_table_resolve_returns_empty_array_when_value_is_empty_and_is_multi?
 
-    lookup_table = Rets::Metadata::LookupTable.new(fragment, nil)
+    lookup_table = Rets::Metadata::LookupTable.new({}, nil)
+    lookup_table.stubs(:multi? => true)
 
     assert_equal [], lookup_table.resolve("")
   end
 
-  def test_lookup_table_resolve_returns_single_value_array
-    fragment = { "Interpretation" => "SomethingElse" }
-
-    lookup_table = Rets::Metadata::LookupTable.new(fragment, nil)
+  def test_lookup_table_resolve_returns_single_value_if_not_multi
+    lookup_table = Rets::Metadata::LookupTable.new({}, nil)
+    lookup_table.stubs(:multi? => false)
 
     lookup_table.expects(:lookup_type).with("A,B").returns(mock(:long_value => "AaaBbb"))
 
-    assert_equal ["AaaBbb"], lookup_table.resolve("A,B")
+    assert_equal "AaaBbb", lookup_table.resolve("A,B")
   end
 
   def test_lookup_table_resolve_returns_multi_value_array_when_multi
@@ -382,20 +391,20 @@ class TestMetadata < Test::Unit::TestCase
 
     lookup_table.expects(:warn).with("Discarding unmappable value of #{"B".inspect}")
 
-    assert_equal ["Aaa", nil], lookup_table.resolve("A,B")
+    assert_equal ["Aaa", ""], lookup_table.resolve("A,B")
   end
 
   # This scenario is unfortunately common.
   def test_lookup_table_resolve_returns_nil_when_lookup_type_is_not_present_for_single_value
-    fragment = { "Interpretation" => "SomethingElse" }
 
-    lookup_table = Rets::Metadata::LookupTable.new(fragment, nil)
+    lookup_table = Rets::Metadata::LookupTable.new({}, nil)
+    lookup_table.stubs(:multi? => true)
 
     lookup_table.expects(:lookup_type).with("A").returns(nil)
 
     lookup_table.expects(:warn).with("Discarding unmappable value of #{"A".inspect}")
 
-    assert_equal [nil], lookup_table.resolve("A")
+    assert_equal [""], lookup_table.resolve("A")
   end
 
   def test_table_initialize
@@ -406,16 +415,22 @@ class TestMetadata < Test::Unit::TestCase
     assert_equal("B", table.name)
   end
 
-  def test_table_resolve_returns_empty_array_when_value_is_empty
+  def test_table_resolve_returns_empty_string_when_value_nil
     table = Rets::Metadata::Table.new({})
 
-    assert_equal [], table.resolve("")
+    assert_equal "", table.resolve(nil)
   end
 
-  def test_table_resolve_returns_single_value_array
+  def test_table_resolve_passes_values_straight_through
     table = Rets::Metadata::Table.new({})
 
-    assert_equal ["Foo"], table.resolve("Foo")
+    assert_equal "Foo", table.resolve("Foo")
+  end
+
+  def test_table_resolve_passes_values_strips_extra_whitspace
+    table = Rets::Metadata::Table.new({})
+
+    assert_equal "Foo", table.resolve(" Foo ")
   end
 
   def test_root_can_be_serialized

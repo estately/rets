@@ -87,8 +87,11 @@ module Rets
       # version was published, or a version number. These values may or may
       # not exist on any given rets server.
       def current?(current_timestamp, current_version)
-        (current_version ? current_version == version : true) &&
-          (current_timestamp ? current_timestamp == date : true)
+	if !current_version.to_s.empty? && !version.to_s.empty?
+	  current_version == version 
+	else
+          current_timestamp ? current_timestamp == date : true
+	end
       end
 
       def build_tree
