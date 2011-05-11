@@ -196,7 +196,7 @@ module Rets
     def metadata
       return @metadata if @metadata
 
-      if @cached_metadata.current?(capabilities["MetadataTimestamp"], capabilities["MetadataVersion"])
+      if @cached_metadata && @cached_metadata.current?(capabilities["MetadataTimestamp"], capabilities["MetadataVersion"])
         self.metadata = @cached_metadata
       else
         metadata_fetcher = lambda { |type| retrieve_metadata_type(type) }
