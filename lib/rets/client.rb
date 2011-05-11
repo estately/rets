@@ -106,7 +106,7 @@ module Rets
 
     def decorate_result(result, rets_class)
       result.each do |key, value|
-        result[key] = rets_class.find_table(key).resolve(value.to_s).strip
+        result[key] = rets_class.find_table(key).resolve(value.to_s)
       end
     end
 
