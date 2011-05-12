@@ -398,7 +398,7 @@ module Rets
     def persistent_connection
       conn = Net::HTTP::Persistent.new
 
-      def conn.idempotent?
+      def conn.idempotent?(*)
 	true
       end
 
