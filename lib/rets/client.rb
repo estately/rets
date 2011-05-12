@@ -25,7 +25,7 @@ module Rets
       self.logger = options[:logger] || FakeLogger.new
 
       self.session  = options[:session]  if options[:session]
-      @cached_metadata = options[:metadata] if options[:metadata]
+      @cached_metadata = options[:metadata] || nil
     end
 
 
@@ -391,8 +391,18 @@ module Rets
 
     def connection
       @connection ||= options[:persistent] ?
-        Net::HTTP::Persistent.new :
+        persistent_connection :
         Net::HTTP.new(uri.host, uri.port)
+    end
+
+    def persistent_connection
+      conn = Net::HTTP::Persistent.new
+
+      def conn.idempotent?
+	true
+      end
+
+      conn
     end
 
 
