@@ -4,19 +4,17 @@
 
 ## DESCRIPTION:
 
-FIX (describe your package)
+A pure-ruby library for fetching data from [RETS] servers.
 
-## FEATURES:
-
-* FIX (list of features or problems)
+[RETS]: http://www.rets.org
 
 ## REQUIREMENTS:
 
-* FIX (list of requirements)
+* [net-http-persistent]
+* [nokogiri]
 
-## INSTALL:
-
-    $ [sudo] gem install rets
+[net-http-persistent]: http://seattlerb.rubyforge.org/net-http-persistent/
+[nokogiri]: http://nokogiri.org
 
 ## LICENSE:
 
