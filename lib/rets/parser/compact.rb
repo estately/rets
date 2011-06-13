@@ -25,6 +25,10 @@ module Rets
         end
       end
 
+      def self.parse_count(xml)
+        Nokogiri.parse(xml).at("//COUNT").attribute("Records").value.to_i
+      end
+
       # Parses a single row of RETS-COMPACT data.
       #
       # Delimiter must be a regexp because String#split behaves differently when

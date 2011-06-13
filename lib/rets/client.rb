@@ -2,6 +2,7 @@ module Rets
   Session = Struct.new(:authorization, :capabilities, :cookies)
 
   class Client
+    COUNT = Struct.new(:exclude, :include, :only).new(0,1,2)
     DEFAULT_OPTIONS = { :persistent => true }
 
     include Authentication
@@ -64,6 +65,11 @@ module Rets
       end
     end
 
+    def count(opts = {})
+      response = find_every(opts.merge(:count => COUNT.only))
+      Parser::Compact.parse_count response.body
+    end
+
     alias search find
 
     def find_every(opts = {})
@@ -84,7 +90,11 @@ module Rets
         "Content-Length" => body.size.to_s
       )
 
-      results = request_with_compact_response(search_uri.path, body, headers)
+      results = if opts[:count] == COUNT.only
+        request(search_uri.path, body, headers)
+      else
+        request_with_compact_response(search_uri.path, body, headers)
+      end
 
       if resolve
         rets_class = find_rets_class(opts[:search_type], opts[:class])

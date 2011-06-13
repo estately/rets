@@ -140,3 +140,10 @@ SAMPLE_COMPACT_2 = <<XML
   </METADATA-TABLE>
 </RETS>
 XML
+
+SAMPLE_COUNT = <<XML
+<?xml version="1.0" encoding="utf-8"?>
+<RETS ReplyCode="0" ReplyText="Success">
+  <COUNT Records="3000" />
+</RETS>
+XML
