@@ -17,12 +17,25 @@ module Rets
           raise InvalidDelimiter, "Empty or invalid delimiter found, unable to parse."
         end
 
-        columns = doc.at("//COLUMNS").text
-        rows    = doc.xpath("//DATA")
+        self.columns = doc.at("//COLUMNS").text
+        rows = doc.xpath("//DATA")
 
-        rows.map do |data|
-          self.parse(columns, data.text, delimiter)
+        rows.map.with_index do |data, i|
+          puts "## Processing record: #{i+1} (#{Time.now})" if i%500 == 0
+          parse(data.text, delimiter)
         end
+      end
+
+      def self.columns=(columns, delimiter = TAB)
+        @columns = columns.split(delimiter)
+      end
+
+      def self.columns
+        @columns
+      end
+
+      def self.parse_count(xml)
+        Nokogiri.parse(xml).at("//COUNT").attribute("Records").value.to_i
       end
 
       # Parses a single row of RETS-COMPACT data.
@@ -30,16 +43,12 @@ module Rets
       # Delimiter must be a regexp because String#split behaves differently when
       # given a string pattern. (It removes leading spaces).
       #
-      def self.parse(columns, data, delimiter = TAB)
+      def self.parse(data, delimiter = TAB)
         raise ArgumentError, "Delimiter must be a regular expression" unless Regexp === delimiter
 
-        column_names = columns.split(delimiter)
-        data_values = data.split(delimiter, INCLUDE_NULL_FIELDS)
-
-        zipped_key_values = column_names.zip(data_values).map { |k, v| [k, v.to_s] }
-
-        hash = Hash[*zipped_key_values.flatten]
-        hash.reject { |key, value| key.empty? && value.to_s.empty? }
+        hash = {}
+        data.split(delimiter, INCLUDE_NULL_FIELDS).each_with_index { |v, i| hash[columns[i]] = v.to_s unless v.to_s.empty? }
+        hash
       end
     end
   end
