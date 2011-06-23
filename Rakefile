@@ -1,6 +1,8 @@
 require 'rubygems'
 require 'hoe'
 
+Hoe.plugin :git, :doofus
+
 Hoe.spec 'rets' do
   developer 'Estately, Inc. Open Source', 'opensource@estately.com'
   developer 'Ben Bleything',              'ben@bleything.net'
