@@ -382,7 +382,7 @@ module Rets
       # Feel free to make this better. It has a test.
       raw_key_values.split(/\n/).
         map  { |r| r.split(/=/, 2) }.
-        each { |k,v| h[k.strip.downcase] = v }
+        each { |k,v| h[k.strip.downcase] = v.strip }
 
       h
     end
