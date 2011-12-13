@@ -181,6 +181,13 @@ class TestClient < Test::Unit::TestCase
     )
   end
 
+  def test_extract_capabilities_with_whitespace
+    assert_equal(
+      {"action" => "/RETS/Action"},
+      @client.extract_capabilities(Nokogiri.parse(CAPABILITIES_WITH_WHITESPACE))
+    )
+  end
+
   def test_capability_url_returns_parsed_url
     @client.capabilities = { "foo" => "http://example.com" }
 

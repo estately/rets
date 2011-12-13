@@ -21,6 +21,14 @@ CAPABILITIES = <<-XML
 </RETS>
 XML
 
+CAPABILITIES_WITH_WHITESPACE = <<XML
+<RETS ReplyCode="0" ReplyText="Operation Successful">
+<RETS-RESPONSE>
+Action = /RETS/Action
+</RETS-RESPONSE>
+</RETS>
+XML
+
 # 44 is the ASCII code for comma; an invalid delimiter.
 INVALID_DELIMETER = <<-XML
 <?xml version="1.0"?>
