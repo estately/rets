@@ -207,6 +207,12 @@ class TestClient < Test::Unit::TestCase
     @client.capabilities
   end
 
+  def test_login_fails_if_cannot_read_capabilities
+    @client.stubs(:request)
+    assert_raise Rets::UnknownResponse do
+      @client.login
+    end
+  end
 
   def test_cookies?
     assert @client.cookies?({"set-cookie" => "FavoriteFruit=Plum;"})
