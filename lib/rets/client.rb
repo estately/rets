@@ -34,7 +34,8 @@ module Rets
     # RETS server provides, per http://retsdoc.onconfluence.com/display/rets172/4.10+Capability+URL+List.
     def login
       request(uri.path)
-      capabilities
+      raise UnknownResponse, "Cannot read rets server capabilities." unless @capabilities
+      @capabilities
     end
 
     # Finds records.
