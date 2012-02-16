@@ -68,11 +68,11 @@ module Rets
     # will be sent as +Offset+.
     #
     def find(quantity, opts = {})
-        case quantity
-          when :first  then find_every(opts.merge(:limit => 1)).first
-          when :all    then find_every(opts)
-          else raise ArgumentError, "First argument must be :first or :all"
-        end
+      case quantity
+        when :first  then find_every(opts.merge(:limit => 1)).first
+        when :all    then find_every(opts)
+        else raise ArgumentError, "First argument must be :first or :all"
+      end
     end
 
     alias search find
