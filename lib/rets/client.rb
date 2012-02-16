@@ -10,22 +10,32 @@ module Rets
     attr_writer   :capabilities, :metadata
 
     def initialize(options)
+      @options = options
+      clean_setup
+    end
+    
+    def clean_setup
+      
       @capabilities = nil
       @cookies      = nil
       @metadata     = nil
+      @cached_metadata = nil
+      
+      self.authorization = nil
+      self.capabilities = nil
 
-      uri          = URI.parse(options[:login_url])
+      uri          = URI.parse(@options[:login_url])
 
-      uri.user     = options.key?(:username) ? CGI.escape(options[:username]) : nil
-      uri.password = options.key?(:password) ? CGI.escape(options[:password]) : nil
+      uri.user     = @options.key?(:username) ? CGI.escape(@options[:username]) : nil
+      uri.password = @options.key?(:password) ? CGI.escape(@options[:password]) : nil
 
-      self.options = DEFAULT_OPTIONS.merge(options)
+      self.options = DEFAULT_OPTIONS.merge(@options)
       self.uri     = uri
 
-      self.logger = options[:logger] || FakeLogger.new
+      self.logger = @options[:logger] || FakeLogger.new
 
-      self.session  = options[:session]  if options[:session]
-      @cached_metadata = options[:metadata] || nil
+      self.session  = @options[:session]  if @options[:session]
+      @cached_metadata = @options[:metadata] || nil
     end
 
 
@@ -58,40 +68,50 @@ module Rets
     # will be sent as +Offset+.
     #
     def find(quantity, opts = {})
-      case quantity
-        when :first  then find_every(opts.merge(:limit => 1)).first
-        when :all    then find_every(opts)
-        else raise ArgumentError, "First argument must be :first or :all"
-      end
+        case quantity
+          when :first  then find_every(opts.merge(:limit => 1)).first
+          when :all    then find_every(opts)
+          else raise ArgumentError, "First argument must be :first or :all"
+        end
     end
 
     alias search find
 
     def find_every(opts = {})
-      search_uri = capability_url("Search")
+      retries = 0
+      begin
+        search_uri = capability_url("Search")
 
-      resolve = opts.delete(:resolve)
+        resolve = opts.delete(:resolve)
 
-      extras = fixup_keys(opts)
+        extras = fixup_keys(opts)
 
-      defaults = {"QueryType" => "DMQL2", "Format" => "COMPACT"}
+        defaults = {"QueryType" => "DMQL2", "Format" => "COMPACT"}
 
-      query = defaults.merge(extras)
+        query = defaults.merge(extras)
 
-      body = build_key_values(query)
+        body = build_key_values(query)
 
-      headers = build_headers.merge(
-        "Content-Type"   => "application/x-www-form-urlencoded",
-        "Content-Length" => body.size.to_s
-      )
+        headers = build_headers.merge(
+          "Content-Type"   => "application/x-www-form-urlencoded",
+          "Content-Length" => body.size.to_s
+        )
 
-      results = request_with_compact_response(search_uri.path, body, headers)
+        results = request_with_compact_response(search_uri.path, body, headers)
 
-      if resolve
-        rets_class = find_rets_class(opts[:search_type], opts[:class])
-        decorate_results(results, rets_class)
-      else
-        results
+        if resolve
+          rets_class = find_rets_class(opts[:search_type], opts[:class])
+          decorate_results(results, rets_class)
+        else
+          results
+        end
+      rescue
+        if retries < 3
+          retries += 1
+          self.logger.warn "Retrying search #{retries}/3.."
+          clean_setup
+          retry
+        end
       end
     end
 

@@ -420,6 +420,11 @@ DIGEST
     end
   end
 
+  def test_find_retries_on_errors
+    @client.stubs(:request_with_compact_response).raises(URI::InvalidURIError).then.raises(Nokogiri::XML::SyntaxError).then.returns(nil)
+    @client.find(:all, :foo => :bar)
+  end
+
   def test_find_provides_default_values
     @client.expects(:build_key_values).
       with("QueryType" => "DMQL2", "Format" => "COMPACT", "Query" => "x", "Foo" => "bar").
