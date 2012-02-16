@@ -69,49 +69,54 @@ module Rets
     #
     def find(quantity, opts = {})
       case quantity
-        when :first  then find_every(opts.merge(:limit => 1)).first
-        when :all    then find_every(opts)
+        when :first  then find_with_retries(opts.merge(:limit => 1)).first
+        when :all    then find_with_retries(opts)
         else raise ArgumentError, "First argument must be :first or :all"
       end
     end
 
     alias search find
 
-    def find_every(opts = {})
+    def find_with_retries(opts = {})
       retries = 0
       begin
-        search_uri = capability_url("Search")
-
-        resolve = opts.delete(:resolve)
-
-        extras = fixup_keys(opts)
-
-        defaults = {"QueryType" => "DMQL2", "Format" => "COMPACT"}
-
-        query = defaults.merge(extras)
-
-        body = build_key_values(query)
-
-        headers = build_headers.merge(
-          "Content-Type"   => "application/x-www-form-urlencoded",
-          "Content-Length" => body.size.to_s
-        )
-
-        results = request_with_compact_response(search_uri.path, body, headers)
-
-        if resolve
-          rets_class = find_rets_class(opts[:search_type], opts[:class])
-          decorate_results(results, rets_class)
-        else
-          results
-        end
-      rescue
+        find_every(opts)
+      rescue AuthorizationFailure, InvalidRequest => e
         if retries < 3
           retries += 1
-          self.logger.warn "Retrying search #{retries}/3.."
+          self.logger.warn "Failed with message: #{e.message}"
+          self.logger.info "Retry #{retries}/3"
           clean_setup
           retry
         end
+      end
+    end
+    
+    def find_every(opts = {})
+      search_uri = capability_url("Search")
+
+      resolve = opts.delete(:resolve)
+
+      extras = fixup_keys(opts)
+
+      defaults = {"QueryType" => "DMQL2", "Format" => "COMPACT"}
+
+      query = defaults.merge(extras)
+
+      body = build_key_values(query)
+
+      headers = build_headers.merge(
+        "Content-Type"   => "application/x-www-form-urlencoded",
+        "Content-Length" => body.size.to_s
+      )
+
+      results = request_with_compact_response(search_uri.path, body, headers)
+
+      if resolve
+        rets_class = find_rets_class(opts[:search_type], opts[:class])
+        decorate_results(results, rets_class)
+      else
+        results
       end
     end
 
@@ -295,6 +300,7 @@ module Rets
       if Net::HTTPUnauthorized === response
         raise AuthorizationFailure, "Authorization failed, check credentials?"
       else
+        check_errors(response)
         self.capabilities = extract_capabilities(Nokogiri.parse(response.body))
       end
     end
@@ -305,23 +311,7 @@ module Rets
         handle_unauthorized_response(response)
 
       elsif Net::HTTPSuccess === response # 2xx
-        begin
-          if !response.body.empty?
-            xml = Nokogiri::XML.parse(response.body, nil, nil, Nokogiri::XML::ParseOptions::STRICT)
-
-            reply_text = xml.xpath("/RETS").attr("ReplyText").value
-            reply_code = xml.xpath("/RETS").attr("ReplyCode").value.to_i
-
-            if reply_code.nonzero?
-              raise InvalidRequest, "Got error code #{reply_code} (#{reply_text})."
-            end
-          end
-
-        rescue Nokogiri::XML::SyntaxError => e
-          logger.debug "Not xml"
-
-        end
-
+        check_errors(response)
       else
         raise UnknownResponse, "Unable to handle response #{response.class}"
       end
@@ -329,6 +319,23 @@ module Rets
       return response
     end
 
+    def check_errors(response)
+      begin
+        if !response.body.empty?
+          xml = Nokogiri::XML.parse(response.body, nil, nil, Nokogiri::XML::ParseOptions::STRICT)
+
+          reply_text = xml.xpath("/RETS").attr("ReplyText").value
+          reply_code = xml.xpath("/RETS").attr("ReplyCode").value.to_i
+
+          if reply_code.nonzero?
+            raise InvalidRequest, "Got error code #{reply_code} (#{reply_text})."
+          end
+        end
+
+      rescue Nokogiri::XML::SyntaxError => e
+        logger.debug "Not xml"
+      end
+    end
 
     def handle_cookies(response)
       if cookies?(response)

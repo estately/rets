@@ -116,6 +116,18 @@ class TestClient < Test::Unit::TestCase
     end
   end
 
+  def test_handle_unauthorize_response_handles_rets_errors
+    response = Net::HTTPSuccess.new("", "", "")
+    response.stubs(:body => RETS_ERROR)
+    @client.stubs(:build_auth)
+    @client.stubs(:extract_digest_header)
+    @client.stubs(:raw_request).returns(response)
+
+    assert_raise Rets::InvalidRequest do
+      @client.handle_unauthorized_response(response)
+    end
+  end
+
   def test_handle_response_handles_rets_valid_response
     response = Net::HTTPSuccess.new("", "", "")
     response.stubs(:body => RETS_REPLY)
@@ -421,7 +433,7 @@ DIGEST
   end
 
   def test_find_retries_on_errors
-    @client.stubs(:request_with_compact_response).raises(URI::InvalidURIError).then.raises(Nokogiri::XML::SyntaxError).then.returns(nil)
+    @client.stubs(:find_every).raises(Rets::AuthorizationFailure).then.raises(Rets::InvalidRequest).then.returns([])
     @client.find(:all, :foo => :bar)
   end
 
