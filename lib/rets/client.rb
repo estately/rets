@@ -10,22 +10,32 @@ module Rets
     attr_writer   :capabilities, :metadata
 
     def initialize(options)
+      @options = options
+      clean_setup
+    end
+    
+    def clean_setup
+      
       @capabilities = nil
       @cookies      = nil
       @metadata     = nil
+      @cached_metadata = nil
+      
+      self.authorization = nil
+      self.capabilities = nil
 
-      uri          = URI.parse(options[:login_url])
+      uri          = URI.parse(@options[:login_url])
 
-      uri.user     = options.key?(:username) ? CGI.escape(options[:username]) : nil
-      uri.password = options.key?(:password) ? CGI.escape(options[:password]) : nil
+      uri.user     = @options.key?(:username) ? CGI.escape(@options[:username]) : nil
+      uri.password = @options.key?(:password) ? CGI.escape(@options[:password]) : nil
 
-      self.options = DEFAULT_OPTIONS.merge(options)
+      self.options = DEFAULT_OPTIONS.merge(@options)
       self.uri     = uri
 
-      self.logger = options[:logger] || FakeLogger.new
+      self.logger = @options[:logger] || FakeLogger.new
 
-      self.session  = options[:session]  if options[:session]
-      @cached_metadata = options[:metadata] || nil
+      self.session  = @options[:session]  if @options[:session]
+      @cached_metadata = @options[:metadata] || nil
     end
 
 
@@ -59,14 +69,29 @@ module Rets
     #
     def find(quantity, opts = {})
       case quantity
-        when :first  then find_every(opts.merge(:limit => 1)).first
-        when :all    then find_every(opts)
+        when :first  then find_with_retries(opts.merge(:limit => 1)).first
+        when :all    then find_with_retries(opts)
         else raise ArgumentError, "First argument must be :first or :all"
       end
     end
 
     alias search find
 
+    def find_with_retries(opts = {})
+      retries = 0
+      begin
+        find_every(opts)
+      rescue AuthorizationFailure, InvalidRequest => e
+        if retries < 3
+          retries += 1
+          self.logger.warn "Failed with message: #{e.message}"
+          self.logger.info "Retry #{retries}/3"
+          clean_setup
+          retry
+        end
+      end
+    end
+    
     def find_every(opts = {})
       search_uri = capability_url("Search")
 
@@ -275,6 +300,7 @@ module Rets
       if Net::HTTPUnauthorized === response
         raise AuthorizationFailure, "Authorization failed, check credentials?"
       else
+        check_errors(response)
         self.capabilities = extract_capabilities(Nokogiri.parse(response.body))
       end
     end
@@ -285,23 +311,7 @@ module Rets
         handle_unauthorized_response(response)
 
       elsif Net::HTTPSuccess === response # 2xx
-        begin
-          if !response.body.empty?
-            xml = Nokogiri::XML.parse(response.body, nil, nil, Nokogiri::XML::ParseOptions::STRICT)
-
-            reply_text = xml.xpath("/RETS").attr("ReplyText").value
-            reply_code = xml.xpath("/RETS").attr("ReplyCode").value.to_i
-
-            if reply_code.nonzero?
-              raise InvalidRequest, "Got error code #{reply_code} (#{reply_text})."
-            end
-          end
-
-        rescue Nokogiri::XML::SyntaxError => e
-          logger.debug "Not xml"
-
-        end
-
+        check_errors(response)
       else
         raise UnknownResponse, "Unable to handle response #{response.class}"
       end
@@ -309,6 +319,23 @@ module Rets
       return response
     end
 
+    def check_errors(response)
+      begin
+        if !response.body.empty?
+          xml = Nokogiri::XML.parse(response.body, nil, nil, Nokogiri::XML::ParseOptions::STRICT)
+
+          reply_text = xml.xpath("/RETS").attr("ReplyText").value
+          reply_code = xml.xpath("/RETS").attr("ReplyCode").value.to_i
+
+          if reply_code.nonzero?
+            raise InvalidRequest, "Got error code #{reply_code} (#{reply_text})."
+          end
+        end
+
+      rescue Nokogiri::XML::SyntaxError => e
+        logger.debug "Not xml"
+      end
+    end
 
     def handle_cookies(response)
       if cookies?(response)
