@@ -8,7 +8,7 @@ require 'net/http/persistent'
 require 'nokogiri'
 
 module Rets
-  VERSION = '0.1.1'
+  VERSION = '0.1.2'
 
   AuthorizationFailure = Class.new(ArgumentError)
   InvalidRequest       = Class.new(ArgumentError)
