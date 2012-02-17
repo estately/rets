@@ -1,3 +1,7 @@
+### 0.1.2 / 2012-02-17
+
+* bugfix - check ReplyCode in login, retry on errors
+
 ### 0.1.1 / 2012-01-11
 
 * bugfix - prevent infinite loop in login
