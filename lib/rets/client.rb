@@ -194,7 +194,7 @@ module Rets
         "Resource" => opts[:resource],
         "Type"     => opts[:object_type],
         "ID"       => "#{opts[:resource_id]}:#{object_id}",
-        "Location" => 0
+        "Location" => opts[:location] || 0
       )
 
       headers = build_headers.merge(
