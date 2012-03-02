@@ -531,6 +531,17 @@ DIGEST
     @client.create_parts_from_response(response)
   end
 
+  def test_parse_boundary_wo_quotes
+    response = {"content-type" => 'multipart; boundary=simple boundary; foo;'}
+    response.stubs(:body => MULITPART_RESPONSE)
+
+    Rets::Parser::Multipart.expects(:parse).
+      with(MULITPART_RESPONSE, "simple boundary").
+      returns([])
+
+    @client.create_parts_from_response(response)
+  end
+
   def test_create_parts_from_response_returns_a_single_part_when_not_multipart_response
     response = {"content-type" => "text/plain"}
     response.stubs(:body => "fakebody")

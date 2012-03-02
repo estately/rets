@@ -157,7 +157,7 @@ module Rets
       content_type = response["content-type"]
 
       if content_type.include?("multipart")
-        boundary = content_type.scan(/boundary="(.*?)"/).to_s
+        boundary = content_type.scan(/boundary="?([^;"]*)?/).to_s
 
         parts = Parser::Multipart.parse(response.body, boundary)
 
