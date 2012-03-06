@@ -109,6 +109,49 @@ MULITPART_RESPONSE = [
   ""
 ].join("\r\n")
 
+MULTIPART_RESPONSE_URLS = [
+  '--rets.object.content.boundary.1330546052739',
+  'Content-ID: 38845440',
+  'Object-ID: 1',
+  'Content-Type: text/xml',
+  'Location: http://foobarmls.com/RETS//MediaDisplay/98/hr2890998-1.jpg',
+  '',
+  '<RETS ReplyCode="0" ReplyText="Operation Successful" />',
+  '',
+  '--rets.object.content.boundary.1330546052739',
+  'Content-ID: 38845440',
+  'Object-ID: 2',
+  'Content-Type: text/xml',
+  'Location: http://foobarmls.com/RETS//MediaDisplay/98/hr2890998-2.jpg',
+  '',
+  '<RETS ReplyCode="0" ReplyText="Operation Successful" />',
+  '',
+  '--rets.object.content.boundary.1330546052739',
+  'Content-ID: 38845440',
+  'Object-ID: 3',
+  'Content-Type: text/xml',
+  'Location: http://foobarmls.com/RETS//MediaDisplay/98/hr2890998-3.jpg',
+  '',
+  '<RETS ReplyCode="0" ReplyText="Operation Successful" />',
+  '',
+  '--rets.object.content.boundary.1330546052739',
+  'Content-ID: 38845440',
+  'Object-ID: 4',
+  'Content-Type: text/xml',
+  'Location: http://foobarmls.com/RETS//MediaDisplay/98/hr2890998-4.jpg',
+  '',
+  '<RETS ReplyCode="0" ReplyText="Operation Successful" />',
+  '',
+  '--rets.object.content.boundary.1330546052739',
+  'Content-ID: 38845440',
+  'Object-ID: 5',
+  'Content-Type: text/xml',
+  'Location: http://foobarmls.com/RETS//MediaDisplay/98/hr2890998-5.jpg',
+  '',
+  '<RETS ReplyCode="0" ReplyText="Operation Successful" />',
+  '',
+  '--rets.object.content.boundary.1330546052739--'
+].join("\r\n")
 
 SAMPLE_COMPACT = <<XML
 <RETS ReplyCode="0" ReplyText="Operation successful.">

@@ -157,7 +157,7 @@ module Rets
       content_type = response["content-type"]
 
       if content_type.include?("multipart")
-        boundary = content_type.scan(/boundary="(.*?)"/).to_s
+        boundary = content_type.scan(/boundary="?([^;"]*)?/).to_s
 
         parts = Parser::Multipart.parse(response.body, boundary)
 
@@ -194,7 +194,7 @@ module Rets
         "Resource" => opts[:resource],
         "Type"     => opts[:object_type],
         "ID"       => "#{opts[:resource_id]}:#{object_id}",
-        "Location" => 0
+        "Location" => opts[:location] || 0
       )
 
       headers = build_headers.merge(
