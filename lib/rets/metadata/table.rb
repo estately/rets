@@ -16,12 +16,14 @@ module Rets
     class Table
       attr_accessor :type
       attr_accessor :name
+      attr_accessor :long_name
       attr_accessor :table_fragment
 
       def initialize(table_fragment)
         self.table_fragment = table_fragment
         self.type = table_fragment["DataType"]
         self.name = table_fragment["SystemName"]
+        self.long_name = table_fragment["LongName"]
       end
 
       def print_tree
@@ -43,12 +45,14 @@ module Rets
       attr_accessor :lookup_name
       attr_accessor :name
       attr_accessor :interpretation
+      attr_accessor :long_name
 
       def initialize(table_fragment, resource)
         self.resource = resource
         self.name = table_fragment["SystemName"]
         self.interpretation = table_fragment["Interpretation"]
         self.lookup_name = table_fragment["LookupName"]
+        self.long_name = table_fragment["LongName"]
       end
 
       def multi?
