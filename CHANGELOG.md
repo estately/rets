@@ -1,3 +1,7 @@
+### 0.1.4 / 2012-03-12
+
+* fix: an MLS uses lower case in RETS tag
+
 ### 0.1.3 / 2012-03-05
 
 * fixes to support location=1 in getobject query
