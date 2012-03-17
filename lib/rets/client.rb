@@ -88,6 +88,8 @@ module Rets
           self.logger.info "Retry #{retries}/3"
           clean_setup
           retry
+        else
+          raise e
         end
       end
     end
