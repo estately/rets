@@ -302,7 +302,7 @@ module Rets
       if Net::HTTPUnauthorized === response
         raise AuthorizationFailure, "Authorization failed, check credentials?"
       else
-        check_errors(response)
+        ErrorChecker.check(response)
         self.capabilities = extract_capabilities(Nokogiri.parse(response.body))
       end
     end
@@ -313,31 +313,12 @@ module Rets
         handle_unauthorized_response(response)
 
       elsif Net::HTTPSuccess === response # 2xx
-        check_errors(response)
+        ErrorChecker.check(response)
       else
         raise UnknownResponse, "Unable to handle response #{response.class}"
       end
 
       return response
-    end
-
-    def check_errors(response)
-      begin
-        if !response.body.empty?
-          xml = Nokogiri::XML.parse(response.body, nil, nil, Nokogiri::XML::ParseOptions::STRICT)
-
-          rets_element = xml.xpath("/RETS")
-          reply_text = (rets_element.attr("ReplyText") || rets_element.attr("replyText")).value
-          reply_code = (rets_element.attr("ReplyCode") || rets_element.attr("replyCode")).value.to_i
-
-          if reply_code.nonzero?
-            raise InvalidRequest, "Got error code #{reply_code} (#{reply_text})."
-          end
-        end
-
-      rescue Nokogiri::XML::SyntaxError => e
-        logger.debug "Not xml"
-      end
     end
 
     def handle_cookies(response)
@@ -498,6 +479,27 @@ module Rets
       end
 
       out.join("\n")
+    end
+
+    class ErrorChecker
+      def self.check(response)
+        begin
+          if !response.body.empty?
+            xml = Nokogiri::XML.parse(response.body, nil, nil, Nokogiri::XML::ParseOptions::STRICT)
+
+            rets_element = xml.xpath("/RETS")
+            reply_text = (rets_element.attr("ReplyText") || rets_element.attr("replyText")).value
+            reply_code = (rets_element.attr("ReplyCode") || rets_element.attr("replyCode")).value.to_i
+
+            if reply_code.nonzero?
+              raise InvalidRequest, "Got error code #{reply_code} (#{reply_text})."
+            end
+          end
+
+        rescue Nokogiri::XML::SyntaxError => e
+          #Not xml
+        end
+      end
     end
 
   end
