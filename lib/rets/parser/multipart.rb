@@ -28,8 +28,13 @@ module Rets
               next # not a valid chunk.
             end
           end
-
+        check_for_invalids_parts!(parts)
         parts
+      end
+
+      def self.check_for_invalids_parts!(parts)
+        return unless parts.length == 1 && parts.first.headers['content-type'] == 'text/xml'
+        Client::ErrorChecker.check(parts.first)
       end
     end
   end
