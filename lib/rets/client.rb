@@ -13,16 +13,17 @@ module Rets
       @options = options
       clean_setup
     end
-    
+
     def clean_setup
-      
-      @capabilities = nil
-      @cookies      = nil
-      @metadata     = nil
-      @cached_metadata = nil
-      
+
+      @capabilities      = nil
+      @cookies           = nil
+      @metadata          = nil
+      @cached_metadata   = nil
+      @tries             = nil
+      @connection        = nil
       self.authorization = nil
-      self.capabilities = nil
+      self.capabilities  = nil
 
       uri          = URI.parse(@options[:login_url])
 
