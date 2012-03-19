@@ -1,3 +1,9 @@
+### 0.1.5 / 2012-03-17
+
+* fix: retries raise error after too many failures
+* fix: raise error for failed multipart object request
+* fix: retries start with a clean slate, fixing authorization errors during retry
+
 ### 0.1.4 / 2012-03-12
 
 * fix: an MLS uses lower case in RETS tag
