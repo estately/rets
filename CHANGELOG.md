@@ -1,3 +1,7 @@
+### 0.1.6 / 2012-03-12
+
+* fix: user_agent authentication
+
 ### 0.1.5 / 2012-03-17
 
 * fix: retries raise error after too many failures

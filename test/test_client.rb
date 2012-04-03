@@ -331,7 +331,7 @@ DIGEST
     Digest::MD5.expects(:hexdigest).with("a1::session:version").returns("hash")
 
     assert_equal "hash",
-      @client.calculate_user_agent_digest("agent", "secret", "session", "version")
+      @client.calculate_user_agent_digest("agent", "secret", '', "session", "version")
   end
 
 
