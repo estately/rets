@@ -351,6 +351,12 @@ module Rets
       @cookies.map{ |k,v| "#{k}=#{v}" }.join("; ")
     end
 
+    def cookie(name)
+      return if @cookies.nil? or @cookies.empty?
+
+      @cookies[name]
+    end
+
 
     def session=(session)
       self.authorization = session.authorization
@@ -440,7 +446,7 @@ module Rets
       if options[:ua_password]
         headers.merge!(
           "RETS-UA-Authorization" => build_user_agent_auth(
-            user_agent, options[:ua_password], "", rets_version))
+            user_agent, options[:ua_password], '', cookie('RETS-Session-ID'), rets_version))
       end
 
       headers
