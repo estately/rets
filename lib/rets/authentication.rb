@@ -52,7 +52,7 @@ module Rets
     end
 
     def build_user_agent_auth(*args)
-      %Q(Digest "#{calculate_user_agent_digest(*args)}")
+      %Q(Digest #{calculate_user_agent_digest(*args)})
     end
 
   end
