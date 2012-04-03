@@ -437,7 +437,7 @@ DIGEST
     @client.find(:all, :foo => :bar)
   end
 
-  def test_find_retries_on_errors
+  def test_find_eventually_reraises_errors
     @client.stubs(:find_every).raises(Rets::AuthorizationFailure)
     assert_raise Rets::AuthorizationFailure do
       @client.find(:all, :foo => :bar)
