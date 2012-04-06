@@ -1,4 +1,8 @@
-### 0.1.6 / 2012-03-12
+### 0.1.6 / 2012-04-05
+
+* feature: key_field lookup for resources
+
+### 0.1.6 / 2012-04-03
 
 * fix: user_agent authentication
 
