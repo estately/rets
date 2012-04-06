@@ -3,6 +3,7 @@ module Rets
     class Resource
       attr_accessor :rets_classes
       attr_accessor :lookup_types
+      attr_accessor :key_field
 
       attr_accessor :id
 
@@ -11,6 +12,7 @@ module Rets
         self.lookup_types = {}
 
         self.id = resource["ResourceID"]
+        self.key_field = resource["KeyField"]
       end
 
       def self.find_lookup_containers(metadata, resource)
