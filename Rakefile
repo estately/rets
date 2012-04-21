@@ -2,6 +2,7 @@ require 'rubygems'
 require 'hoe'
 
 Hoe.plugin :git, :doofus
+Hoe.plugin :travis
 
 Hoe.spec 'rets' do
   developer 'Estately, Inc. Open Source', 'opensource@estately.com'
