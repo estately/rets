@@ -6,7 +6,6 @@ Hoe.plugin :travis
 
 Hoe.spec 'rets' do
   developer 'Estately, Inc. Open Source', 'opensource@estately.com'
-  developer 'Ben Bleything',              'ben@bleything.net'
 
   extra_deps << [ "net-http-persistent", "~> 1.7" ]
   extra_deps << [ "nokogiri",            "~> 1.5.2" ]
