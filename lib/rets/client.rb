@@ -160,7 +160,7 @@ module Rets
       content_type = response["content-type"]
 
       if content_type.include?("multipart")
-        boundary = content_type.scan(/boundary="?([^;"]*)?/).to_s
+        boundary = content_type.scan(/boundary="?([^;"]*)?/).join
 
         parts = Parser::Multipart.parse(response.body, boundary)
 
@@ -336,7 +336,7 @@ module Rets
     def cookies=(cookies)
       @cookies ||= {}
 
-      cookies.each do |cookie|
+      Array(cookies).each do |cookie|
         cookie.match(/(\S+)=([^;]+);?/)
 
         @cookies[$1] = $2
@@ -385,7 +385,7 @@ module Rets
 
       begin
         capability_uri = URI.parse(url)
-      rescue URI::InvalidURIError => e
+      rescue URI::InvalidURIError
         raise MalformedResponse, "Unable to parse capability URL: #{url.inspect}"
       end
 
@@ -395,15 +395,15 @@ module Rets
     def extract_capabilities(document)
       raw_key_values = document.xpath("/RETS/RETS-RESPONSE").text.strip
 
-      h = Hash.new{|h,k| h.key?(k.downcase) ? h[k.downcase] : nil }
+      hash = Hash.new{|h,k| h.key?(k.downcase) ? h[k.downcase] : nil }
 
       # ... :(
       # Feel free to make this better. It has a test.
       raw_key_values.split(/\n/).
         map  { |r| r.split(/=/, 2) }.
-        each { |k,v| h[k.strip.downcase] = v.strip }
+        each { |k,v| hash[k.strip.downcase] = v.strip }
 
-      h
+      hash
     end
 
 
@@ -503,7 +503,7 @@ module Rets
             end
           end
 
-        rescue Nokogiri::XML::SyntaxError => e
+        rescue Nokogiri::XML::SyntaxError
           #Not xml
         end
       end
