@@ -147,10 +147,10 @@ module Rets
         class_name = type.capitalize.gsub(/_(\w)/) { $1.upcase }
         container_name = "#{class_name}Container"
 
-        if ::RUBY_VERSION =~ /1.9/
-          container_class = Containers.const_defined?(container_name, true) ? Containers.const_get(container_name, true) : Containers::Container
-        else
+        if ::RUBY_VERSION < '1.9'
           container_class = Containers.const_defined?(container_name) ? Containers.const_get(container_name) : Containers::Container
+        else
+          container_class = Containers.const_defined?(container_name, true) ? Containers.const_get(container_name, true) : Containers::Container
         end
         container_class.new(fragment)
       end
