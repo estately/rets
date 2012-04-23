@@ -1,4 +1,8 @@
-### 0.1.6 / 2012-04-05
+### 0.2.0 / 2012-04-20
+
+* feature: Ruby 1.9 compatibility!
+
+### 0.1.7 / 2012-04-05
 
 * feature: key_field lookup for resources
 

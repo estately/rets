@@ -193,7 +193,7 @@ class TestMetadata < Test::Unit::TestCase
     Rets::Metadata::Resource.expects(:find_rets_classes).with(metadata, resource).returns([rets_class_fragment])
 
     classes = Rets::Metadata::Resource.build_classes(resource, metadata)
-    assert([rets_class], classes)
+    assert_equal([rets_class], classes)
   end
 
   def test_resource_build
