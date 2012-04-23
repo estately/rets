@@ -81,21 +81,21 @@ module Rets
 
         values = multi? ? value.split(","): [value]
 
-        values = values.map do |value|
+        values = values.map do |v|
 
           #Remove surrounding quotes
-          value  = value.scan(/^["']?(.*?)["']?$/).to_s
+          clean_value  = v.scan(/^["']?(.*?)["']?$/).join
 
-          lookup_type = lookup_type(value)
+          lookup_type = lookup_type(clean_value)
 
           resolved_value = lookup_type ? lookup_type.long_value : nil
 
-          warn("Discarding unmappable value of #{value.inspect}") if resolved_value.nil? && $VERBOSE
+          warn("Discarding unmappable value of #{clean_value.inspect}") if resolved_value.nil? && $VERBOSE
 
           resolved_value
         end
 
-        multi? ? values.map {|value| value.to_s.strip } : values.first.to_s.strip
+        multi? ? values.map {|v| v.to_s.strip } : values.first.to_s.strip
       end
     end
   end

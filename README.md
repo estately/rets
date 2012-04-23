@@ -4,6 +4,7 @@
 
 ## DESCRIPTION:
 
+[![Build Status](https://secure.travis-ci.org/estately/rets.png?branch=master)](http://travis-ci.org/estately/rets)
 A pure-ruby library for fetching data from [RETS] servers.
 
 [RETS]: http://www.rets.org
