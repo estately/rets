@@ -159,6 +159,10 @@ module Rets
     def create_parts_from_response(response)
       content_type = response["content-type"]
 
+      if content_type.nil?
+        raise MalformedResponse, "Unable to read content-type from response: #{response.inspect}"
+      end
+
       if content_type.include?("multipart")
         boundary = content_type.scan(/boundary="?([^;"]*)?/).join
 

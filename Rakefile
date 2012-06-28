@@ -11,6 +11,8 @@ Hoe.spec 'rets' do
   extra_deps << [ "nokogiri",            "~> 1.5.2" ]
 
   extra_dev_deps << [ "mocha", "~> 0.11.0" ]
+  extra_dev_deps << [ "vcr", "~> 2.2.2" ]
+  extra_dev_deps << [ "webmock", "~> 1.8.0" ]
 
   ### Use markdown for changelog and readme
   self.history_file = 'CHANGELOG.md'

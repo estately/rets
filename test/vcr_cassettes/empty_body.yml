@@ -1,0 +1,186 @@
+---
+http_interactions:
+- request:
+    method: post
+    uri: http://www.example.com:6103/
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - estately/1.5
+      Host:
+      - www.example.com:6103
+      Rets-Version:
+      - RETS/1.7.2
+      Accept:
+      - ! '*/*'
+      Connection:
+      - keep-alive
+      Keep-Alive:
+      - 30
+  response:
+    status:
+      code: 401
+      message: Unauthorized
+    headers:
+      Cache-Control:
+      - private
+      Content-Type:
+      - text/html
+      Server:
+      - Microsoft-IIS/7.5
+      X-Aspnet-Version:
+      - 2.0.50727
+      Www-Authenticate:
+      - Digest  realm="RETS@reil.com", domain="/", nonce="qqqqqqqqqqqqqqqq",
+        stale=False, algorithm=MD5, qop="auth"
+      X-Powered-By:
+      - ASP.NET
+      Date:
+      - Thu, 28 Jun 2012 21:39:28 GMT
+      Content-Length:
+      - '1293'
+    body:
+      encoding: US-ASCII
+      string: ! "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\r\n<html
+        xmlns=\"http://www.w3.org/1999/xhtml\">\r\n<head>\r\n<meta http-equiv=\"Content-Type\"
+        content=\"text/html; charset=iso-8859-1\"/>\r\n<title>401 - Unauthorized:
+        Access is denied due to invalid credentials.</title>\r\n<style type=\"text/css\">\r\n<!--\r\nbody{margin:0;font-size:.7em;font-family:Verdana,
+        Arial, Helvetica, sans-serif;background:#EEEEEE;}\r\nfieldset{padding:0 15px
+        10px 15px;} \r\nh1{font-size:2.4em;margin:0;color:#FFF;}\r\nh2{font-size:1.7em;margin:0;color:#CC0000;}
+        \r\nh3{font-size:1.2em;margin:10px 0 0 0;color:#000000;} \r\n#header{width:96%;margin:0
+        0 0 0;padding:6px 2% 6px 2%;font-family:\"trebuchet MS\", Verdana, sans-serif;color:#FFF;\r\nbackground-color:#555555;}\r\n#content{margin:0
+        0 0 2%;position:relative;}\r\n.content-container{background:#FFF;width:96%;margin-top:8px;padding:10px;position:relative;}\r\n-->\r\n</style>\r\n</head>\r\n<body>\r\n<div
+        id=\"header\"><h1>Server Error</h1></div>\r\n<div id=\"content\">\r\n <div
+        class=\"content-container\"><fieldset>\r\n  <h2>401 - Unauthorized: Access
+        is denied due to invalid credentials.</h2>\r\n  <h3>You do not have permission
+        to view this directory or page using the credentials that you supplied.</h3>\r\n
+        </fieldset></div>\r\n</div>\r\n</body>\r\n</html>\r\n"
+    http_version: 
+  recorded_at: Thu, 28 Jun 2012 21:40:14 GMT
+- request:
+    method: post
+    uri: http://www.example.com:6103/
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - estately/1.5
+      Host:
+      - http://www.example.com:6103/
+      Rets-Version:
+      - RETS/1.7.2
+      Authorization:
+      - Digest username="fake_user", realm="RETS@reil.com", qop="auth", uri="/", nonce="qqqqqqqqqqqqqqqq",
+        nc=00000001, cnonce="qqqqqqqqqqqqqqqq", response="qqqqqqqqqqqqqqqq",
+        opaque=""
+      Accept:
+      - ! '*/*'
+      Connection:
+      - keep-alive
+      Keep-Alive:
+      - 30
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Cache-Control:
+      - no-cache, no-store
+      Pragma:
+      - no-cache
+      Content-Length:
+      - '876'
+      Content-Type:
+      - text/xml; charset=us-ascii
+      Expires:
+      - '-1'
+      Server:
+      - Microsoft-IIS/7.5
+      X-Aspnet-Version:
+      - 2.0.50727
+      Rets-Version:
+      - RETS/1.7.2
+      Rets-Server:
+      - MLSServer/3.27
+      Set-Cookie:
+      - ASP.NET_SessionId=oftaln55ziml42fl51hy1bqv; path=/; HttpOnly
+      X-Powered-By:
+      - ASP.NET
+      Date:
+      - Thu, 28 Jun 2012 21:39:29 GMT
+    body:
+      encoding: US-ASCII
+      string: ! "<?xml version=\"1.0\" encoding=\"us-ascii\"?>\r\n<RETS ReplyCode=\"0\"
+        ReplyText=\"Login Successful\">\r\n  <RETS-RESPONSE>\r\nMemberName=Estately
+        Inc.\r\nUser=fake_user,2,Agent,fake_user\r\nBroker=\r\nMetadataVersion=1.01.00023\r\nMinMetadataVersion=1.01.00021\r\nMetadataTimestamp=2009-12-20T08:00:00Z\r\nMinMetadataTimestamp=2009-06-30T07:00:00Z\r\nTimeoutSeconds=1200\r\nExpr=2012-09-16T21:49:26Z,10\r\nAction=http://www.example.com:6103/Action.ashx\r\nChangePassword=http://www.example.com:6103/ChangePassword.ashx\r\nGetObject=http://www.example.com:6103/GetObject.ashx\r\nLogin=http://www.example.com:6103/Login.ashx\r\nLogout=http://www.example.com:6103/Logout.ashx\r\nSearch=http://www.example.com:6103/Search.ashx\r\nGetMetadata=http://www.example.com:6103/GetMetadata.ashx\r\nServerInformation=http://www.example.com:6103/ServerInformation.ashx\r\n</RETS-RESPONSE>\r\n</RETS>"
+    http_version: 
+  recorded_at: Thu, 28 Jun 2012 21:40:15 GMT
+- request:
+    method: post
+    uri: http://www.example.com:6103/GetObject.ashx
+    body:
+      encoding: US-ASCII
+      string: Resource=Property&Type=Photo&ID=480346%3A1&Location=0
+    headers:
+      User-Agent:
+      - estately/1.5
+      Host:
+      - www.example.com:6103
+      Rets-Version:
+      - RETS/1.7.2
+      Authorization:
+      - Digest username="fake_user", realm="RETS@reil.com", qop="auth", uri="/", nonce="qqqqqqqqqqqqqqqq",
+        nc=00000001, cnonce="qqqqqqqqqqqqqqqq", response="qqqqqqqqqqqqqqqq",
+        opaque=""
+      Cookie:
+      - ASP.NET_SessionId=oftaln55ziml42fl51hy1bqv
+      Accept:
+      - image/jpeg, image/png;q=0.5, image/gif;q=0.1, */*
+      Content-Type:
+      - application/x-www-form-urlencoded
+      Content-Length:
+      - '53'
+      Connection:
+      - keep-alive
+      Keep-Alive:
+      - 30
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Cache-Control:
+      - no-cache, no-store
+      Pragma:
+      - no-cache
+      Content-Length:
+      - '0'
+      Expires:
+      - '-1'
+      Server:
+      - Microsoft-IIS/7.5
+      X-Aspnet-Version:
+      - 2.0.50727
+      Rets-Version:
+      - RETS/1.7.2
+      Rets-Server:
+      - MLSServer/3.27
+      Content-Id:
+      - '480346'
+      Object-Id:
+      - '1'
+      Mime-Version:
+      - '1.0'
+      X-Powered-By:
+      - ASP.NET
+      Date:
+      - Thu, 28 Jun 2012 21:39:29 GMT
+    body:
+      encoding: US-ASCII
+      string: ''
+    http_version: 
+  recorded_at: Thu, 28 Jun 2012 21:40:15 GMT
+recorded_with: VCR 2.2.2
