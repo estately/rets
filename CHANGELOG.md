@@ -1,3 +1,7 @@
+### 0.2.1 / 2012-04-20
+
+* fix: better handling of malformed RETS responses
+
 ### 0.2.0 / 2012-04-20
 
 * feature: Ruby 1.9 compatibility!
