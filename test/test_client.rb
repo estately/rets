@@ -521,6 +521,15 @@ DIGEST
     @client.objects([1,2], :foo => :bar)
   end
 
+  def test_object_handles_empty_bodies
+    @client = Rets::Client.new(:password=>"fake", :agent=>"agent", :login_url=>"http://www.example.com:6103/", :username=>"fake_user")
+    assert_raise Rets::MalformedResponse do
+      VCR.use_cassette('empty_body') do
+        @client.objects([1], :resource => 'Property', :object_type => 'Photo', :resource_id => '480346')
+      end
+    end
+  end
+
   def test_objects_raises_on_other_arguments
     assert_raise ArgumentError do
       @client.objects(Object.new, :foo => :bar)
