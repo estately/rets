@@ -625,4 +625,12 @@ DIGEST
     assert_equal "response", @client.retrieve_metadata_type("FOO")
   end
 
+  def test_decorate_result_handles_bad_metadata
+    result = {'foo' => 'bar'}
+    rets_class = stub
+    rets_class.expects(:find_table).with('foo').returns(nil)
+    response = @client.decorate_result(result, rets_class)
+    assert_equal response, result
+  end
+
 end
