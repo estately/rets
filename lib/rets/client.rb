@@ -135,7 +135,13 @@ module Rets
 
     def decorate_result(result, rets_class)
       result.each do |key, value|
-        result[key] = rets_class.find_table(key).resolve(value.to_s)
+        table = rets_class.find_table(key)
+        if table
+          result[key] = table.resolve(value.to_s)
+        else
+          #can't resolve just leave the value be
+          logger.warn "Can't resolve find metadata for #{key.inspect}"
+        end
       end
     end
 
