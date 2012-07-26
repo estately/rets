@@ -292,7 +292,14 @@ module Rets
     end
 
     def request(*args, &block)
-      handle_response(raw_request(*args, &block))
+      response = handle_response(raw_request(*args, &block))
+      if Net::HTTPUnauthorized === response
+        retry_response = handle_response(raw_request(*args, &block))
+        raise AuthorizationFailure if retry_response === Net::HTTPUnauthorized
+        retry_response
+      else
+        response
+      end
     end
 
     def request_with_compact_response(path, body, headers)
@@ -307,15 +314,19 @@ module Rets
     end
 
     def handle_unauthorized_response(response)
-      self.authorization = build_auth(extract_digest_header(response), uri, tries)
+      if self.authorization.nil?
+        self.authorization = build_auth(extract_digest_header(response), uri, tries)
+        response = raw_request(uri.path)
 
-      response = raw_request(uri.path)
-
-      if Net::HTTPUnauthorized === response
-        raise AuthorizationFailure, "Authorization failed, check credentials?"
+        if Net::HTTPUnauthorized === response
+          raise AuthorizationFailure, "Authorization failed, check credentials?"
+        else
+          ErrorChecker.check(response)
+          self.capabilities = extract_capabilities(Nokogiri.parse(response.body))
+        end
       else
-        ErrorChecker.check(response)
-        self.capabilities = extract_capabilities(Nokogiri.parse(response.body))
+        clean_setup
+        login
       end
     end
 

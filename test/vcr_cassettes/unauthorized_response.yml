@@ -1,0 +1,262 @@
+---
+http_interactions:
+- request:
+    method: post
+    uri: http://rets.example.com/GetObject.asmx/GetObject
+    body:
+      encoding: US-ASCII
+      string: Resource=Property&Type=Photo&ID=2661580%3A1&Location=0
+    headers:
+      User-Agent:
+      - Estately/1.0
+      Host:
+      - rets.example.com:80
+      Rets-Version:
+      - RETS/1.7.2
+      Authorization:
+      - Digest username="login", realm="fake_realm", qop="auth",
+        uri="/Login.asmx/Login", nonce="a8f4bc805062602c8ba7a87b2109f808", nc=00000001,
+        cnonce="6e2dd038eea6cbacf0b956fd11f914b6", response="fake_digest",
+        opaque="96eda461-41d0-4624-b7fe-b59e966035f3"
+      Cookie:
+      - ASP.NET_SessionId=mapij045k3bphj3gqqgpmmrx
+      Accept:
+      - image/jpeg, image/png;q=0.5, image/gif;q=0.1
+      Content-Type:
+      - application/x-www-form-urlencoded
+      Content-Length:
+      - '54'
+  response:
+    status:
+      code: 401
+      message: Unauthorized
+    headers:
+      Connection:
+      - close
+      Date:
+      - Thu, 26 Jul 2012 00:11:02 GMT
+      Server:
+      - Microsoft-IIS/6.0
+      Cache-Control:
+      - private
+      - private
+      X-Aspnet-Version:
+      - 2.0.50727
+      Www-Authenticate:
+      - Digest realm="fake_realm",nonce="dfd74deac03147e1a4fff598679f1a80",opaque="8e5029c6-bb9c-4562-b440-e7c2b8960743",qop="auth"
+      Content-Type:
+      - text/plain
+    body:
+      encoding: US-ASCII
+      string: ! "Unauthorized Request. Digest Session Invalid Reauthenticate\r\nReference:
+        e0ff89c0-2d64-4287-a6b7-6be27c7d3ade"
+    http_version: 
+  recorded_at: Thu, 26 Jul 2012 00:11:13 GMT
+- request:
+    method: post
+    uri: http://rets.example.com/Login.asmx/Login
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - Estately/1.0
+      Host:
+      - rets.example.com:80
+      Rets-Version:
+      - RETS/1.7.2
+      Accept:
+      - ! '*/*'
+  response:
+    status:
+      code: 401
+      message: Unauthorized
+    headers:
+      Connection:
+      - close
+      Date:
+      - Thu, 26 Jul 2012 00:11:03 GMT
+      Server:
+      - Microsoft-IIS/6.0
+      Cache-Control:
+      - private
+      - private
+      X-Aspnet-Version:
+      - 2.0.50727
+      Www-Authenticate:
+      - Digest realm="fake_realm",nonce="17fdfe2c6125296bd93bb81bd88dc4be",opaque="aee1e7da-60eb-41b3-b704-8eb3969645fd",qop="auth"
+      Content-Type:
+      - text/plain
+    body:
+      encoding: US-ASCII
+      string: ! "Unauthorized Request. Authentication needed\r\nReference: c2c5ab9f-8c12-42bb-94ce-5b6ebf156da4"
+    http_version: 
+  recorded_at: Thu, 26 Jul 2012 00:11:13 GMT
+- request:
+    method: post
+    uri: http://rets.example.com/Login.asmx/Login
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - Estately/1.0
+      Host:
+      - rets.example.com:80
+      Rets-Version:
+      - RETS/1.7.2
+      Authorization:
+      - Digest username="login", realm="fake_realm", qop="auth",
+        uri="/Login.asmx/Login", nonce="17fdfe2c6125296bd93bb81bd88dc4be", nc=00000001,
+        cnonce="ad805b9e2d6f08ad82175085e5febd8d", response="7402076f53663602f052e1aa343d3dab",
+        opaque="aee1e7da-60eb-41b3-b704-8eb3969645fd"
+      Accept:
+      - ! '*/*'
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Date:
+      - Thu, 26 Jul 2012 00:11:03 GMT
+      Server:
+      - Microsoft-IIS/6.0
+      Cache-Control:
+      - private
+      - private, max-age=0
+      X-Aspnet-Version:
+      - 2.0.50727
+      Rets-Version:
+      - RETS/1.7.2
+      Rets-Server:
+      - Interealty-RETS/1.5.247.0
+      Transfer-Encoding:
+      - chunked
+      Set-Cookie:
+      - ASP.NET_SessionId=vuesmq55l0cpjy45zyn0e555; path=/; HttpOnly
+      - RETS-Session-ID=vuesmq55l0cpjy45zyn0e555; path=/
+      Content-Type:
+      - text/xml
+    body:
+      encoding: US-ASCII
+      string: ! "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<RETS ReplyCode=\"0\"
+        ReplyText=\"Success. Reference ID: a3073726-a011-4391-b22e-900adae5184b\">\r\n
+        \ <RETS-RESPONSE>\r\nMemberName=John Wolff\r\nUser=23756,60,RH,login\r\nBroker=BRDA,BRDA01\r\nMetadataVersion=31.76.69587\r\nMetadataTimeStamp=2012-07-24T17:33:07Z\r\nMinMetadataTimeStamp=2012-07-24T17:33:07Z\r\nTimeoutSeconds=7200\r\nChangePassword=/ChangePassword.asmx/ChangePassword\r\nGetObject=/GetObject.asmx/GetObject\r\nLogin=/Login.asmx/Login\r\nLogout=/Logout.asmx/Logout\r\nSearch=/Search.asmx/Search\r\nGetMetadata=/GetMetadata.asmx/GetMetadata\r\n</RETS-RESPONSE>\r\n</RETS>"
+    http_version: 
+  recorded_at: Thu, 26 Jul 2012 00:11:14 GMT
+- request:
+    method: post
+    uri: http://rets.example.com/Login.asmx/Login
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - Estately/1.0
+      Host:
+      - rets.example.com:80
+      Rets-Version:
+      - RETS/1.7.2
+      Authorization:
+      - Digest username="login", realm="fake_realm", qop="auth",
+        uri="/Login.asmx/Login", nonce="17fdfe2c6125296bd93bb81bd88dc4be", nc=00000001,
+        cnonce="ad805b9e2d6f08ad82175085e5febd8d", response="7402076f53663602f052e1aa343d3dab",
+        opaque="aee1e7da-60eb-41b3-b704-8eb3969645fd"
+      Cookie:
+      - ASP.NET_SessionId=vuesmq55l0cpjy45zyn0e555; RETS-Session-ID=vuesmq55l0cpjy45zyn0e555
+      Accept:
+      - ! '*/*'
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Date:
+      - Thu, 26 Jul 2012 00:11:03 GMT
+      Server:
+      - Microsoft-IIS/6.0
+      Cache-Control:
+      - private
+      - private, max-age=0
+      X-Aspnet-Version:
+      - 2.0.50727
+      Rets-Version:
+      - RETS/1.7.2
+      Rets-Server:
+      - Interealty-RETS/1.5.247.0
+      Transfer-Encoding:
+      - chunked
+      Set-Cookie:
+      - RETS-Session-ID=vuesmq55l0cpjy45zyn0e555; path=/
+      Content-Type:
+      - text/xml
+    body:
+      encoding: US-ASCII
+      string: ! "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<RETS ReplyCode=\"0\"
+        ReplyText=\"Success. Reference ID: a48b4f59-cb22-41be-8e7b-1cee28fb8644\">\r\n
+        \ <RETS-RESPONSE>\r\nMemberName=John Wolff\r\nUser=23756,60,RH,login\r\nBroker=BRDA,BRDA01\r\nMetadataVersion=31.76.69587\r\nMetadataTimeStamp=2012-07-24T17:33:07Z\r\nMinMetadataTimeStamp=2012-07-24T17:33:07Z\r\nTimeoutSeconds=7200\r\nChangePassword=/ChangePassword.asmx/ChangePassword\r\nGetObject=/GetObject.asmx/GetObject\r\nLogin=/Login.asmx/Login\r\nLogout=/Logout.asmx/Logout\r\nSearch=/Search.asmx/Search\r\nGetMetadata=/GetMetadata.asmx/GetMetadata\r\n</RETS-RESPONSE>\r\n</RETS>"
+    http_version: 
+  recorded_at: Thu, 26 Jul 2012 00:11:14 GMT
+- request:
+    method: post
+    uri: http://rets.example.com/GetObject.asmx/GetObject
+    body:
+      encoding: US-ASCII
+      string: Resource=Property&Type=Photo&ID=2661580%3A1&Location=0
+    headers:
+      User-Agent:
+      - Estately/1.0
+      Host:
+      - rets.example.com:80
+      Rets-Version:
+      - RETS/1.7.2
+      Authorization:
+      - Digest username="login", realm="fake_realm", qop="auth",
+        uri="/Login.asmx/Login", nonce="17fdfe2c6125296bd93bb81bd88dc4be", nc=00000001,
+        cnonce="ad805b9e2d6f08ad82175085e5febd8d", response="7402076f53663602f052e1aa343d3dab",
+        opaque="aee1e7da-60eb-41b3-b704-8eb3969645fd"
+      Cookie:
+      - ASP.NET_SessionId=vuesmq55l0cpjy45zyn0e555; RETS-Session-ID=vuesmq55l0cpjy45zyn0e555
+      Accept:
+      - image/jpeg, image/png;q=0.5, image/gif;q=0.1
+      Content-Type:
+      - application/x-www-form-urlencoded
+      Content-Length:
+      - '54'
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Date:
+      - Thu, 26 Jul 2012 00:11:04 GMT
+      Server:
+      - Microsoft-IIS/6.0
+      Cache-Control:
+      - private
+      - private, max-age=0
+      X-Aspnet-Version:
+      - 2.0.50727
+      Mime-Version:
+      - '1.0'
+      Rets-Version:
+      - RETS/1.7.2
+      Rets-Server:
+      - Interealty-RETS/1.5.247.0
+      Content-Id:
+      - '2661580'
+      Object-Id:
+      - '1'
+      Transfer-Encoding:
+      - chunked
+      Set-Cookie:
+      - RETS-Session-ID=vuesmq55l0cpjy45zyn0e555; path=/
+      Content-Type:
+      - image/jpeg
+    body:
+      encoding: ASCII-8BIT
+      string: !binary |-
+        /9j/4AAQSkZJRgABAQEAYABgAAD///2Q==
+    http_version: 
+  recorded_at: Thu, 26 Jul 2012 00:11:14 GMT
+recorded_with: VCR 2.2.2
