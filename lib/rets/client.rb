@@ -35,7 +35,7 @@ module Rets
 
       self.logger = @options[:logger] || FakeLogger.new
 
-      self.session  = @options[:session]  if @options[:session]
+      self.session  = @options.delete(:session)  if @options[:session]
       @cached_metadata = @options[:metadata] || nil
     end
 
