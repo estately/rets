@@ -108,12 +108,12 @@ module Rets
 
       body = build_key_values(query)
 
-      headers = build_headers.merge(
+      extra_headers = {
         "Content-Type"   => "application/x-www-form-urlencoded",
         "Content-Length" => body.size.to_s
-      )
+      }
 
-      results = request_with_compact_response(search_uri.path, body, headers)
+      results = request_with_compact_response(search_uri.path, body, extra_headers)
 
       if resolve
         rets_class = find_rets_class(opts[:search_type], opts[:class])
@@ -210,13 +210,13 @@ module Rets
         "Location" => opts[:location] || 0
       )
 
-      headers = build_headers.merge(
+      extra_headers = {
         "Accept"         => "image/jpeg, image/png;q=0.5, image/gif;q=0.1",
         "Content-Type"   => "application/x-www-form-urlencoded",
         "Content-Length" => body.size.to_s
-      )
+      }
 
-      request(object_uri.path, body, headers)
+      request(object_uri.path, body, extra_headers)
     end
 
     # Changes keys to be camel cased, per the RETS standard for queries.
@@ -252,18 +252,19 @@ module Rets
         "ID"     => "0"
       )
 
-      headers = build_headers.merge(
+      extra_headers = {
         "Content-Type"   => "application/x-www-form-urlencoded",
         "Content-Length" => body.size.to_s
-      )
+      }
 
-      response = request(metadata_uri.path, body, headers)
+      response = request(metadata_uri.path, body, extra_headers)
 
       response.body
     end
 
-    def raw_request(path, body = nil, headers = build_headers, &reader)
+    def raw_request(path, body = nil, extra_headers = {}, &reader)
       logger.info "posting to #{path}"
+      headers = build_headers.merge(extra_headers)
 
       post = Net::HTTP::Post.new(path, headers)
       post.body = body.to_s
