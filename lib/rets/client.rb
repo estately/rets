@@ -35,7 +35,7 @@ module Rets
 
       self.logger = @options[:logger] || FakeLogger.new
 
-      self.session  = @options[:session]  if @options[:session]
+      self.session  = @options.delete(:session)  if @options[:session]
       @cached_metadata = @options[:metadata] || nil
     end
 
@@ -108,12 +108,12 @@ module Rets
 
       body = build_key_values(query)
 
-      headers = build_headers.merge(
+      extra_headers = {
         "Content-Type"   => "application/x-www-form-urlencoded",
         "Content-Length" => body.size.to_s
-      )
+      }
 
-      results = request_with_compact_response(search_uri.path, body, headers)
+      results = request_with_compact_response(search_uri.path, body, extra_headers)
 
       if resolve
         rets_class = find_rets_class(opts[:search_type], opts[:class])
@@ -210,13 +210,13 @@ module Rets
         "Location" => opts[:location] || 0
       )
 
-      headers = build_headers.merge(
+      extra_headers = {
         "Accept"         => "image/jpeg, image/png;q=0.5, image/gif;q=0.1",
         "Content-Type"   => "application/x-www-form-urlencoded",
         "Content-Length" => body.size.to_s
-      )
+      }
 
-      request(object_uri.path, body, headers)
+      request(object_uri.path, body, extra_headers)
     end
 
     # Changes keys to be camel cased, per the RETS standard for queries.
@@ -252,18 +252,19 @@ module Rets
         "ID"     => "0"
       )
 
-      headers = build_headers.merge(
+      extra_headers = {
         "Content-Type"   => "application/x-www-form-urlencoded",
         "Content-Length" => body.size.to_s
-      )
+      }
 
-      response = request(metadata_uri.path, body, headers)
+      response = request(metadata_uri.path, body, extra_headers)
 
       response.body
     end
 
-    def raw_request(path, body = nil, headers = build_headers, &reader)
+    def raw_request(path, body = nil, extra_headers = {}, &reader)
       logger.info "posting to #{path}"
+      headers = build_headers.merge(extra_headers)
 
       post = Net::HTTP::Post.new(path, headers)
       post.body = body.to_s
@@ -291,7 +292,14 @@ module Rets
     end
 
     def request(*args, &block)
-      handle_response(raw_request(*args, &block))
+      response = handle_response(raw_request(*args, &block))
+      if Net::HTTPUnauthorized === response
+        retry_response = handle_response(raw_request(*args, &block))
+        raise AuthorizationFailure if retry_response === Net::HTTPUnauthorized
+        retry_response
+      else
+        response
+      end
     end
 
     def request_with_compact_response(path, body, headers)
@@ -306,15 +314,19 @@ module Rets
     end
 
     def handle_unauthorized_response(response)
-      self.authorization = build_auth(extract_digest_header(response), uri, tries)
+      if self.authorization.nil?
+        self.authorization = build_auth(extract_digest_header(response), uri, tries)
+        response = raw_request(uri.path)
 
-      response = raw_request(uri.path)
-
-      if Net::HTTPUnauthorized === response
-        raise AuthorizationFailure, "Authorization failed, check credentials?"
+        if Net::HTTPUnauthorized === response
+          raise AuthorizationFailure, "Authorization failed, check credentials?"
+        else
+          ErrorChecker.check(response)
+          self.capabilities = extract_capabilities(Nokogiri.parse(response.body))
+        end
       else
-        ErrorChecker.check(response)
-        self.capabilities = extract_capabilities(Nokogiri.parse(response.body))
+        clean_setup
+        login
       end
     end
 
