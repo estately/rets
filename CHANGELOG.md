@@ -1,3 +1,7 @@
+### 0.3.0.rc.0 / 2012-07-26
+
+* feature: significantly better handling of authorization failures
+
 ### 0.2.1 / 2012-04-20
 
 * fix: better handling of malformed RETS responses
