@@ -94,7 +94,7 @@ module Rets
         end
       end
     end
-    
+
     def find_every(opts = {})
       search_uri = capability_url("Search")
 
@@ -263,15 +263,17 @@ module Rets
     end
 
     def raw_request(path, body = nil, extra_headers = {}, &reader)
-      logger.info "posting to #{path}"
       headers = build_headers.merge(extra_headers)
 
       post = Net::HTTP::Post.new(path, headers)
       post.body = body.to_s
 
-      logger.debug ""
-      logger.debug format_headers(headers)
-      logger.debug body.to_s
+      logger.debug <<EOF
+POST #{path}
+#{format_headers(headers)}
+
+#{binary?(body.to_s) ? '<<< BINARY BODY >>>' : body.to_s}
+EOF
 
       connection_args = [Net::HTTP::Persistent === connection ? uri : nil, post].compact
 
@@ -279,15 +281,15 @@ module Rets
         res.read_body(&reader)
       end
 
-      handle_cookies(response)
-
       logger.debug "Response: (#{response.class})"
-      logger.debug ""
-      logger.debug format_headers(response.to_hash)
-      logger.debug ""
-      logger.debug "Body:"
-      logger.debug response.body
+      logger.debug <<EOF
+#{response.code} #{response.message}
+#{format_headers(response.to_hash)}
 
+#{binary?(response.body.to_s) ? '<<< BINARY BODY >>>' : response.body.to_s}
+EOF
+
+      handle_cookies(response)
       return response
     end
 
@@ -467,7 +469,9 @@ module Rets
       data.map{|k,v| "#{CGI.escape(k.to_s)}=#{CGI.escape(v.to_s)}" }.join("&")
     end
 
-
+    def binary?(data)
+      data.slice(0, 1024).find {|b| b >= "\x0" && b < " " && b != '-' && b != '~' && b != "\t" && b != "\r" && b != "\n"}
+    end
 
     def tries
       @tries ||= 1
