@@ -44,7 +44,8 @@ module Rets
     # provided in initialize. Returns the capabilities that the
     # RETS server provides, per http://retsdoc.onconfluence.com/display/rets172/4.10+Capability+URL+List.
     def login
-      request(uri.path)
+      response = request(uri.path)
+      self.capabilities = extract_capabilities(Nokogiri.parse(response.body))
       raise UnknownResponse, "Cannot read rets server capabilities." unless @capabilities
       @capabilities
     end
@@ -236,8 +237,10 @@ module Rets
       return @metadata if @metadata
 
       if @cached_metadata && @cached_metadata.current?(capabilities["MetadataTimestamp"], capabilities["MetadataVersion"])
+        logger.info "Use cached metadata"
         self.metadata = @cached_metadata
       else
+        logger.info @cached_metadata ? "Cached metadata out of date" : "Cached metadata unavailable"
         metadata_fetcher = lambda { |type| retrieve_metadata_type(type) }
         self.metadata = Metadata::Root.new(&metadata_fetcher)
       end
@@ -269,6 +272,7 @@ module Rets
       post.body = body.to_s
 
       logger.debug <<EOF
+>>>> Request
 POST #{path}
 #{format_headers(headers)}
 
@@ -281,8 +285,8 @@ EOF
         res.read_body(&reader)
       end
 
-      logger.debug "Response: (#{response.class})"
       logger.debug <<EOF
+<<<< Response
 #{response.code} #{response.message}
 #{format_headers(response.to_hash)}
 
@@ -293,8 +297,23 @@ EOF
       return response
     end
 
+    def digest_auth_request(path, body = nil, extra_headers = {}, &reader)
+      response = raw_request(path, body, extra_headers, &reader)
+      if Net::HTTPUnauthorized === response
+        challenge = extract_digest_header(response)
+        if challenge
+          self.authorization = build_auth(challenge, uri, tries)
+          response = raw_request(path, body, extra_headers, &reader)
+          if Net::HTTPUnauthorized === response
+            raise AuthorizationFailure, "Authorization failed, check credentials?"
+          end
+        end
+      end
+      response
+    end
+
     def request(*args, &block)
-      handle_response(raw_request(*args, &block))
+      handle_response(digest_auth_request(*args, &block))
     end
 
     def request_with_compact_response(path, body, headers)
@@ -308,31 +327,13 @@ EOF
       authenticate_headers.detect {|h| h =~ /Digest/}
     end
 
-    def handle_unauthorized_response(response)
-      self.authorization = build_auth(extract_digest_header(response), uri, tries)
-
-      response = raw_request(uri.path)
-
-      if Net::HTTPUnauthorized === response
-        raise AuthorizationFailure, "Authorization failed, check credentials?"
-      else
-        ErrorChecker.check(response)
-        self.capabilities = extract_capabilities(Nokogiri.parse(response.body))
-      end
-    end
-
     def handle_response(response)
-
-      if Net::HTTPUnauthorized === response # 401
-        handle_unauthorized_response(response)
-
-      elsif Net::HTTPSuccess === response # 2xx
+      if Net::HTTPSuccess === response
         ErrorChecker.check(response)
       else
         raise UnknownResponse, "Unable to handle response #{response.class}"
       end
-
-      return response
+      response
     end
 
     def handle_cookies(response)
@@ -369,7 +370,6 @@ EOF
 
       @cookies[name]
     end
-
 
     def session=(session)
       self.authorization = session.authorization
