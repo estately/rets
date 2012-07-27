@@ -3,6 +3,7 @@ require 'hoe'
 
 Hoe.plugin :git, :doofus
 Hoe.plugin :travis
+Hoe.plugin :gemspec
 
 Hoe.spec 'rets' do
   developer 'Estately, Inc. Open Source', 'opensource@estately.com'

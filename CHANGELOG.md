@@ -1,3 +1,7 @@
+### 0.2.2
+
+* WIP
+
 ### 0.2.1 / 2012-04-20
 
 * fix: better handling of malformed RETS responses
