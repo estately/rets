@@ -2,11 +2,11 @@
 
 Gem::Specification.new do |s|
   s.name = "rets"
-  s.version = "0.2.2.20120727180543"
+  s.version = "0.3.1.20120728224847"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Estately, Inc. Open Source"]
-  s.date = "2012-07-27"
+  s.date = "2012-07-28"
   s.description = "[![Build Status](https://secure.travis-ci.org/estately/rets.png?branch=master)](http://travis-ci.org/estately/rets)\nA pure-ruby library for fetching data from [RETS] servers.\n\n[RETS]: http://www.rets.org"
   s.email = ["opensource@estately.com"]
   s.executables = ["rets"]

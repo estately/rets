@@ -98,33 +98,12 @@ class TestClient < Test::Unit::TestCase
     client.request("/foo")
   end
 
-
-  def test_handle_response_instigates_login_process
-    response = Net::HTTPUnauthorized.new("","","")
-
-    @client.expects(:handle_unauthorized_response)
-
-    assert_equal response, @client.handle_response(response)
-  end
-
   def test_handle_response_handles_rets_errors
     response = Net::HTTPSuccess.new("", "", "")
     response.stubs(:body => RETS_ERROR)
 
     assert_raise Rets::InvalidRequest do
       @client.handle_response(response)
-    end
-  end
-
-  def test_handle_unauthorize_response_handles_rets_errors
-    response = Net::HTTPSuccess.new("", "", "")
-    response.stubs(:body => RETS_ERROR)
-    @client.stubs(:build_auth)
-    @client.stubs(:extract_digest_header)
-    @client.stubs(:raw_request).returns(response)
-
-    assert_raise Rets::InvalidRequest do
-      @client.handle_unauthorized_response(response)
     end
   end
 
@@ -156,35 +135,6 @@ class TestClient < Test::Unit::TestCase
       assert_equal response, @client.handle_response(response)
     end
   end
-
-
-  def test_handle_unauthorized_response_sets_capabilities_on_success
-    response = Net::HTTPSuccess.new("","","")
-    response.stubs(:body => CAPABILITIES, :get_fields => ["xxx"])
-
-    @client.stubs(:build_auth)
-    @client.expects(:raw_request).with("/login").returns(response)
-
-    @client.handle_unauthorized_response(response)
-
-    capabilities = {"abc" => "123", "def" => "ghi=jk"}
-
-    assert_equal capabilities, @client.capabilities
-  end
-
-  def test_handle_unauthorized_response_raises_on_auth_failure
-    response = Net::HTTPUnauthorized.new("","","")
-    response.stubs(:body => "", :get_fields => ["xxx"])
-
-    @client.stubs(:build_auth)
-    @client.expects(:raw_request).with("/login").returns(response)
-
-    assert_raise Rets::AuthorizationFailure do
-      @client.handle_unauthorized_response(response)
-    end
-  end
-
-
 
   def test_extract_capabilities
     assert_equal(
@@ -220,7 +170,10 @@ class TestClient < Test::Unit::TestCase
   end
 
   def test_login_fails_if_cannot_read_capabilities
-    @client.stubs(:request)
+    response = Net::HTTPSuccess.new("", "", "")
+    response.stubs(:body => RETS_REPLY)
+    @client.stubs(:request).returns(response)
+    @client.stubs(:extract_capabilities)
     assert_raise Rets::UnknownResponse do
       @client.login
     end
@@ -521,14 +474,40 @@ DIGEST
     @client.objects([1,2], :foo => :bar)
   end
 
-  def test_object_handles_empty_bodies
-    @client = Rets::Client.new(:password=>"fake", :agent=>"agent", :login_url=>"http://www.example.com:6103/", :username=>"fake_user")
-    assert_raise Rets::MalformedResponse do
-      VCR.use_cassette('empty_body') do
-        @client.objects([1], :resource => 'Property', :object_type => 'Photo', :resource_id => '480346')
-      end
+  def test_unauthorized_session
+    session = Rets::Session.new(
+      "Digest username=\"login\", realm=\"fake_realm\", qop=\"auth\", uri=\"/Login.asmx/Login\", nonce=\"a8f4bc805062602c8ba7a87b2109f808\", nc=00000001, cnonce=\"6e2dd038eea6cbacf0b956fd11f914b6\", response=\"fake_digest\", opaque=\"96eda461-41d0-4624-b7fe-b59e966035f3\"",
+      {
+        "GetObject"=>"/GetObject.asmx/GetObject",
+        "GetMetadata"=>"/GetMetadata.asmx/GetMetadata",
+        "Login"=>"/Login.asmx/Login",
+        "metadatatimestamp"=>"2012-07-17T16:34:22Z",
+        "user"=>"23756,60,RH,login",
+        "Search"=>"/Search.asmx/Search",
+        "timeoutseconds"=>"7200"
+      },
+      "ASP.NET_SessionId=mapij045k3bphj3gqqgpmmrx; RETS-Session-ID=mapij045k3bphj3gqqgpmmrx"
+    )
+    opts = {
+      :username  => 'login',
+      :password  => 'Bn1X@y4L',
+      :login_url => 'http://rets.example.com/Login.asmx/Login',
+      :agent     => 'Estately/1.0',
+      :persistent => false,
+      :session    => session
+    }
+    client = Rets::Client.new(opts)
+    response = nil
+    VCR.use_cassette('unauthorized_response') do
+      response = client.objects("1",
+                                :resource    => 'Property',
+                                :object_type => 'Photo',
+                                :resource_id => '2661580'
+                               )
     end
+    assert_equal 'image/jpeg', response.first.headers['content-type']
   end
+
 
   def test_objects_raises_on_other_arguments
     assert_raise ArgumentError do
