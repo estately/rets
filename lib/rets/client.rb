@@ -302,7 +302,11 @@ EOF
       if Net::HTTPUnauthorized === response
         challenge = extract_digest_header(response)
         if challenge
-          self.authorization = build_auth(challenge, uri, tries)
+          uri2 = URI.parse(uri.to_s)
+          uri2.user = uri.user
+          uri2.password = uri.password
+          uri2.path = path
+          self.authorization = build_auth(challenge, uri2, tries)
           response = raw_request(path, body, extra_headers, &reader)
           if Net::HTTPUnauthorized === response
             raise AuthorizationFailure, "Authorization failed, check credentials?"
