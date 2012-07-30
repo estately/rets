@@ -324,7 +324,11 @@ EOF
 
     def extract_digest_header(response)
       authenticate_headers = response.get_fields("www-authenticate")
-      authenticate_headers.detect {|h| h =~ /Digest/}
+      if authenticate_headers
+        authenticate_headers.detect {|h| h =~ /Digest/}
+      else
+        nil
+      end
     end
 
     def handle_response(response)
