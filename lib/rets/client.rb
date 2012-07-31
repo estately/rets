@@ -236,7 +236,8 @@ module Rets
     def metadata
       return @metadata if @metadata
 
-      if @cached_metadata && @cached_metadata.current?(capabilities["MetadataTimestamp"], capabilities["MetadataVersion"])
+      if @cached_metadata && (@options[:skip_metadata_uptodate_check] ||
+          @cached_metadata.current?(capabilities["MetadataTimestamp"], capabilities["MetadataVersion"]))
         logger.info "Use cached metadata"
         self.metadata = @cached_metadata
       else
