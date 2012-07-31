@@ -98,33 +98,12 @@ class TestClient < Test::Unit::TestCase
     client.request("/foo")
   end
 
-
-  def test_handle_response_instigates_login_process
-    response = Net::HTTPUnauthorized.new("","","")
-
-    @client.expects(:handle_unauthorized_response)
-
-    assert_equal response, @client.handle_response(response)
-  end
-
   def test_handle_response_handles_rets_errors
     response = Net::HTTPSuccess.new("", "", "")
     response.stubs(:body => RETS_ERROR)
 
     assert_raise Rets::InvalidRequest do
       @client.handle_response(response)
-    end
-  end
-
-  def test_handle_unauthorize_response_handles_rets_errors
-    response = Net::HTTPSuccess.new("", "", "")
-    response.stubs(:body => RETS_ERROR)
-    @client.stubs(:build_auth)
-    @client.stubs(:extract_digest_header)
-    @client.stubs(:raw_request).returns(response)
-
-    assert_raise Rets::InvalidRequest do
-      @client.handle_unauthorized_response(response)
     end
   end
 
@@ -156,35 +135,6 @@ class TestClient < Test::Unit::TestCase
       assert_equal response, @client.handle_response(response)
     end
   end
-
-
-  def test_handle_unauthorized_response_sets_capabilities_on_success
-    response = Net::HTTPSuccess.new("","","")
-    response.stubs(:body => CAPABILITIES, :get_fields => ["xxx"])
-
-    @client.stubs(:build_auth)
-    @client.expects(:raw_request).with("/login").returns(response)
-
-    @client.handle_unauthorized_response(response)
-
-    capabilities = {"abc" => "123", "def" => "ghi=jk"}
-
-    assert_equal capabilities, @client.capabilities
-  end
-
-  def test_handle_unauthorized_response_raises_on_auth_failure
-    response = Net::HTTPUnauthorized.new("","","")
-    response.stubs(:body => "", :get_fields => ["xxx"])
-
-    @client.stubs(:build_auth)
-    @client.expects(:raw_request).with("/login").returns(response)
-
-    assert_raise Rets::AuthorizationFailure do
-      @client.handle_unauthorized_response(response)
-    end
-  end
-
-
 
   def test_extract_capabilities
     assert_equal(
@@ -220,7 +170,10 @@ class TestClient < Test::Unit::TestCase
   end
 
   def test_login_fails_if_cannot_read_capabilities
-    @client.stubs(:request)
+    response = Net::HTTPSuccess.new("", "", "")
+    response.stubs(:body => RETS_REPLY)
+    @client.stubs(:request).returns(response)
+    @client.stubs(:extract_capabilities)
     assert_raise Rets::UnknownResponse do
       @client.login
     end
