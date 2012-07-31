@@ -1,4 +1,4 @@
-### 0.3.1.dev
+### 0.3.0.rc.1
 
 * correctly handle digest authentication
 
