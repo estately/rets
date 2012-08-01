@@ -44,7 +44,8 @@ module Rets
     # provided in initialize. Returns the capabilities that the
     # RETS server provides, per http://retsdoc.onconfluence.com/display/rets172/4.10+Capability+URL+List.
     def login
-      request(uri.path)
+      response = request(uri.path)
+      self.capabilities = extract_capabilities(Nokogiri.parse(response.body))
       raise UnknownResponse, "Cannot read rets server capabilities." unless @capabilities
       @capabilities
     end
@@ -94,7 +95,7 @@ module Rets
         end
       end
     end
-    
+
     def find_every(opts = {})
       search_uri = capability_url("Search")
 
@@ -235,9 +236,12 @@ module Rets
     def metadata
       return @metadata if @metadata
 
-      if @cached_metadata && @cached_metadata.current?(capabilities["MetadataTimestamp"], capabilities["MetadataVersion"])
+      if @cached_metadata && (@options[:skip_metadata_uptodate_check] ||
+          @cached_metadata.current?(capabilities["MetadataTimestamp"], capabilities["MetadataVersion"]))
+        logger.info "Use cached metadata"
         self.metadata = @cached_metadata
       else
+        logger.info @cached_metadata ? "Cached metadata out of date" : "Cached metadata unavailable"
         metadata_fetcher = lambda { |type| retrieve_metadata_type(type) }
         self.metadata = Metadata::Root.new(&metadata_fetcher)
       end
@@ -263,15 +267,18 @@ module Rets
     end
 
     def raw_request(path, body = nil, extra_headers = {}, &reader)
-      logger.info "posting to #{path}"
       headers = build_headers.merge(extra_headers)
 
       post = Net::HTTP::Post.new(path, headers)
       post.body = body.to_s
 
-      logger.debug ""
-      logger.debug format_headers(headers)
-      logger.debug body.to_s
+      logger.debug <<EOF
+>>>> Request
+POST #{path}
+#{format_headers(headers)}
+
+#{binary?(body.to_s) ? '<<< BINARY BODY >>>' : body.to_s}
+EOF
 
       connection_args = [Net::HTTP::Persistent === connection ? uri : nil, post].compact
 
@@ -279,27 +286,39 @@ module Rets
         res.read_body(&reader)
       end
 
+      logger.debug <<EOF
+<<<< Response
+#{response.code} #{response.message}
+#{format_headers(response.to_hash)}
+
+#{binary?(response.body.to_s) ? '<<< BINARY BODY >>>' : response.body.to_s}
+EOF
+
       handle_cookies(response)
-
-      logger.debug "Response: (#{response.class})"
-      logger.debug ""
-      logger.debug format_headers(response.to_hash)
-      logger.debug ""
-      logger.debug "Body:"
-      logger.debug response.body
-
       return response
     end
 
-    def request(*args, &block)
-      response = handle_response(raw_request(*args, &block))
+    def digest_auth_request(path, body = nil, extra_headers = {}, &reader)
+      response = raw_request(path, body, extra_headers, &reader)
       if Net::HTTPUnauthorized === response
-        retry_response = handle_response(raw_request(*args, &block))
-        raise AuthorizationFailure if retry_response === Net::HTTPUnauthorized
-        retry_response
-      else
-        response
+        challenge = extract_digest_header(response)
+        if challenge
+          uri2 = URI.parse(uri.to_s)
+          uri2.user = uri.user
+          uri2.password = uri.password
+          uri2.path = path
+          self.authorization = build_auth(challenge, uri2, tries)
+          response = raw_request(path, body, extra_headers, &reader)
+          if Net::HTTPUnauthorized === response
+            raise AuthorizationFailure, "Authorization failed, check credentials?"
+          end
+        end
       end
+      response
+    end
+
+    def request(*args, &block)
+      handle_response(digest_auth_request(*args, &block))
     end
 
     def request_with_compact_response(path, body, headers)
@@ -310,38 +329,20 @@ module Rets
 
     def extract_digest_header(response)
       authenticate_headers = response.get_fields("www-authenticate")
-      authenticate_headers.detect {|h| h =~ /Digest/}
-    end
-
-    def handle_unauthorized_response(response)
-      if self.authorization.nil?
-        self.authorization = build_auth(extract_digest_header(response), uri, tries)
-        response = raw_request(uri.path)
-
-        if Net::HTTPUnauthorized === response
-          raise AuthorizationFailure, "Authorization failed, check credentials?"
-        else
-          ErrorChecker.check(response)
-          self.capabilities = extract_capabilities(Nokogiri.parse(response.body))
-        end
+      if authenticate_headers
+        authenticate_headers.detect {|h| h =~ /Digest/}
       else
-        clean_setup
-        login
+        nil
       end
     end
 
     def handle_response(response)
-
-      if Net::HTTPUnauthorized === response # 401
-        handle_unauthorized_response(response)
-
-      elsif Net::HTTPSuccess === response # 2xx
+      if Net::HTTPSuccess === response
         ErrorChecker.check(response)
       else
         raise UnknownResponse, "Unable to handle response #{response.class}"
       end
-
-      return response
+      response
     end
 
     def handle_cookies(response)
@@ -378,7 +379,6 @@ module Rets
 
       @cookies[name]
     end
-
 
     def session=(session)
       self.authorization = session.authorization
@@ -478,7 +478,9 @@ module Rets
       data.map{|k,v| "#{CGI.escape(k.to_s)}=#{CGI.escape(v.to_s)}" }.join("&")
     end
 
-
+    def binary?(data)
+      data.slice(0, 1024).any? {|b| b >= "\x0" && b < " " && b != '-' && b != '~' && b != "\t" && b != "\r" && b != "\n"}
+    end
 
     def tries
       @tries ||= 1

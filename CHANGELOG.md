@@ -1,3 +1,7 @@
+### 0.3.0.rc.1
+
+* correctly handle digest authentication
+
 ### 0.3.0.rc.0 / 2012-07-26
 
 * feature: significantly better handling of authorization failures
