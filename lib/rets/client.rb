@@ -479,7 +479,7 @@ EOF
     end
 
     def binary?(data)
-      data.slice(0, 1024).any? {|b| b >= "\x0" && b < " " && b != '-' && b != '~' && b != "\t" && b != "\r" && b != "\n"}
+      data.slice(0, 1024).chars.any? {|b| b >= "\x0" && b < " " && b != '-' && b != '~' && b != "\t" && b != "\r" && b != "\n"}
     end
 
     def tries
