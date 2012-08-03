@@ -339,6 +339,8 @@ EOF
     def handle_response(response)
       if Net::HTTPSuccess === response
         ErrorChecker.check(response)
+      elsif Net::HTTPUnauthorized === response
+        raise AuthorizationFailure, "Authorization failed, check credentials?"
       else
         raise UnknownResponse, "Unable to handle response #{response.class}"
       end
