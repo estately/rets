@@ -46,8 +46,10 @@ module Rets
       attr_accessor :name
       attr_accessor :interpretation
       attr_accessor :long_name
+      attr_accessor :table_fragment
 
       def initialize(table_fragment, resource)
+        self.table_fragment = table_fragment
         self.resource = resource
         self.name = table_fragment["SystemName"]
         self.interpretation = table_fragment["Interpretation"]
