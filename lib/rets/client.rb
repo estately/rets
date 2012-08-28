@@ -24,17 +24,17 @@ module Rets
       @connection        = nil
       self.capabilities  = nil
 
-      uri          = URI.parse(@options[:login_url])
+      uri              = URI.parse(@options[:login_url])
 
-      uri.user     = @options.key?(:username) ? CGI.escape(@options[:username]) : nil
-      uri.password = @options.key?(:password) ? CGI.escape(@options[:password]) : nil
+      uri.user         = @options.key?(:username) ? CGI.escape(@options[:username]) : nil
+      uri.password     = @options.key?(:password) ? CGI.escape(@options[:password]) : nil
 
-      self.options = DEFAULT_OPTIONS.merge(@options)
-      self.login_uri     = uri
+      self.options     = DEFAULT_OPTIONS.merge(@options)
+      self.login_uri   = uri
 
-      self.logger = @options[:logger] || FakeLogger.new
+      self.logger      = @options[:logger] || FakeLogger.new
 
-      self.session  = @options.delete(:session)  if @options[:session]
+      self.session     = @options.delete(:session)  if @options[:session]
       @cached_metadata = @options[:metadata] || nil
     end
 
@@ -314,9 +314,9 @@ EOF
     def authorization(path)
       return nil unless auth_digest
       uri2 = URI.parse(login_uri.to_s)
-      uri2.user = login_uri.user
+      uri2.user     = login_uri.user
       uri2.password = login_uri.password
-      uri2.path = path
+      uri2.path     = path
       authorization = build_auth(self.auth_digest, uri2, tries)
     end
 
