@@ -317,7 +317,7 @@ EOF
       uri2.user     = login_uri.user
       uri2.password = login_uri.password
       uri2.path     = path
-      authorization = build_auth(self.auth_digest, uri2, tries)
+      build_auth(self.auth_digest, uri2, tries)
     end
 
 
