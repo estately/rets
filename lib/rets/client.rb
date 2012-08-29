@@ -16,12 +16,13 @@ module Rets
 
     def clean_setup
 
+      @auth_digest       = nil
+      @cached_metadata   = nil
       @capabilities      = nil
+      @connection        = nil
       @cookies           = nil
       @metadata          = nil
-      @cached_metadata   = nil
       @tries             = nil
-      @connection        = nil
       self.capabilities  = nil
 
       uri              = URI.parse(@options[:login_url])
@@ -300,8 +301,8 @@ EOF
     def digest_auth_request(path, body = nil, extra_headers = {}, &reader)
       response = raw_request(path, body, extra_headers, &reader)
       if Net::HTTPUnauthorized === response
-        self.auth_digest = extract_digest_header(response)
-        if auth_digest
+        @auth_digest = extract_digest_header(response)
+        if @auth_digest
           response = raw_request(path, body, extra_headers, &reader)
           if Net::HTTPUnauthorized === response
             raise AuthorizationFailure, "Authorization failed, check credentials?"
@@ -312,12 +313,12 @@ EOF
     end
 
     def authorization(path)
-      return nil unless auth_digest
+      return nil unless @auth_digest
       uri2 = URI.parse(login_uri.to_s)
       uri2.user     = login_uri.user
       uri2.password = login_uri.password
       uri2.path     = path
-      build_auth(self.auth_digest, uri2, tries)
+      build_auth(@auth_digest, uri2, tries)
     end
 
 
