@@ -11,8 +11,8 @@ class TestClient < Test::Unit::TestCase
       :login_url => "http://example.com",
       :username => "bob@example.com")
 
-    assert_equal CGI.escape("bob@example.com"), client.uri.user
-    assert_nil client.uri.password
+    assert_equal CGI.escape("bob@example.com"), client.login_uri.user
+    assert_nil client.login_uri.password
   end
 
   def test_initialize_adds_escaped_password_to_uri
@@ -21,7 +21,7 @@ class TestClient < Test::Unit::TestCase
       :username => "bob",
       :password => "secret@2!")
 
-    assert_equal CGI.escape("secret@2!"), client.uri.password
+    assert_equal CGI.escape("secret@2!"), client.login_uri.password
   end
 
   def test_initialize_merges_default_options
@@ -58,11 +58,11 @@ class TestClient < Test::Unit::TestCase
     post = mock()
     post.expects(:body=).with("fake body")
 
-    headers = @client.build_headers
+    headers = @client.build_headers('path')
 
     Net::HTTP::Post.expects(:new).with("/foo", headers).returns(post)
 
-    @client.connection.expects(:request).with(@client.uri, post).returns(stub_everything)
+    @client.connection.expects(:request).with(@client.login_uri, post).returns(stub_everything)
 
     @client.expects(:handle_cookies)
     @client.expects(:handle_response)
@@ -77,7 +77,7 @@ class TestClient < Test::Unit::TestCase
   end
 
   def test_request_passes_correct_arguments_to_persistent_connection
-    @client.connection.expects(:request).with(@client.uri, instance_of(Net::HTTP::Post)).returns(stub_everything)
+    @client.connection.expects(:request).with(@client.login_uri, instance_of(Net::HTTP::Post)).returns(stub_everything)
 
     @client.stubs(:handle_cookies)
     @client.stubs(:handle_response)
@@ -213,18 +213,18 @@ class TestClient < Test::Unit::TestCase
       "User-Agent"    => "Client/1.0",
       "Host"          => "example.com:80",
       "RETS-Version"  => "RETS/1.7.2"},
-      @client.build_headers)
+      @client.build_headers('path'))
   end
 
   def test_build_headers_provides_authorization
-    @client.authorization = "Just trust me"
+    @client.expects(:authorization).returns("Just trust me")
 
     assert_equal({
       "Authorization" => "Just trust me",
       "User-Agent"    => "Client/1.0",
       "Host"          => "example.com:80",
       "RETS-Version"  => "RETS/1.7.2"},
-      @client.build_headers)
+      @client.build_headers('path'))
   end
 
   def test_build_headers_provides_cookies
@@ -235,7 +235,7 @@ class TestClient < Test::Unit::TestCase
       "User-Agent"    => "Client/1.0",
       "Host"          => "example.com:80",
       "RETS-Version"  => "RETS/1.7.2"},
-      @client.build_headers)
+      @client.build_headers('path'))
   end
 
 
@@ -289,33 +289,33 @@ DIGEST
 
 
   def test_session_restores_state
-    session = Rets::Session.new("Digest auth", {"Foo" => "/foo"}, "sessionid=123")
+    session = Rets::Session.new({:digest => 'true'}, {"Foo" => "/foo"}, "sessionid=123")
 
     @client.session = session
 
-    assert_equal("Digest auth",     @client.authorization)
+    assert_equal({:digest => 'true'},     @client.auth_digest)
     assert_equal({"Foo" => "/foo"}, @client.capabilities)
     assert_equal("sessionid=123",   @client.cookies)
   end
 
   def test_session_dumps_state
-    @client.authorization = "Digest auth"
+    @client.auth_digest = {:digest => 'true'}
     @client.capabilities  = {"Foo" => "/foo"}
     @client.cookies       = "session-id=123"
 
     session = @client.session
 
-    assert_equal("Digest auth",     session.authorization)
+    assert_equal({:digest => 'true'},     session.auth_digest)
     assert_equal({"Foo" => "/foo"}, session.capabilities)
     assert_equal("session-id=123",  session.cookies)
   end
 
   def test_initialize_with_session_restores_state
-    session = Rets::Session.new("Digest auth", {"Foo" => "/foo"}, "sessionid=123")
+    session = Rets::Session.new({:digest => true}, {"Foo" => "/foo"}, "sessionid=123")
 
     client = Rets::Client.new(:login_url => "http://example.com", :session => session)
 
-    assert_equal("Digest auth",     client.authorization)
+    assert_equal({:digest => true},     client.auth_digest)
     assert_equal({"Foo" => "/foo"}, client.capabilities)
     assert_equal("sessionid=123",   client.cookies)
   end
