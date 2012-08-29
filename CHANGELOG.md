@@ -1,3 +1,7 @@
+### 0.4.0 / 2012-08-29
+
+* fix: update authentication header to uri matches path
+
 ### 0.3.0 / 2012-07-31
 
 * correctly handle digest authentication
