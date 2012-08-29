@@ -1,4 +1,4 @@
-### 0.3.0.rc.1
+### 0.3.0 / 2012-07-31
 
 * correctly handle digest authentication
 
