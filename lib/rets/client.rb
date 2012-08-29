@@ -1,12 +1,12 @@
 module Rets
-  Session = Struct.new(:authorization, :capabilities, :cookies)
+  Session = Struct.new(:auth_digest, :capabilities, :cookies)
 
   class Client
     DEFAULT_OPTIONS = { :persistent => true }
 
     include Authentication
 
-    attr_accessor :uri, :options, :authorization, :logger
+    attr_accessor :login_uri, :options, :logger, :auth_digest
     attr_writer   :capabilities, :metadata
 
     def initialize(options)
@@ -16,26 +16,26 @@ module Rets
 
     def clean_setup
 
+      @auth_digest       = nil
+      @cached_metadata   = nil
       @capabilities      = nil
+      @connection        = nil
       @cookies           = nil
       @metadata          = nil
-      @cached_metadata   = nil
       @tries             = nil
-      @connection        = nil
-      self.authorization = nil
       self.capabilities  = nil
 
-      uri          = URI.parse(@options[:login_url])
+      uri              = URI.parse(@options[:login_url])
 
-      uri.user     = @options.key?(:username) ? CGI.escape(@options[:username]) : nil
-      uri.password = @options.key?(:password) ? CGI.escape(@options[:password]) : nil
+      uri.user         = @options.key?(:username) ? CGI.escape(@options[:username]) : nil
+      uri.password     = @options.key?(:password) ? CGI.escape(@options[:password]) : nil
 
-      self.options = DEFAULT_OPTIONS.merge(@options)
-      self.uri     = uri
+      self.options     = DEFAULT_OPTIONS.merge(@options)
+      self.login_uri   = uri
 
-      self.logger = @options[:logger] || FakeLogger.new
+      self.logger      = @options[:logger] || FakeLogger.new
 
-      self.session  = @options.delete(:session)  if @options[:session]
+      self.session     = @options.delete(:session)  if @options[:session]
       @cached_metadata = @options[:metadata] || nil
     end
 
@@ -44,7 +44,7 @@ module Rets
     # provided in initialize. Returns the capabilities that the
     # RETS server provides, per http://retsdoc.onconfluence.com/display/rets172/4.10+Capability+URL+List.
     def login
-      response = request(uri.path)
+      response = request(login_uri.path)
       self.capabilities = extract_capabilities(Nokogiri.parse(response.body))
       raise UnknownResponse, "Cannot read rets server capabilities." unless @capabilities
       @capabilities
@@ -267,7 +267,7 @@ module Rets
     end
 
     def raw_request(path, body = nil, extra_headers = {}, &reader)
-      headers = build_headers.merge(extra_headers)
+      headers = build_headers(path).merge(extra_headers)
 
       post = Net::HTTP::Post.new(path, headers)
       post.body = body.to_s
@@ -280,7 +280,7 @@ POST #{path}
 #{binary?(body.to_s) ? '<<< BINARY BODY >>>' : body.to_s}
 EOF
 
-      connection_args = [Net::HTTP::Persistent === connection ? uri : nil, post].compact
+      connection_args = [Net::HTTP::Persistent === connection ? login_uri : nil, post].compact
 
       response = connection.request(*connection_args) do |res|
         res.read_body(&reader)
@@ -301,13 +301,8 @@ EOF
     def digest_auth_request(path, body = nil, extra_headers = {}, &reader)
       response = raw_request(path, body, extra_headers, &reader)
       if Net::HTTPUnauthorized === response
-        challenge = extract_digest_header(response)
-        if challenge
-          uri2 = URI.parse(uri.to_s)
-          uri2.user = uri.user
-          uri2.password = uri.password
-          uri2.path = path
-          self.authorization = build_auth(challenge, uri2, tries)
+        @auth_digest = extract_digest_header(response)
+        if @auth_digest
           response = raw_request(path, body, extra_headers, &reader)
           if Net::HTTPUnauthorized === response
             raise AuthorizationFailure, "Authorization failed, check credentials?"
@@ -316,6 +311,16 @@ EOF
       end
       response
     end
+
+    def authorization(path)
+      return nil unless @auth_digest
+      uri2 = URI.parse(login_uri.to_s)
+      uri2.user     = login_uri.user
+      uri2.password = login_uri.password
+      uri2.path     = path
+      build_auth(@auth_digest, uri2, tries)
+    end
+
 
     def request(*args, &block)
       handle_response(digest_auth_request(*args, &block))
@@ -383,13 +388,13 @@ EOF
     end
 
     def session=(session)
-      self.authorization = session.authorization
-      self.capabilities  = session.capabilities
-      self.cookies       = session.cookies
+      self.auth_digest  = session.auth_digest
+      self.capabilities = session.capabilities
+      self.cookies      = session.cookies
     end
 
     def session
-      Session.new(authorization, capabilities, cookies)
+      Session.new(auth_digest, capabilities, cookies)
     end
 
 
@@ -435,7 +440,7 @@ EOF
     def connection
       @connection ||= options[:persistent] ?
         persistent_connection :
-        Net::HTTP.new(uri.host, uri.port)
+        Net::HTTP.new(login_uri.host, login_uri.port)
     end
 
     def persistent_connection
@@ -457,15 +462,16 @@ EOF
       options[:version] || "RETS/1.7.2"
     end
 
-    def build_headers
+    def build_headers(path)
       headers = {
         "User-Agent"   => user_agent,
-        "Host"         => "#{uri.host}:#{uri.port}",
+        "Host"         => "#{login_uri.host}:#{login_uri.port}",
         "RETS-Version" => rets_version
       }
 
-      headers.merge!("Authorization" => authorization) if authorization
-      headers.merge!("Cookie" => cookies)              if cookies
+      auth = authorization(path)
+      headers.merge!("Authorization" => auth) if auth
+      headers.merge!("Cookie" => cookies)     if cookies
 
       if options[:ua_password]
         headers.merge!(
