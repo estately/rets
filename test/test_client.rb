@@ -390,6 +390,11 @@ DIGEST
     @client.find(:all, :foo => :bar)
   end
 
+  def test_find_retries_on_errors_preserves_resolve
+    @client.stubs(:find_every).raises(Rets::AuthorizationFailure).then.raises(Rets::InvalidRequest).then.with({:foo => :bar}, true).returns([])
+    @client.find(:all, {:foo => :bar, :resolve => true})
+  end
+
   def test_find_eventually_reraises_errors
     @client.stubs(:find_every).raises(Rets::AuthorizationFailure)
     assert_raise Rets::AuthorizationFailure do
