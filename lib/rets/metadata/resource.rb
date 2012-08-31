@@ -61,7 +61,7 @@ module Rets
       end
 
       def print_tree
-        puts "Resource: #{id}"
+        puts "Resource: #{id} (Key Field: #{key_field})"
 
         rets_classes.each(&:print_tree)
       end
