@@ -1,3 +1,5 @@
 .DS_Store
 pkg/
 *.swp
+nbproject/*
+nbproject/private/
