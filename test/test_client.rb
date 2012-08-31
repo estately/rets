@@ -368,13 +368,13 @@ DIGEST
 
 
   def test_find_first_calls_find_every_with_limit_one
-    @client.expects(:find_every).with(:limit => 1, :foo => :bar).returns([1,2,3])
+    @client.expects(:find_every).with({:limit => 1, :foo => :bar}, nil).returns([1,2,3])
 
     assert_equal 1, @client.find(:first, :foo => :bar, :limit => 5), "User-specified limit should be ignored"
   end
 
   def test_find_all_calls_find_every
-    @client.expects(:find_every).with(:limit => 5, :foo => :bar).returns([1,2,3])
+    @client.expects(:find_every).with({:limit => 5, :foo => :bar}, nil).returns([1,2,3])
 
     assert_equal [1,2,3], @client.find(:all, :limit => 5, :foo => :bar)
   end
