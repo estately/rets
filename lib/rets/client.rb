@@ -81,8 +81,9 @@ module Rets
 
     def find_with_retries(opts = {})
       retries = 0
+      resolve = opts.delete(:resolve)
       begin
-        find_every(opts)
+        find_every(opts, resolve)
       rescue AuthorizationFailure, InvalidRequest => e
         if retries < 3
           retries += 1
@@ -96,10 +97,8 @@ module Rets
       end
     end
 
-    def find_every(opts = {})
+    def find_every(opts, resolve)
       search_uri = capability_url("Search")
-
-      resolve = opts.delete(:resolve)
 
       extras = fixup_keys(opts)
 
