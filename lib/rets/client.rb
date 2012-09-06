@@ -97,6 +97,11 @@ module Rets
       end
     end
 
+    def logout
+      logout_uri = capability_url("Logout")
+      raw_request(logout_uri.path)
+    end
+
     def find_every(opts, resolve)
       search_uri = capability_url("Search")
 
