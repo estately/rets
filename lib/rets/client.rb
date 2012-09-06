@@ -451,7 +451,7 @@ EOF
       conn = Net::HTTP::Persistent.new
 
       def conn.idempotent?(*)
-	true
+        true
       end
 
       conn
