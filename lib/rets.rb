@@ -16,7 +16,6 @@ module Rets
   UnknownResponse      = Class.new(ArgumentError)
 end
 
-require 'rets/authentication'
 require 'rets/metadata'
 require 'rets/parser/compact'
 require 'rets/parser/multipart'

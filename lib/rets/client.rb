@@ -1,12 +1,12 @@
+require 'httpclient'
+
 module Rets
-  Session = Struct.new(:auth_digest, :capabilities, :cookies)
+  Session = Struct.new(:capabilities)
 
   class Client
-    DEFAULT_OPTIONS = { :persistent => true }
+    DEFAULT_OPTIONS = { :cookie_store => "/tmp/rets_cookie_store.dat" }
 
-    include Authentication
-
-    attr_accessor :login_uri, :options, :logger, :auth_digest
+    attr_accessor :login_url, :options, :logger
     attr_writer   :capabilities, :metadata
 
     def initialize(options)
@@ -15,39 +15,32 @@ module Rets
     end
 
     def clean_setup
+      self.options     = DEFAULT_OPTIONS.merge(@options)
+      self.login_url   = self.options[:login_url]
 
-      @auth_digest       = nil
       @cached_metadata   = nil
       @capabilities      = nil
-      @connection        = nil
-      @cookies           = nil
       @metadata          = nil
       @tries             = nil
       self.capabilities  = nil
 
-      uri              = URI.parse(@options[:login_url])
-
-      uri.user         = @options.key?(:username) ? CGI.escape(@options[:username]) : nil
-      uri.password     = @options.key?(:password) ? CGI.escape(@options[:password]) : nil
-
-      self.options     = DEFAULT_OPTIONS.merge(@options)
-      self.login_uri   = uri
-
       self.logger      = @options[:logger] || FakeLogger.new
-
       self.session     = @options.delete(:session)  if @options[:session]
       @cached_metadata = @options[:metadata] || nil
     end
-
 
     # Attempts to login by making an empty request to the URL
     # provided in initialize. Returns the capabilities that the
     # RETS server provides, per http://retsdoc.onconfluence.com/display/rets172/4.10+Capability+URL+List.
     def login
-      response = request(login_uri.path)
-      self.capabilities = extract_capabilities(Nokogiri.parse(response.body))
+      res = http_get(login_url)
+      self.capabilities = extract_capabilities(Nokogiri.parse(res.body))
       raise UnknownResponse, "Cannot read rets server capabilities." unless @capabilities
       @capabilities
+    end
+
+    def logout
+      http_get capability_url("Logout")
     end
 
     # Finds records.
@@ -97,28 +90,10 @@ module Rets
       end
     end
 
-    def logout
-      logout_uri = capability_url("Logout")
-      raw_request(logout_uri.path)
-    end
-
     def find_every(opts, resolve)
-      search_uri = capability_url("Search")
-
-      extras = fixup_keys(opts)
-
-      defaults = {"QueryType" => "DMQL2", "Format" => "COMPACT"}
-
-      query = defaults.merge(extras)
-
-      body = build_key_values(query)
-
-      extra_headers = {
-        "Content-Type"   => "application/x-www-form-urlencoded",
-        "Content-Length" => body.size.to_s
-      }
-
-      results = request_with_compact_response(search_uri.path, body, extra_headers)
+      params = {"QueryType" => "DMQL2", "Format" => "COMPACT"}.merge(fixup_keys(opts))
+      res = http_post(capability_url("Search"), params)
+      results = Parser::Compact.parse_document res.body
 
       if resolve
         rets_class = find_rets_class(opts[:search_type], opts[:class])
@@ -168,7 +143,7 @@ module Rets
     end
 
     def create_parts_from_response(response)
-      content_type = response["content-type"]
+      content_type = response.header["content-type"][0]
 
       if content_type.nil?
         raise MalformedResponse, "Unable to read content-type from response: #{response.inspect}"
@@ -185,7 +160,7 @@ module Rets
       else
         # fake a multipart for interface compatibility
         headers = {}
-        response.each { |k,v| headers[k] = v }
+        response.headers.each { |k,v| headers[k] = v[0] }
 
         part = Parser::Multipart::Part.new(headers, response.body)
 
@@ -201,27 +176,22 @@ module Rets
     # object_id    can be "*", or a comma delimited string of one or more integers.
     def object(object_id, opts = {})
       response = fetch_object(object_id, opts)
-
       response.body
     end
 
     def fetch_object(object_id, opts = {})
-      object_uri = capability_url("GetObject")
-
-      body = build_key_values(
+      params = {
         "Resource" => opts[:resource],
         "Type"     => opts[:object_type],
         "ID"       => "#{opts[:resource_id]}:#{object_id}",
         "Location" => opts[:location] || 0
-      )
-
-      extra_headers = {
-        "Accept"         => "image/jpeg, image/png;q=0.5, image/gif;q=0.1",
-        "Content-Type"   => "application/x-www-form-urlencoded",
-        "Content-Length" => body.size.to_s
       }
 
-      request(object_uri.path, body, extra_headers)
+      extra_headers = {
+        "Accept" => "image/jpeg, image/png;q=0.5, image/gif;q=0.1",
+      }
+
+      http_post(capability_url("GetObject"), params, extra_headers)
     end
 
     # Changes keys to be camel cased, per the RETS standard for queries.
@@ -252,153 +222,20 @@ module Rets
     end
 
     def retrieve_metadata_type(type)
-      metadata_uri = capability_url("GetMetadata")
-
-      body = build_key_values(
-        "Format" => "COMPACT",
-        "Type"   => "METADATA-#{type}",
-        "ID"     => "0"
-      )
-
-      extra_headers = {
-        "Content-Type"   => "application/x-www-form-urlencoded",
-        "Content-Length" => body.size.to_s
-      }
-
-      response = request(metadata_uri.path, body, extra_headers)
-
-      response.body
-    end
-
-    def raw_request(path, body = nil, extra_headers = {}, &reader)
-      headers = build_headers(path).merge(extra_headers)
-
-      post = Net::HTTP::Post.new(path, headers)
-      post.body = body.to_s
-
-      logger.debug <<EOF
->>>> Request
-POST #{path}
-#{format_headers(headers)}
-
-#{binary?(body.to_s) ? '<<< BINARY BODY >>>' : body.to_s}
-EOF
-
-      connection_args = [Net::HTTP::Persistent === connection ? login_uri : nil, post].compact
-
-      response = connection.request(*connection_args) do |res|
-        res.read_body(&reader)
-      end
-
-      logger.debug <<EOF
-<<<< Response
-#{response.code} #{response.message}
-#{format_headers(response.to_hash)}
-
-#{binary?(response.body.to_s) ? '<<< BINARY BODY >>>' : response.body.to_s}
-EOF
-
-      handle_cookies(response)
-      return response
-    end
-
-    def digest_auth_request(path, body = nil, extra_headers = {}, &reader)
-      response = raw_request(path, body, extra_headers, &reader)
-      if Net::HTTPUnauthorized === response
-        @auth_digest = extract_digest_header(response)
-        if @auth_digest
-          response = raw_request(path, body, extra_headers, &reader)
-          if Net::HTTPUnauthorized === response
-            raise AuthorizationFailure, "Authorization failed, check credentials?"
-          end
-        end
-      end
-      response
-    end
-
-    def authorization(path)
-      return nil unless @auth_digest
-      uri2 = URI.parse(login_uri.to_s)
-      uri2.user     = login_uri.user
-      uri2.password = login_uri.password
-      uri2.path     = path
-      build_auth(@auth_digest, uri2, tries)
-    end
-
-
-    def request(*args, &block)
-      handle_response(digest_auth_request(*args, &block))
-    end
-
-    def request_with_compact_response(path, body, headers)
-      response = request(path, body, headers)
-
-      Parser::Compact.parse_document response.body
-    end
-
-    def extract_digest_header(response)
-      authenticate_headers = response.get_fields("www-authenticate")
-      if authenticate_headers
-        authenticate_headers.detect {|h| h =~ /Digest/}
-      else
-        nil
-      end
-    end
-
-    def handle_response(response)
-      if Net::HTTPSuccess === response
-        ErrorChecker.check(response)
-      elsif Net::HTTPUnauthorized === response
-        raise AuthorizationFailure, "Authorization failed, check credentials?"
-      else
-        raise UnknownResponse, "Unable to handle response #{response.class}"
-      end
-      response
-    end
-
-    def handle_cookies(response)
-      if cookies?(response)
-        self.cookies = response.get_fields('set-cookie')
-        logger.info "Cookies set to #{cookies.inspect}"
-      end
-    end
-
-    def cookies?(response)
-      response['set-cookie']
-    end
-
-    def cookies=(cookies)
-      @cookies ||= {}
-
-      Array(cookies).each do |cookie|
-        cookie.match(/(\S+)=([^;]+);?/)
-
-        @cookies[$1] = $2
-      end
-
-      nil
-    end
-
-    def cookies
-      return if @cookies.nil? or @cookies.empty?
-
-      @cookies.map{ |k,v| "#{k}=#{v}" }.join("; ")
-    end
-
-    def cookie(name)
-      return if @cookies.nil? or @cookies.empty?
-
-      @cookies[name]
+      res = http_post(capability_url("GetMetadata"),
+                      { "Format" => "COMPACT",
+                        "Type"   => "METADATA-#{type}",
+                        "ID"     => "0"
+                      })
+      res.body
     end
 
     def session=(session)
-      self.auth_digest  = session.auth_digest
       self.capabilities = session.capabilities
-      self.cookies      = session.cookies
     end
 
     def session
-      Session.new(auth_digest, capabilities, cookies)
+      Session.new(capabilities)
     end
 
 
@@ -414,15 +251,15 @@ EOF
     end
 
     def capability_url(name)
-      url = capabilities[name]
+      path = capabilities[name]
 
       begin
-        capability_uri = URI.parse(url)
+        uri = URI.parse(login_url)
+        uri.path = path
       rescue URI::InvalidURIError
-        raise MalformedResponse, "Unable to parse capability URL: #{url.inspect}"
+        raise MalformedResponse, "Unable to parse capability URL: #{uri.inspect}"
       end
-
-      capability_uri
+      uri.to_s
     end
 
     def extract_capabilities(document)
@@ -439,59 +276,56 @@ EOF
       hash
     end
 
+    def http
+      return @http if @http
 
-
-    def connection
-      @connection ||= options[:persistent] ?
-        persistent_connection :
-        Net::HTTP.new(login_uri.host, login_uri.port)
+      @http = HTTPClient.new
+      @http.set_cookie_store(options[:cookie_store])
+      @http
     end
 
-    def persistent_connection
-      conn = Net::HTTP::Persistent.new
+    def save_cookie_store
+      @http.save_cookie_store
+    end
 
-      def conn.idempotent?(*)
-        true
+    def http_cookie(name)
+      # XXX we completely ignore cookie's domain, path, expiration, etc
+      http.cookies.each do |c|
+        return c.value if c.name.downcase == name.downcase
       end
-
-      conn
+      nil
     end
 
-
-    def user_agent
-      options[:agent] || "Client/1.0"
+    def http_get(url, params=nil, extra_headers={})
+      http.set_auth(url, options[:username], options[:password])
+      res = http.get(url, params, extra_headers.merge(rets_extra_headers))
+      ErrorChecker.check(res)
+      res
     end
 
-    def rets_version
-      options[:version] || "RETS/1.7.2"
+    def http_post(url, params, extra_headers = {})
+      http.set_auth(url, options[:username], options[:password])
+      res = http.post(url, params, extra_headers.merge(rets_extra_headers))
+      ErrorChecker.check(res)
+      res
     end
 
-    def build_headers(path)
+    def rets_extra_headers
+      user_agent = options[:agent] || "Client/1.0"
+      rets_version = options[:version] || "RETS/1.7.2"
+
       headers = {
         "User-Agent"   => user_agent,
-        "Host"         => "#{login_uri.host}:#{login_uri.port}",
         "RETS-Version" => rets_version
       }
 
-      auth = authorization(path)
-      headers.merge!("Authorization" => auth) if auth
-      headers.merge!("Cookie" => cookies)     if cookies
-
       if options[:ua_password]
-        headers.merge!(
-          "RETS-UA-Authorization" => build_user_agent_auth(
-            user_agent, options[:ua_password], '', cookie('RETS-Session-ID'), rets_version))
+        up = Digest::MD5.hexdigest "#{user_agent}:#{options[:ua_password]}"
+        digest = Digest::MD5.hexdigest "#{up}::#{http_cookie('RETS-Session-ID')}:#{rets_version}"
+        headers.merge!("RETS-UA-Authorization" => "Digest #{digest}")
       end
 
       headers
-    end
-
-    def build_key_values(data)
-      data.map{|k,v| "#{CGI.escape(k.to_s)}=#{CGI.escape(v.to_s)}" }.join("&")
-    end
-
-    def binary?(data)
-      data.slice(0, 1024).chars.any? {|b| b >= "\x0" && b < " " && b != '-' && b != '~' && b != "\t" && b != "\r" && b != "\n"}
     end
 
     def tries
@@ -506,22 +340,6 @@ EOF
       def warn(*);  end
       def info(*);  end
       def debug(*); end
-    end
-
-    def format_headers(headers)
-      out = []
-
-      headers.each do |name, value|
-        if Array === value
-          value.each do |v|
-            out << "#{name}: #{v}"
-          end
-        else
-          out << "#{name}: #{value}"
-        end
-      end
-
-      out.join("\n")
     end
 
     class ErrorChecker
@@ -544,6 +362,5 @@ EOF
         end
       end
     end
-
   end
 end
