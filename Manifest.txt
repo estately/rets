@@ -4,7 +4,6 @@ README.md
 Rakefile
 bin/rets
 lib/rets.rb
-lib/rets/authentication.rb
 lib/rets/client.rb
 lib/rets/metadata.rb
 lib/rets/metadata/containers.rb
