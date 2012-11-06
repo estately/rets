@@ -251,13 +251,17 @@ module Rets
     end
 
     def capability_url(name)
-      path = capabilities[name]
+      val = capabilities[name]
 
       begin
-        uri = URI.parse(login_url)
-        uri.path = path
+        if val.downcase.match /^https?:\/\//
+          uri = URI.parse(val)
+        else
+          uri = URI.parse(login_url)
+          uri.path = val
+        end
       rescue URI::InvalidURIError
-        raise MalformedResponse, "Unable to parse capability URL: #{uri.inspect}"
+        raise MalformedResponse, "Unable to parse capability URL: #{name} => #{val.inspect}"
       end
       uri.to_s
     end
