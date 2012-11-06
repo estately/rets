@@ -25,6 +25,7 @@ Gem::Specification.new do |s|
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
       s.add_runtime_dependency(%q<net-http-persistent>, ["~> 1.7"])
+      s.add_runtime_dependency(%q<httpclient>, ["~> 2.3.0"])
       s.add_runtime_dependency(%q<nokogiri>, ["~> 1.5.2"])
       s.add_development_dependency(%q<rdoc>, ["~> 3.10"])
       s.add_development_dependency(%q<mocha>, ["~> 0.11.0"])
@@ -42,6 +43,7 @@ Gem::Specification.new do |s|
     end
   else
     s.add_dependency(%q<net-http-persistent>, ["~> 1.7"])
+    s.add_dependency(%q<httpclient>, ["~> 2.3.0"])
     s.add_dependency(%q<nokogiri>, ["~> 1.5.2"])
     s.add_dependency(%q<rdoc>, ["~> 3.10"])
     s.add_dependency(%q<mocha>, ["~> 0.11.0"])
