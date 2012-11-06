@@ -284,12 +284,12 @@ module Rets
       return @http if @http
 
       @http = HTTPClient.new
-      @http.set_cookie_store(options[:cookie_store])
+      @http.set_cookie_store(options[:cookie_store]) if options[:cookie_store]
       @http
     end
 
     def save_cookie_store
-      @http.save_cookie_store
+      @http.save_cookie_store if options[:cookie_store]
     end
 
     def http_cookie(name)
