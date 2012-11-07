@@ -1,6 +1,8 @@
 require 'httpclient'
 
 module Rets
+  class HttpError < StandardError ; end
+
   Session = Struct.new(:capabilities)
 
   class Client
@@ -348,6 +350,8 @@ module Rets
 
     class ErrorChecker
       def self.check(response)
+        raise HttpError, "HTTP status: #{response.status_code}, body: #{response.body}" unless response.ok?
+
         begin
           if !response.body.empty?
             xml = Nokogiri::XML.parse(response.body, nil, nil, Nokogiri::XML::ParseOptions::STRICT)
