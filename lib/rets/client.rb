@@ -6,7 +6,7 @@ module Rets
   Session = Struct.new(:capabilities)
 
   class Client
-    DEFAULT_OPTIONS = { :cookie_store => "/tmp/rets_cookie_store.dat" }
+    DEFAULT_OPTIONS = {}
 
     attr_accessor :login_url, :options, :logger
     attr_writer   :capabilities, :metadata
@@ -290,8 +290,14 @@ module Rets
       @http
     end
 
-    def save_cookie_store
-      @http.save_cookie_store if options[:cookie_store]
+    def save_cookie_store(force=nil)
+      if options[:cookie_store]
+        if force
+          @http.cookie_manager.save_all_cookies(true, true, true)
+        else
+          @http.save_cookie_store
+        end
+      end
     end
 
     def http_cookie(name)
