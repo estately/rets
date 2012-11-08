@@ -3,8 +3,6 @@ require 'httpclient'
 module Rets
   class HttpError < StandardError ; end
 
-  Session = Struct.new(:capabilities)
-
   class Client
     DEFAULT_OPTIONS = {}
 
@@ -27,7 +25,6 @@ module Rets
       self.capabilities  = nil
 
       self.logger      = @options[:logger] || FakeLogger.new
-      self.session     = @options.delete(:session)  if @options[:session]
       @cached_metadata = @options[:metadata] || nil
     end
 
@@ -232,15 +229,6 @@ module Rets
       res.body
     end
 
-    def session=(session)
-      self.capabilities = session.capabilities
-    end
-
-    def session
-      Session.new(capabilities)
-    end
-
-
     # The capabilies as provided by the RETS server during login.
     #
     # Currently, only the path in the endpoint URLs is used[1]. Host,
@@ -356,7 +344,9 @@ module Rets
 
     class ErrorChecker
       def self.check(response)
-        raise HttpError, "HTTP status: #{response.status_code}, body: #{response.body}" unless response.ok?
+        if response.respond_to?(:ok?) && ! response.ok?
+          raise HttpError, "HTTP status: #{response.status_code}, body: #{response.body}"
+        end
 
         begin
           if !response.body.empty?
