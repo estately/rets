@@ -344,12 +344,11 @@ module Rets
 
     class ErrorChecker
       def self.check(response)
-        if response.respond_to?(:ok?) && ! response.ok?
-          raise HttpError, "HTTP status: #{response.status_code}, body: #{response.body}"
-        end
+        # some RETS servers return success code in XML body but failure code 4xx in http status
+        # If xml body is present we ignore http status
 
-        begin
-          if !response.body.empty?
+        if !response.body.empty?
+          begin
             xml = Nokogiri::XML.parse(response.body, nil, nil, Nokogiri::XML::ParseOptions::STRICT)
 
             rets_element = xml.xpath("/RETS")
@@ -358,11 +357,16 @@ module Rets
 
             if reply_code.nonzero?
               raise InvalidRequest, "Got error code #{reply_code} (#{reply_text})."
+            else
+              return
             end
+          rescue Nokogiri::XML::SyntaxError
+            #Not xml
           end
+        end
 
-        rescue Nokogiri::XML::SyntaxError
-          #Not xml
+        if response.respond_to?(:ok?) && ! response.ok?
+          raise HttpError, "HTTP status: #{response.status_code}, body: #{response.body}"
         end
       end
     end
