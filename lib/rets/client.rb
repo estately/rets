@@ -289,9 +289,8 @@ module Rets
     end
 
     def http_cookie(name)
-      # XXX we completely ignore cookie's domain, path, expiration, etc
       http.cookies.each do |c|
-        return c.value if c.name.downcase == name.downcase
+        return c.value if c.name.downcase == name.downcase && c.match?(URI.parse(login_url))
       end
       nil
     end
@@ -321,7 +320,8 @@ module Rets
 
       if options[:ua_password]
         up = Digest::MD5.hexdigest "#{user_agent}:#{options[:ua_password]}"
-        digest = Digest::MD5.hexdigest "#{up}::#{http_cookie('RETS-Session-ID')}:#{rets_version}"
+        session_id = http_cookie('RETS-Session-ID') || ''
+        digest = Digest::MD5.hexdigest "#{up}::#{session_id}:#{rets_version}"
         headers.merge!("RETS-UA-Authorization" => "Digest #{digest}")
       end
 
