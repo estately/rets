@@ -244,7 +244,7 @@ module Rets
       val = capabilities[name]
 
       begin
-        if val.downcase.match /^https?:\/\//
+        if val.downcase.match(/^https?:\/\//)
           uri = URI.parse(val)
         else
           uri = URI.parse(login_url)

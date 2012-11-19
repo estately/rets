@@ -1,10 +1,5 @@
-require 'net/http'
 require 'uri'
-require 'cgi'
 require 'digest/md5'
-
-require 'rubygems'
-require 'net/http/persistent'
 require 'nokogiri'
 
 module Rets
@@ -16,8 +11,7 @@ module Rets
   UnknownResponse      = Class.new(ArgumentError)
 end
 
+require 'rets/client'
 require 'rets/metadata'
 require 'rets/parser/compact'
 require 'rets/parser/multipart'
-
-require 'rets/client'
