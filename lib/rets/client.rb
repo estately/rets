@@ -366,7 +366,11 @@ module Rets
         end
 
         if response.respond_to?(:ok?) && ! response.ok?
-          raise HttpError, "HTTP status: #{response.status_code}, body: #{response.body}"
+          if response.status_code == 401
+            raise AuthorizationFailure, "HTTP status: #{response.status_code}, body: #{response.body}"
+          else
+            raise HttpError, "HTTP status: #{response.status_code}, body: #{response.body}"
+          end
         end
       end
     end
