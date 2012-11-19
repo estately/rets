@@ -79,8 +79,8 @@ module Rets
       rescue AuthorizationFailure, InvalidRequest => e
         if retries < 3
           retries += 1
-          self.logger.warn "Failed with message: #{e.message}"
-          self.logger.info "Retry #{retries}/3"
+          self.logger.warn "Rets::Client: Failed with message: #{e.message}"
+          self.logger.info "Rets::Client: Retry #{retries}/3"
           clean_setup
           retry
         else
@@ -119,7 +119,7 @@ module Rets
           result[key] = table.resolve(value.to_s)
         else
           #can't resolve just leave the value be
-          logger.warn "Can't resolve find metadata for #{key.inspect}"
+          logger.warn "Rets::Client: Can't resolve find metadata for #{key.inspect}"
         end
       end
     end
@@ -153,13 +153,13 @@ module Rets
 
         parts = Parser::Multipart.parse(response.body, boundary)
 
-        logger.debug "Found #{parts.size} parts"
+        logger.debug "Rets::Client: Found #{parts.size} parts"
 
         return parts
       else
         # fake a multipart for interface compatibility
         headers = {}
-        response.headers.each { |k,v| headers[k] = v[0] }
+        response.headers.each { |k,v| headers[k] = v }
 
         part = Parser::Multipart::Part.new(headers, response.body)
 
@@ -211,10 +211,10 @@ module Rets
 
       if @cached_metadata && (@options[:skip_metadata_uptodate_check] ||
           @cached_metadata.current?(capabilities["MetadataTimestamp"], capabilities["MetadataVersion"]))
-        logger.info "Use cached metadata"
+        logger.info "Rets::Client: Use cached metadata"
         self.metadata = @cached_metadata
       else
-        logger.info @cached_metadata ? "Cached metadata out of date" : "Cached metadata unavailable"
+        logger.info @cached_metadata ? "Rets::Client: Cached metadata out of date" : "Rets::Client: Cached metadata unavailable"
         metadata_fetcher = lambda { |type| retrieve_metadata_type(type) }
         self.metadata = Metadata::Root.new(&metadata_fetcher)
       end
@@ -297,14 +297,18 @@ module Rets
 
     def http_get(url, params=nil, extra_headers={})
       http.set_auth(url, options[:username], options[:password])
-      res = http.get(url, params, extra_headers.merge(rets_extra_headers))
+      headers = extra_headers.merge(rets_extra_headers)
+      res = http.get(url, params, headers)
+      log_http_traffic("POST", url, params, headers, res)
       ErrorChecker.check(res)
       res
     end
 
     def http_post(url, params, extra_headers = {})
       http.set_auth(url, options[:username], options[:password])
-      res = http.post(url, params, extra_headers.merge(rets_extra_headers))
+      headers = extra_headers.merge(rets_extra_headers)
+      res = http.post(url, params, headers)
+      log_http_traffic("POST", url, params, headers, res)
       ErrorChecker.check(res)
       res
     end
@@ -326,6 +330,15 @@ module Rets
       end
 
       headers
+    end
+
+    def log_http_traffic(method, url, params, headers, res)
+      return unless logger.debug?
+      logger.debug "Rets::Client >> #{method} #{url}"
+      logger.debug "Rets::Client >> params = #{params.inspect}"
+      logger.debug "Rets::Client >> headers = #{headers.inspect}"
+      logger.debug "Rets::Client << Status #{res.status_code}"
+      res.headers.each { |k, v| logger.debug "Rets::Client << #{k}: #{v}" }
     end
 
     def tries
