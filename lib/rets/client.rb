@@ -159,7 +159,7 @@ module Rets
       else
         # fake a multipart for interface compatibility
         headers = {}
-        response.headers.each { |k,v| headers[k] = v }
+        response.headers.each { |k,v| headers[k] = v[0] }
 
         part = Parser::Multipart::Part.new(headers, response.body)
 
