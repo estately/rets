@@ -1,3 +1,4 @@
+require 'logger'
 module Rets
   Session = Struct.new(:auth_digest, :capabilities, :cookies)
 
@@ -500,12 +501,10 @@ EOF
       (@tries += 1) - 1
     end
 
-    class FakeLogger
-      def fatal(*); end
-      def error(*); end
-      def warn(*);  end
-      def info(*);  end
-      def debug(*); end
+    class FakeLogger < Logger
+      def initialize
+        super("/dev/null")
+      end
     end
 
     def format_headers(headers)
