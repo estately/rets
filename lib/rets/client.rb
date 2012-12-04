@@ -506,6 +506,8 @@ EOF
       def warn(*);  end
       def info(*);  end
       def debug(*); end
+
+      def debug?(*); end
     end
 
     def format_headers(headers)
