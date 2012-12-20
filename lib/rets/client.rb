@@ -1,4 +1,5 @@
 require 'httpclient'
+require 'logger'
 
 module Rets
   class HttpError < StandardError ; end
@@ -347,12 +348,10 @@ module Rets
       (@tries += 1) - 1
     end
 
-    class FakeLogger
-      def fatal(*); end
-      def error(*); end
-      def warn(*);  end
-      def info(*);  end
-      def debug(*); end
+    class FakeLogger < Logger
+      def initialize
+        super("/dev/null")
+      end
     end
 
     class ErrorChecker
