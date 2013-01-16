@@ -56,6 +56,11 @@ class TestParserCompact < Test::Unit::TestCase
     end
   end
 
+  def test_parse_empty_document
+    rows = Rets::Parser::Compact.parse_document(EMPTY_COMPACT)
+    assert_equal [], rows
+  end
+
   def test_parse_example
     rows = Rets::Parser::Compact.parse_document(Nokogiri.parse(SAMPLE_COMPACT))
 
