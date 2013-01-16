@@ -13,7 +13,8 @@ module Rets
         parts = []
         boundary_regexp = /--#{Regexp.quote(boundary)}(--)?#{CRLF}/
 
-        raw.force_encoding 'ascii-8bit'   # WTF some RETS servers declare response body including jpeg binary is encoded in utf8
+        # WTF some RETS servers declare response body including jpeg binary is encoded in utf8
+        raw.force_encoding 'ascii-8bit' if raw.respond_to?(:force_encoding)
 
         raw.split(boundary_regexp).each do |chunk|
           header_part, body_part = chunk.split(/#{CRLF}#{WSP}*#{CRLF}/m, 2)
