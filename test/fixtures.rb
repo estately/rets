@@ -49,6 +49,12 @@ COMPACT = <<-XML
 </METADATA>
 XML
 
+
+EMPTY_COMPACT = <<-XML
+<METADATA-TABLE Resource="OpenHouse" Class="OpenHouse" Version="01.01.00000" Date="2011-07-29T12:09:16">
+</METADATA-TABLE>
+XML
+
 METADATA_UNKNOWN = <<-XML
 <?xml version="1.0"?>
 <RETS ReplyCode="0" ReplyText="Operation successful.">
