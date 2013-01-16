@@ -17,7 +17,12 @@ module Rets
           raise InvalidDelimiter, "Empty or invalid delimiter found, unable to parse."
         end
 
-        columns = doc.at("//COLUMNS").text
+        column_node = doc.at("//COLUMNS")
+        if column_node.nil?
+          columns = ''
+        else
+          columns = column_node.text
+        end
         rows    = doc.xpath("//DATA")
 
         rows.map do |data|
