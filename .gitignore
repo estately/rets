@@ -3,3 +3,5 @@ pkg/
 *.swp
 nbproject/*
 nbproject/private/
+/.rvmrc
+/Gemfile.lock
