@@ -38,6 +38,7 @@ end
 
 require 'rets/client'
 require 'rets/metadata'
+require 'rets/request_exception'
 require 'rets/parser/compact'
 require 'rets/parser/multipart'
 require 'rets/measuring_http_client'

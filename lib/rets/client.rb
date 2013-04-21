@@ -334,7 +334,7 @@ module Rets
             reply_code = (rets_element.attr("ReplyCode") || rets_element.attr("replyCode")).value.to_i
 
             if reply_code.nonzero?
-              raise InvalidRequest.new(reply_code, reply_text)
+              raise RequestException.new(reply_code, reply_text)
             else
               return
             end
