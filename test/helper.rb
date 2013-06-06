@@ -1,9 +1,9 @@
-require "test/unit"
-require "mocha"
+require "minitest"
+require "mocha/setup"
 
-require "rets"
+require_relative "../lib/rets"
 
-require "fixtures"
+require_relative "fixtures"
 
 require 'vcr'
 

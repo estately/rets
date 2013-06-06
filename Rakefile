@@ -1,5 +1,6 @@
 require 'rubygems'
 require 'hoe'
+require 'rake/testtask'
 
 Hoe.plugin :git, :doofus
 Hoe.plugin :travis
@@ -18,4 +19,9 @@ Hoe.spec 'rets' do
   ### Use markdown for changelog and readme
   self.history_file = 'CHANGELOG.md'
   self.readme_file  = 'README.md'
+end
+
+
+Rake::TestTask.new do |t|
+  t.pattern = "test/test_*.rb"
 end

@@ -1,0 +1,43 @@
+PATH
+  remote: .
+  specs:
+    rets (0.4.0.20121120222622)
+      httpclient (~> 2.3.0)
+      nokogiri (~> 1.5.2)
+
+GEM
+  remote: http://rubygems.org/
+  specs:
+    addressable (2.3.4)
+    crack (0.3.2)
+    hoe (3.6.2)
+      rake (>= 0.8, < 11.0)
+    hoe-gemspec (1.0.0)
+      hoe (>= 2.2.0)
+    httpclient (2.3.3)
+    json (1.8.0)
+    metaclass (0.0.1)
+    minitest (5.0.3)
+    mocha (0.14.0)
+      metaclass (~> 0.0.1)
+    nokogiri (1.5.9)
+    rake (10.0.4)
+    rdoc (3.12.2)
+      json (~> 1.4)
+    vcr (2.2.5)
+    webmock (1.8.11)
+      addressable (>= 2.2.7)
+      crack (>= 0.1.7)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  hoe
+  hoe-gemspec
+  minitest
+  mocha
+  rdoc (~> 3.10)
+  rets!
+  vcr (~> 2.2.2)
+  webmock (~> 1.8.0)
