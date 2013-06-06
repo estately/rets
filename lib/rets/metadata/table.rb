@@ -88,6 +88,7 @@ module Rets
           #Remove surrounding quotes
           clean_value  = v.scan(/^["']?(.*?)["']?$/).join
 
+
           lookup_type = lookup_type(clean_value)
 
           resolved_value = lookup_type ? lookup_type.long_value : nil

@@ -1,8 +1,13 @@
-require "helper"
+require_relative "helper"
 
-class TestMetadata < Test::Unit::TestCase
+class TestMetadata < MiniTest::Test
   def setup
     @root = Rets::Metadata::Root.new
+    $VERBOSE = true
+  end
+
+  def teardown
+    $VERBOSE = false
   end
 
   def test_metadata_root_fetch_sources_returns_hash_of_metadata_types
