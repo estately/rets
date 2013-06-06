@@ -1,6 +1,6 @@
 require "helper"
 
-class TestClient < Test::Unit::TestCase
+class TestClient < MiniTest::Test
 
   def setup
     @client = Rets::Client.new(:login_url => "http://example.com/login")

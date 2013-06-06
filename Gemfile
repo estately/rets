@@ -8,4 +8,5 @@ end
 
 group :testing do
   gem 'minitest'
+  gem 'mocha'
 end

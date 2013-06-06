@@ -1,6 +1,6 @@
 require "helper"
 
-class TestParserCompact < Test::Unit::TestCase
+class TestParserCompact < MiniTest::Test
   def test_parse_document_raises_on_invalid_delimiter
     assert_raise Rets::Parser::Compact::InvalidDelimiter do
       Rets::Parser::Compact.parse_document(INVALID_DELIMETER)

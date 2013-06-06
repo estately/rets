@@ -1,5 +1,5 @@
-require "test/unit"
-require "mocha"
+require "minitest"
+require "mocha/setup"
 
 require "rets"
 

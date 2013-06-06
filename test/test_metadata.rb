@@ -1,6 +1,6 @@
 require "helper"
 
-class TestMetadata < Test::Unit::TestCase
+class TestMetadata < MiniTest::Test
   def setup
     @root = Rets::Metadata::Root.new
   end
