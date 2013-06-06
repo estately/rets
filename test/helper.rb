@@ -3,7 +3,7 @@ require "mocha/setup"
 
 require "rets"
 
-require "fixtures"
+require_relative "fixtures"
 
 require 'vcr'
 

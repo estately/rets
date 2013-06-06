@@ -1,4 +1,4 @@
-require "helper"
+require_relative "helper"
 
 class TestMetadata < MiniTest::Test
   def setup

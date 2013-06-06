@@ -1,4 +1,4 @@
-require "helper"
+require_relative "helper"
 
 class TestParserMultipart < MiniTest::Test
   def test_parse_returns_multiple_parts
