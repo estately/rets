@@ -1,6 +1,6 @@
-require "helper"
+require_relative "helper"
 
-class TestClient < Test::Unit::TestCase
+class TestClient < MiniTest::Test
 
   def setup
     @client = Rets::Client.new(:login_url => "http://example.com/login")
@@ -72,14 +72,11 @@ class TestClient < Test::Unit::TestCase
 
   def test_default_logger_returns_api_compatible_silent_logger
     logger = @client.logger
-
-    assert_nothing_raised do
-      logger.fatal "foo"
-      logger.error "foo"
-      logger.warn  "foo"
-      logger.info  "foo"
-      logger.debug "foo"
-    end
+    logger.fatal "foo"
+    logger.error "foo"
+    logger.warn  "foo"
+    logger.info  "foo"
+    logger.debug "foo"
   end
 
 
@@ -96,7 +93,7 @@ class TestClient < Test::Unit::TestCase
   end
 
   def test_find_raises_on_unknown_quantity
-    assert_raise ArgumentError do
+    assert_raises ArgumentError do
       @client.find(:incorrect, :foo => :bar)
     end
   end
@@ -113,7 +110,7 @@ class TestClient < Test::Unit::TestCase
 
   def test_find_eventually_reraises_errors
     @client.stubs(:find_every).raises(Rets::AuthorizationFailure)
-    assert_raise Rets::AuthorizationFailure do
+    assert_raises Rets::AuthorizationFailure do
       @client.find(:all, :foo => :bar)
     end
   end
@@ -144,7 +141,7 @@ class TestClient < Test::Unit::TestCase
   end
 
   def test_objects_raises_on_other_arguments
-    assert_raise ArgumentError do
+    assert_raises ArgumentError do
       @client.objects(Object.new, :foo => :bar)
     end
   end
