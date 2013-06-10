@@ -1,4 +1,4 @@
-require 'helper'
+require_relative "helper"
 
 class TestLockingClient < MiniTest::Test
   def setup
