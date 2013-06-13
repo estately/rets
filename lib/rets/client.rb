@@ -276,6 +276,10 @@ module Rets
       hash
     end
 
+    def save_cookie_store(force=nil)
+      @http_client.save_cookie_store
+    end
+
     def http_get(url, params=nil, extra_headers={})
       @http_client.http_get(url, params, extra_headers)
     end
