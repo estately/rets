@@ -27,6 +27,15 @@ module Rets
       res
     end
 
+    def save_cookie_store(force=nil)
+      if options[:cookie_store]
+        if force
+          @http.cookie_manager.save_all_cookies(true, true, true)
+        else
+          @http.save_cookie_store
+        end
+      end
+    end
 
     def log_http_traffic(method, url, params, headers, res)
       return unless logger.debug?
@@ -61,16 +70,6 @@ module Rets
         return c.value if c.name.downcase == name.downcase && c.match?(URI.parse(login_url))
       end
       nil
-    end
-
-    def save_cookie_store(force=nil)
-      if options[:cookie_store]
-        if force
-          @http.cookie_manager.save_all_cookies(true, true, true)
-        else
-          @http.save_cookie_store
-        end
-      end
     end
   end
 end
