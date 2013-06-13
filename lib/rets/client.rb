@@ -277,7 +277,7 @@ module Rets
     end
 
     def save_cookie_store(force=nil)
-      @http_client.save_cookie_store
+      @http_client.save_cookie_store(force)
     end
 
     def http_get(url, params=nil, extra_headers={})

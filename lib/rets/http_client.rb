@@ -64,7 +64,6 @@ module Rets
     end
 
     def save_cookie_store(force=nil)
-      @http_client.save_cookie_store(force)
       if options[:cookie_store]
         if force
           @http.cookie_manager.save_all_cookies(true, true, true)
