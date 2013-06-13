@@ -14,7 +14,7 @@ module Rets
       headers = extra_headers.merge(rets_extra_headers)
       res = http.get(url, params, headers)
       log_http_traffic("POST", url, params, headers, res)
-      ErrorChecker.check(res)
+      Client::ErrorChecker.check(res)
       res
     end
 
@@ -23,7 +23,7 @@ module Rets
       headers = extra_headers.merge(rets_extra_headers)
       res = http.post(url, params, headers)
       log_http_traffic("POST", url, params, headers, res)
-      ErrorChecker.check(res)
+      Client::ErrorChecker.check(res)
       res
     end
 
@@ -62,34 +62,7 @@ module Rets
       end
       nil
     end
-  end
 
-  class ErrorChecker
-    def self.check(response)
-      # some RETS servers return success code in XML body but failure code 4xx in http status
-      # If xml body is present we ignore http status
-
-      if !response.body.empty?
-        begin
-          xml = Nokogiri::XML.parse(response.body, nil, nil, Nokogiri::XML::ParseOptions::STRICT)
-
-          rets_element = xml.xpath("/RETS")
-          reply_text = (rets_element.attr("ReplyText") || rets_element.attr("replyText")).value
-          reply_code = (rets_element.attr("ReplyCode") || rets_element.attr("replyCode")).value.to_i
-
-          if reply_code.nonzero?
-            raise InvalidRequest, "Got error code #{reply_code} (#{reply_text})."
-          else
-            return
-          end
-        rescue Nokogiri::XML::SyntaxError
-          #Not xml
-        end
-      end
-
-      if response.respond_to?(:ok?) && ! response.ok?
-        if response.status_code == 401
-          raise AuthorizationFailure, "HTTP status: #{response.status_code}, body: #{response.body}"
     def save_cookie_store(force=nil)
       @http_client.save_cookie_store(force)
       if options[:cookie_store]
