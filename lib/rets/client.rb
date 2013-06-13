@@ -31,7 +31,10 @@ module Rets
       @http = HTTPClient.new
       @http.set_cookie_store(options[:cookie_store]) if options[:cookie_store]
 
-      @http_client = options[:http_client] || Rets::HttpClient.new(@http, @options, @logger, @login_url)
+      @http_client = Rets::HttpClient.new(@http, @options, @logger, @login_url)
+      if options[:http_timing_stats_collector]
+        @http_client = Rets::MeasuringHttpClient.new(@http_client, options[:http_timing_stats_collector])
+      end
     end
 
     # Attempts to login by making an empty request to the URL
