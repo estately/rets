@@ -90,8 +90,13 @@ module Rets
       if response.respond_to?(:ok?) && ! response.ok?
         if response.status_code == 401
           raise AuthorizationFailure, "HTTP status: #{response.status_code}, body: #{response.body}"
+    def save_cookie_store(force=nil)
+      @http_client.save_cookie_store(force)
+      if options[:cookie_store]
+        if force
+          @http.cookie_manager.save_all_cookies(true, true, true)
         else
-          raise HttpError, "HTTP status: #{response.status_code}, body: #{response.body}"
+          @http.save_cookie_store
         end
       end
     end

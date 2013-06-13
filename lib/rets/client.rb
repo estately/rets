@@ -28,7 +28,10 @@ module Rets
 
       self.logger      = @options[:logger] || FakeLogger.new
       @cached_metadata = @options[:metadata] || nil
-      @http_client = options[:http_client] || Rets::HttpClient.new(http, @options, @logger, @login_url)
+      @http = HTTPClient.new
+      @http.set_cookie_store(options[:cookie_store]) if options[:cookie_store]
+
+      @http_client = options[:http_client] || Rets::HttpClient.new(@http, @options, @logger, @login_url)
     end
 
     # Attempts to login by making an empty request to the URL
@@ -271,24 +274,6 @@ module Rets
         each { |k,v| hash[k.strip.downcase] = v.strip }
 
       hash
-    end
-
-    def http
-      return @http if @http
-
-      @http = HTTPClient.new
-      @http.set_cookie_store(options[:cookie_store]) if options[:cookie_store]
-      @http
-    end
-
-    def save_cookie_store(force=nil)
-      if options[:cookie_store]
-        if force
-          @http.cookie_manager.save_all_cookies(true, true, true)
-        else
-          @http.save_cookie_store
-        end
-      end
     end
 
     def http_get(url, params=nil, extra_headers={})
