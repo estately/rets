@@ -33,7 +33,7 @@ module Rets
 
       @http_client = Rets::HttpClient.new(@http, @options, @logger, @login_url)
       if options[:http_timing_stats_collector]
-        @http_client = Rets::MeasuringHttpClient.new(@http_client, options[:http_timing_stats_collector])
+        @http_client = Rets::MeasuringHttpClient.new(@http_client, options[:http_timing_stats_collector], options[:http_timing_stats_prefix])
       end
     end
 
