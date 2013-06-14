@@ -35,6 +35,9 @@ module Rets
       if options[:http_timing_stats_collector]
         @http_client = Rets::MeasuringHttpClient.new(@http_client, options[:http_timing_stats_collector], options[:http_timing_stats_prefix])
       end
+      if options[:lock_around_http_requests]
+        @http_client = Rets::LockingHttpClient.new(@http_client, options.fetch(:locker), options.fetch(:lock_name), options.fetch(:lock_options))
+      end
     end
 
     # Attempts to login by making an empty request to the URL
