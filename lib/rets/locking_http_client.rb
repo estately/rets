@@ -4,7 +4,7 @@ module Rets
       @http_client = http_client
       @locker = locker
       @lock_name = lock_name
-      @options = {}
+      @options = options
     end
 
     def http_get(url, params=nil, extra_headers={})
