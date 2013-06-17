@@ -27,6 +27,7 @@ module Rets
       self.capabilities  = nil
 
       self.logger      = @options[:logger] || FakeLogger.new
+      @client_progress = ClientProgressReporter.new(self.logger)
       @cached_metadata = @options[:metadata] || nil
       @http = HTTPClient.new
       @http.set_cookie_store(options[:cookie_store]) if options[:cookie_store]
@@ -88,11 +89,11 @@ module Rets
       rescue AuthorizationFailure, InvalidRequest => e
         if retries < 3
           retries += 1
-          self.logger.warn "Rets::Client: Failed with message: #{e.message}"
-          self.logger.info "Rets::Client: Retry #{retries}/3"
+          @client_progress.find_with_retries_failed_a_retry(e, retries)
           clean_setup
           retry
         else
+          @client_progress.find_with_retries_exceeded_retry_count(e)
           raise e
         end
       end
@@ -128,7 +129,7 @@ module Rets
           result[key] = table.resolve(value.to_s)
         else
           #can't resolve just leave the value be
-          logger.warn "Rets::Client: Can't resolve find metadata for #{key.inspect}"
+          @client_progress.could_not_resolve_find_metadata(key)
         end
       end
     end
@@ -220,10 +221,10 @@ module Rets
 
       if @cached_metadata && (@options[:skip_metadata_uptodate_check] ||
           @cached_metadata.current?(capabilities["MetadataTimestamp"], capabilities["MetadataVersion"]))
-        logger.info "Rets::Client: Use cached metadata"
+        @client_progress.use_cached_metadata
         self.metadata = @cached_metadata
       else
-        logger.info @cached_metadata ? "Rets::Client: Cached metadata out of date" : "Rets::Client: Cached metadata unavailable"
+        @client_progress.bad_cached_metadata(@cached_metadata)
         metadata_fetcher = lambda { |type| retrieve_metadata_type(type) }
         self.metadata = Metadata::Root.new(&metadata_fetcher)
       end
