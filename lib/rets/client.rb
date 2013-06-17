@@ -27,7 +27,7 @@ module Rets
       self.capabilities  = nil
 
       self.logger      = @options[:logger] || FakeLogger.new
-      @client_progress = ClientProgressReporter.new(self.logger)
+      @client_progress = ClientProgressReporter.new(self.logger, options[:stats_collector], options[:stats_prefix])
       @cached_metadata = @options[:metadata] || nil
       @http = HTTPClient.new
       @http.set_cookie_store(options[:cookie_store]) if options[:cookie_store]

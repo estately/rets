@@ -1,18 +1,35 @@
 module Rets
+  class NullStatsReporter
+    def time(metric_name, &block)
+      block.call
+    end
+
+    def gauge(metric_name, measurement)
+    end
+
+    def count(metric_name, count=1)
+    end
+  end
+
   class ClientProgressReporter
-    def initialize(logger)
+    def initialize(logger, stats, stats_prefix)
       @logger = logger
+      @stats = stats || NullStatsReporter.new
+      @stats_prefix = stats_prefix
     end
 
     def find_with_retries_failed_a_retry(exception, retries)
+      @stats.count("#{@stats_prefix}.rets.find_with_retries_failed_retry")
       @logger.warn("Rets::Client: Failed with message: #{exception.message}")
       @logger.info("Rets::Client: Retry #{retries}/3")
     end
 
     def find_with_retries_exceeded_retry_count(exception)
+      @stats.count("#{@stats_prefix}.rets.find_with_retries_exceeded_retry_count")
     end
 
     def could_not_resolve_find_metadata(key)
+      @stats.count("#{@stats_prefix}.rets.could_not_resolve_find_metadata")
       @logger.warn "Rets::Client: Can't resolve find metadata for #{key.inspect}"
     end
 
