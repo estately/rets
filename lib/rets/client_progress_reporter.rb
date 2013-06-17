@@ -19,17 +19,17 @@ module Rets
     end
 
     def find_with_retries_failed_a_retry(exception, retries)
-      @stats.count("#{@stats_prefix}.rets.find_with_retries_failed_retry")
+      @stats.count("#{@stats_prefix}.find_with_retries_failed_retry")
       @logger.warn("Rets::Client: Failed with message: #{exception.message}")
       @logger.info("Rets::Client: Retry #{retries}/3")
     end
 
     def find_with_retries_exceeded_retry_count(exception)
-      @stats.count("#{@stats_prefix}.rets.find_with_retries_exceeded_retry_count")
+      @stats.count("#{@stats_prefix}find_with_retries_exceeded_retry_count")
     end
 
     def could_not_resolve_find_metadata(key)
-      @stats.count("#{@stats_prefix}.rets.could_not_resolve_find_metadata")
+      @stats.count("#{@stats_prefix}could_not_resolve_find_metadata")
       @logger.warn "Rets::Client: Can't resolve find metadata for #{key.inspect}"
     end
 
