@@ -19,7 +19,7 @@ module Rets
     end
 
     def find_with_retries_failed_a_retry(exception, retries)
-      @stats.count("#{@stats_prefix}.find_with_retries_failed_retry")
+      @stats.count("#{@stats_prefix}find_with_retries_failed_retry")
       @logger.warn("Rets::Client: Failed with message: #{exception.message}")
       @logger.info("Rets::Client: Retry #{retries}/3")
     end
