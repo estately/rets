@@ -317,6 +317,9 @@ module Rets
             xml = Nokogiri::XML.parse(response.body, nil, nil, Nokogiri::XML::ParseOptions::STRICT)
 
             rets_element = xml.xpath("/RETS")
+            if rets_element.empty?
+              return
+            end
             reply_text = (rets_element.attr("ReplyText") || rets_element.attr("replyText")).value
             reply_code = (rets_element.attr("ReplyCode") || rets_element.attr("replyCode")).value.to_i
 
