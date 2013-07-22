@@ -10,10 +10,14 @@ GEM
   specs:
     addressable (2.3.4)
     crack (0.3.2)
+    hashr (0.0.22)
     hoe (3.6.2)
       rake (>= 0.8, < 11.0)
     hoe-gemspec (1.0.0)
       hoe (>= 2.2.0)
+    hoe-travis (1.2)
+      hoe (~> 3.0)
+      travis-lint (~> 1.2)
     httpclient (2.3.3)
     json (1.8.0)
     metaclass (0.0.1)
@@ -24,6 +28,8 @@ GEM
     rake (10.0.4)
     rdoc (3.12.2)
       json (~> 1.4)
+    travis-lint (1.7.0)
+      hashr (~> 0.0.22)
     vcr (2.2.5)
     webmock (1.8.11)
       addressable (>= 2.2.7)
@@ -35,6 +41,7 @@ PLATFORMS
 DEPENDENCIES
   hoe
   hoe-gemspec
+  hoe-travis
   minitest
   mocha
   rdoc (~> 3.10)
