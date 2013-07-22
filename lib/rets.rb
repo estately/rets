@@ -9,6 +9,7 @@ module Rets
   InvalidRequest       = Class.new(ArgumentError)
   MalformedResponse    = Class.new(ArgumentError)
   UnknownResponse      = Class.new(ArgumentError)
+  NoLogout             = Class.new(ArgumentError)
 end
 
 require 'rets/client'

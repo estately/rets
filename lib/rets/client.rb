@@ -52,7 +52,10 @@ module Rets
     end
 
     def logout
-      http_get capability_url("Logout")
+      unless capabilities("Logout")
+        raise NoLogout.new('No logout method found for rets client')
+      end
+      http_get(capability_url("Logout"))
     end
 
     # Finds records.
@@ -254,7 +257,7 @@ module Rets
     end
 
     def capability_url(name)
-      val = capabilities[name]
+      val = capabilities.fetch(name)
 
       begin
         if val.downcase.match(/^https?:\/\//)
