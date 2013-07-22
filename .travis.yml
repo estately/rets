@@ -3,7 +3,7 @@ rvm:
 - 1.9.3
 before_script:
 - gem install hoe-travis --no-rdoc --no-ri
-- rake travis:before -t
+- bundle exec rake travis:before -t
 notifications:
   email:
     - opensource@estately.com
