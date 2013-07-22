@@ -5,11 +5,10 @@ require 'nokogiri'
 module Rets
   VERSION = '0.4.0'
 
-  AuthorizationFailure = Class.new(ArgumentError)
   MalformedResponse    = Class.new(ArgumentError)
   UnknownResponse      = Class.new(ArgumentError)
 
-  class AuthorizationFailure
+  class AuthorizationFailure < ArgumentError
     attr_reader :status, :body
     def initialize(status, body)
       @status = status
