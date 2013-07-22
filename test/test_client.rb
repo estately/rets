@@ -99,17 +99,17 @@ class TestClient < MiniTest::Test
   end
 
   def test_find_retries_on_errors
-    @client.stubs(:find_every).raises(Rets::AuthorizationFailure).then.raises(Rets::InvalidRequest).then.returns([])
+    @client.stubs(:find_every).raises(Rets::AuthorizationFailure.new(401, 'Not Authorized')).then.raises(Rets::InvalidRequest.new(20134, 'Not Found')).then.returns([])
     @client.find(:all, :foo => :bar)
   end
 
   def test_find_retries_on_errors_preserves_resolve
-    @client.stubs(:find_every).raises(Rets::AuthorizationFailure).then.raises(Rets::InvalidRequest).then.with({:foo => :bar}, true).returns([])
+    @client.stubs(:find_every).raises(Rets::AuthorizationFailure.new(401, 'Not Authorized')).then.raises(Rets::InvalidRequest.new(20134, 'Not Found')).then.with({:foo => :bar}, true).returns([])
     @client.find(:all, {:foo => :bar, :resolve => true})
   end
 
   def test_find_eventually_reraises_errors
-    @client.stubs(:find_every).raises(Rets::AuthorizationFailure)
+    @client.stubs(:find_every).raises(Rets::AuthorizationFailure.new(401, 'Not Authorized'))
     assert_raises Rets::AuthorizationFailure do
       @client.find(:all, :foo => :bar)
     end
