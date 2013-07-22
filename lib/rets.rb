@@ -6,9 +6,26 @@ module Rets
   VERSION = '0.4.0'
 
   AuthorizationFailure = Class.new(ArgumentError)
-  InvalidRequest       = Class.new(ArgumentError)
   MalformedResponse    = Class.new(ArgumentError)
   UnknownResponse      = Class.new(ArgumentError)
+
+  class AuthorizationFailure
+    attr_reader :status, :body
+    def initialize(status, body)
+      @status = status
+      @body = body
+      super("HTTP status: #{status} (#{body})")
+    end
+  end
+
+  class InvalidRequest < ArgumentError
+    attr_reader :error_code, :reply_text
+    def initialize(error_code, reply_text)
+      @error_code = error_code
+      @reply_text = reply_text
+      super("Got error code #{error_code} (#{reply_text})")
+    end
+  end
 end
 
 require 'rets/client'
