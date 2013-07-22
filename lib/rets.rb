@@ -7,6 +7,7 @@ module Rets
 
   MalformedResponse    = Class.new(ArgumentError)
   UnknownResponse      = Class.new(ArgumentError)
+  NoLogout             = Class.new(ArgumentError)
 
   class AuthorizationFailure < ArgumentError
     attr_reader :status, :body
