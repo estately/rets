@@ -257,7 +257,9 @@ module Rets
     end
 
     def capability_url(name)
-      val = capabilities.fetch(name)
+      val = capabilities[name] || capabilties[name.downcase]
+
+      raise UnknownCapability.new(name) unless val
 
       begin
         if val.downcase.match(/^https?:\/\//)
