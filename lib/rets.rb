@@ -26,6 +26,14 @@ module Rets
       super("Got error code #{error_code} (#{reply_text})")
     end
   end
+
+  class UnknownCapabilty < ArgumentError
+    attr_reader :capability_name
+    def initialize(capability_name)
+      @capability_name = capability_name
+      super("unknown capabilitiy #{capability_name}")
+    end
+  end
 end
 
 require 'rets/client'
