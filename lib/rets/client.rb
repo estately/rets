@@ -340,7 +340,7 @@ module Rets
 
         if response.respond_to?(:ok?) && ! response.ok?
           if response.status_code == 401
-            raise AuthorizationFailure, "HTTP status: #{response.status_code}, body: #{response.body}"
+            raise AuthorizationFailure, response.status_code, response.body
           else
             raise HttpError, "HTTP status: #{response.status_code}, body: #{response.body}"
           end
