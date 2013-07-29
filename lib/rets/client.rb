@@ -52,7 +52,7 @@ module Rets
     end
 
     def logout
-      unless capabilities("Logout")
+      unless capabilities["Logout"]
         raise NoLogout.new('No logout method found for rets client')
       end
       http_get(capability_url("Logout"))
