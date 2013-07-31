@@ -61,6 +61,11 @@ class TestParserCompact < MiniTest::Test
     assert_equal [], rows
   end
 
+  def test_get_count
+    count = Rets::Parser::Compact.get_count(COUNT_ONLY)
+    assert_equal 1234, count
+  end
+
   def test_parse_example
     rows = Rets::Parser::Compact.parse_document(Nokogiri.parse(SAMPLE_COMPACT))
 
