@@ -140,6 +140,11 @@ module Rets
       end
     end
 
+    def count(opts = {})
+      params = {"QueryType" => "DMQL2", "Format" => "COMPACT", "Count" => "2"}.merge(fixup_keys(opts))
+      res = http_post(capability_url("Search"), params)
+      Parser::Compact.get_count(res.body)
+    end
 
     # Returns an array of all objects associated with the given resource.
     def all_objects(opts = {})

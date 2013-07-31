@@ -4,12 +4,14 @@ require "optparse"
 require "pp"
 
 require "rubygems"
+
+$:.unshift File.join(File.dirname(__FILE__), '..', 'lib')
 require "rets"
 
 class RetsCli
   def self.parse(args)
 
-    actions = %w(metadata search object)
+    actions = %w(metadata search count object)
     options = {:count => 5}
 
     opts = OptionParser.new do |opts|
@@ -164,6 +166,12 @@ case options[:action]
                   :count       => COUNT.exclude,
                   :limit       => options[:limit])
 
+  when "count" then
+    pp client.count(
+              :search_type => options[:resource],
+              :class       => options[:class],
+              :query       => query)
+
   when "object" then
 
     def write_objects(parts)
@@ -191,4 +199,4 @@ case options[:action]
 
 end
 
-
+client.logout
