@@ -109,8 +109,6 @@ query   = ARGV[1]
 
 client = Rets::Client.new(options.merge(:login_url => url))
 
-COUNT = Struct.new(:exclude, :include, :only).new(0,1,2)
-
 if options[:capabilities]
   pp client.capabilities
 end
@@ -163,7 +161,7 @@ case options[:action]
                   :search_type => options[:resource],
                   :class       => options[:class],
                   :query       => query,
-                  :count       => COUNT.exclude,
+                  :count       => Rets::Client::COUNT.exclude,
                   :limit       => options[:limit])
 
   when "count" then
@@ -171,7 +169,7 @@ case options[:action]
               :search_type => options[:resource],
               :class       => options[:class],
               :query       => query,
-              :count       => COUNT.only,
+              :count       => Rets::Client::COUNT.only,
               :limit       => options[:limit])
 
   when "object" then

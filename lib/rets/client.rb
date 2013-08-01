@@ -8,6 +8,8 @@ module Rets
   class Client
     DEFAULT_OPTIONS = {}
 
+    COUNT = Struct.new(:exclude, :include, :only).new(0,1,2)
+
     attr_accessor :login_url, :options, :logger
     attr_writer   :capabilities, :metadata
 
