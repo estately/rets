@@ -108,13 +108,17 @@ module Rets
     def find_every(opts, resolve)
       params = {"QueryType" => "DMQL2", "Format" => "COMPACT"}.merge(fixup_keys(opts))
       res = http_post(capability_url("Search"), params)
-      results = Parser::Compact.parse_document res.body
 
-      if resolve
-        rets_class = find_rets_class(opts[:search_type], opts[:class])
-        decorate_results(results, rets_class)
+      if opts[:count] == COUNT.only
+        Parser::Compact.get_count(res.body)
       else
-        results
+        results = Parser::Compact.parse_document(res.body)
+        if resolve
+          rets_class = find_rets_class(opts[:search_type], opts[:class])
+          decorate_results(results, rets_class)
+        else
+          results
+        end
       end
     end
 
@@ -138,12 +142,6 @@ module Rets
           @client_progress.could_not_resolve_find_metadata(key)
         end
       end
-    end
-
-    def count(opts = {})
-      params = {"QueryType" => "DMQL2", "Format" => "COMPACT", "Count" => "2"}.merge(fixup_keys(opts))
-      res = http_post(capability_url("Search"), params)
-      Parser::Compact.get_count(res.body)
     end
 
     # Returns an array of all objects associated with the given resource.

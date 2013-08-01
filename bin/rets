@@ -167,10 +167,12 @@ case options[:action]
                   :limit       => options[:limit])
 
   when "count" then
-    pp client.count(
+    pp client.find(:all,
               :search_type => options[:resource],
               :class       => options[:class],
-              :query       => query)
+              :query       => query,
+              :count       => COUNT.only,
+              :limit       => options[:limit])
 
   when "object" then
 
