@@ -49,7 +49,7 @@ module Rets
 
       def self.get_count(xml)
         doc = Nokogiri.parse(xml.to_s)
-        doc.at("//COUNT").attr('Records').to_i rescue -1
+        doc.at("//COUNT").attr('Records').to_i
       end
     end
   end
