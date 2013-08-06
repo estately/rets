@@ -190,11 +190,7 @@ module Rets
     # resource_id  the KeyField value of the given resource instance.
     # object_id    can be "*" or a colon delimited string of integers or an array of integers.
     def object(object_id, opts = {})
-      response = case object_id
-        when String then fetch_object(object_ids, opts)
-        when Array  then fetch_object(object_ids.join(":"), opts)
-        else raise ArgumentError, "Expected instance of String or Array, but got #{object_ids.inspect}."
-      end
+      response = fetch_object(Array(object_id).join(':'), opts)
       response.body
     end
 
