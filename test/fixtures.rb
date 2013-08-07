@@ -21,6 +21,12 @@ CAPABILITIES = <<-XML
 </RETS>
 XML
 
+COUNT_ONLY = <<XML
+<RETS ReplyCode="0" ReplyText="Success">
+<COUNT Records="1234" />
+</RETS>
+XML
+
 CAPABILITIES_WITH_WHITESPACE = <<XML
 <RETS ReplyCode="0" ReplyText="Operation Successful">
 <RETS-RESPONSE>

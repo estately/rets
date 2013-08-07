@@ -4,12 +4,14 @@ require "optparse"
 require "pp"
 
 require "rubygems"
+
+$:.unshift File.join(File.dirname(__FILE__), '..', 'lib')
 require "rets"
 
 class RetsCli
   def self.parse(args)
 
-    actions = %w(metadata search object)
+    actions = %w(metadata search count object)
     options = {:count => 5}
 
     opts = OptionParser.new do |opts|
@@ -107,8 +109,6 @@ query   = ARGV[1]
 
 client = Rets::Client.new(options.merge(:login_url => url))
 
-COUNT = Struct.new(:exclude, :include, :only).new(0,1,2)
-
 if options[:capabilities]
   pp client.capabilities
 end
@@ -161,8 +161,16 @@ case options[:action]
                   :search_type => options[:resource],
                   :class       => options[:class],
                   :query       => query,
-                  :count       => COUNT.exclude,
+                  :count       => Rets::Client::COUNT.exclude,
                   :limit       => options[:limit])
+
+  when "count" then
+    pp client.find(:all,
+              :search_type => options[:resource],
+              :class       => options[:class],
+              :query       => query,
+              :count       => Rets::Client::COUNT.only,
+              :limit       => options[:limit])
 
   when "object" then
 
@@ -191,4 +199,4 @@ case options[:action]
 
 end
 
-
+client.logout
