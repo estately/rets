@@ -188,9 +188,9 @@ module Rets
     # resource     RETS resource as defined in the resource metadata.
     # object_type  an object type defined in the object metadata.
     # resource_id  the KeyField value of the given resource instance.
-    # object_id    can be "*", or a comma delimited string of one or more integers.
+    # object_id    can be "*" or a colon delimited string of integers or an array of integers.
     def object(object_id, opts = {})
-      response = fetch_object(object_id, opts)
+      response = fetch_object(Array(object_id).join(':'), opts)
       response.body
     end
 
