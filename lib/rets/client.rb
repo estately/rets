@@ -8,6 +8,8 @@ module Rets
   class Client
     DEFAULT_OPTIONS = {}
 
+    COUNT = Struct.new(:exclude, :include, :only).new(0,1,2)
+
     attr_accessor :login_url, :options, :logger
     attr_writer   :capabilities, :metadata
 
@@ -108,13 +110,17 @@ module Rets
     def find_every(opts, resolve)
       params = {"QueryType" => "DMQL2", "Format" => "COMPACT"}.merge(fixup_keys(opts))
       res = http_post(capability_url("Search"), params)
-      results = Parser::Compact.parse_document res.body
 
-      if resolve
-        rets_class = find_rets_class(opts[:search_type], opts[:class])
-        decorate_results(results, rets_class)
+      if opts[:count] == COUNT.only
+        Parser::Compact.get_count(res.body)
       else
-        results
+        results = Parser::Compact.parse_document(res.body)
+        if resolve
+          rets_class = find_rets_class(opts[:search_type], opts[:class])
+          decorate_results(results, rets_class)
+        else
+          results
+        end
       end
     end
 
@@ -139,7 +145,6 @@ module Rets
         end
       end
     end
-
 
     # Returns an array of all objects associated with the given resource.
     def all_objects(opts = {})

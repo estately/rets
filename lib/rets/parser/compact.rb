@@ -46,6 +46,11 @@ module Rets
         hash = Hash[*zipped_key_values.flatten]
         hash.reject { |key, value| key.empty? && value.to_s.empty? }
       end
+
+      def self.get_count(xml)
+        doc = Nokogiri.parse(xml.to_s)
+        doc.at("//COUNT").attr('Records').to_i
+      end
     end
   end
 end
