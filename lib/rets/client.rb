@@ -262,7 +262,7 @@ module Rets
     end
 
     def capability_url(name)
-      val = capabilities[name] || capabilties[name.downcase]
+      val = capabilities[name] || capabilities[name.downcase]
 
       raise UnknownCapability.new(name) unless val
 
