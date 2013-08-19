@@ -30,13 +30,13 @@ module Rets
 
       self.logger      = @options[:logger] || FakeLogger.new
       @client_progress = ClientProgressReporter.new(self.logger, options[:stats_collector], options[:stats_prefix])
-      @cached_metadata = @options[:metadata] || nil
+      @cached_metadata = @options[:metadata]
       @http = HTTPClient.new
       @http.set_cookie_store(options[:cookie_store]) if options[:cookie_store]
 
       @http_client = Rets::HttpClient.new(@http, @options, @logger, @login_url)
       if options[:http_timing_stats_collector]
-        @http_client = Rets::MeasuringHttpClient.new(@http_client, options[:http_timing_stats_collector], options[:http_timing_stats_prefix])
+        @http_client = Rets::MeasuringHttpClient.new(@http_client, options.fetch(:http_timing_stats_collector), options.fetch(:http_timing_stats_prefix))
       end
       if options[:lock_around_http_requests]
         @http_client = Rets::LockingHttpClient.new(@http_client, options.fetch(:locker), options.fetch(:lock_name), options.fetch(:lock_options))
@@ -125,7 +125,7 @@ module Rets
     end
 
     def find_rets_class(resource_name, rets_class_name)
-      metadata.build_tree[resource_name].find_rets_class(rets_class_name)
+      metadata.build_tree.fetch(resource_name).find_rets_class(rets_class_name)
     end
 
     def decorate_results(results, rets_class)
@@ -201,10 +201,10 @@ module Rets
 
     def fetch_object(object_id, opts = {})
       params = {
-        "Resource" => opts[:resource],
-        "Type"     => opts[:object_type],
-        "ID"       => "#{opts[:resource_id]}:#{object_id}",
-        "Location" => opts[:location] || 0
+        "Resource" => opts.fetch(:resource),
+        "Type"     => opts.fetch(:object_type),
+        "ID"       => "#{opts.fetch(:resource_id)}:#{object_id}",
+        "Location" => opts.fetch(:location, 0)
       }
 
       extra_headers = {
