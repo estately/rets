@@ -27,7 +27,7 @@ module Rets
     end
   end
 
-  class UnknownCapabilty < ArgumentError
+  class UnknownCapability < ArgumentError
     attr_reader :capability_name
     def initialize(capability_name)
       @capability_name = capability_name
