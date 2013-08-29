@@ -67,7 +67,9 @@ module Rets
 
       def print_tree
         puts "    LookupTable: #{name}"
-
+        puts "      LongName: #{long_name}"
+        puts "      LookupName: #{lookup_name}"
+        puts "      Lookup Values:"
         lookup_types.each(&:print_tree)
       end
 
