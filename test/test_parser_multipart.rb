@@ -32,7 +32,7 @@ class TestParserMultipart < MiniTest::Test
   def test_parse_with_error
     raw = "\r\n--89467f8e0c6b48158c8f1883910212ec\r\nContent-Type: text/xml\r\nContent-ID: foo\r\nObject-ID: *\r\n\r\n<RETS ReplyCode=\"20403\" ReplyText=\"No Object Found\" />\r\n\r\n--89467f8e0c6b48158c8f1883910212ec--\r\n"
     boundary = "89467f8e0c6b48158c8f1883910212ec"
-    assert_raise Rets::RequestException do
+    assert_raises Rets::RequestException do
       Rets::Parser::Multipart.parse(raw, boundary)
     end
   end

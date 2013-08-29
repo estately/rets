@@ -34,11 +34,22 @@ module Rets
       super("unknown capabilitiy #{capability_name}")
     end
   end
+
+  class RequestException < StandardError
+    attr_accessor :response_code, :response_text
+    def initialize(response_code, response_text)
+      @response_code = response_code
+      @response_text = response_text
+    end
+
+    def message
+      "Got error code #{response_code} (#{response_text})."
+    end
+  end
 end
 
 require 'rets/client'
 require 'rets/metadata'
-require 'rets/request_exception'
 require 'rets/parser/compact'
 require 'rets/parser/multipart'
 require 'rets/measuring_http_client'

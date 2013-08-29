@@ -3,7 +3,7 @@ PATH
   specs:
     rets (0.4.0.20121120222622)
       httpclient (~> 2.3.0)
-      nokogiri (~> 1.5.2)
+      nokogiri (>= 1.5.2)
 
 GEM
   remote: https://rubygems.org/
@@ -18,13 +18,15 @@ GEM
     hoe-travis (1.2)
       hoe (~> 3.0)
       travis-lint (~> 1.2)
-    httpclient (2.3.3)
+    httpclient (2.3.4.1)
     json (1.8.0)
     metaclass (0.0.1)
+    mini_portile (0.5.1)
     minitest (5.0.3)
     mocha (0.14.0)
       metaclass (~> 0.0.1)
-    nokogiri (1.5.9)
+    nokogiri (1.6.0)
+      mini_portile (~> 0.5.0)
     rake (10.0.4)
     rdoc (3.12.2)
       json (~> 1.4)
