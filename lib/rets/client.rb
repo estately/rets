@@ -125,7 +125,7 @@ module Rets
     end
 
     def find_rets_class(resource_name, rets_class_name)
-      metadata.build_tree.fetch(resource_name).find_rets_class(rets_class_name)
+      metadata.build_tree[resource_name].find_rets_class(rets_class_name)
     end
 
     def decorate_results(results, rets_class)
