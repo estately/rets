@@ -1,3 +1,12 @@
+### 0.5.0 / 2013-09-05
+
+* feature: Allow client.count to get integer count
+* feature: Allow for downcased capability names
+* fix: Handle the rets element being empty
+* feature: Instrument rets client with stats reporting
+* feature: Add a locking client
+* feature: Support Basic Authentication
+
 ### 0.4.0 / 2012-08-29
 
 * fix: update authentication header to uri matches path
