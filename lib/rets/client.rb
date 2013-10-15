@@ -48,6 +48,9 @@ module Rets
     # RETS server provides, per http://retsdoc.onconfluence.com/display/rets172/4.10+Capability+URL+List.
     def login
       res = http_get(login_url)
+      unless res.status_code == 200
+        raise UnknownResponse, "bad response to login, expected a 200, but got #{res.status_code}. Body was #{res.body}."
+      end
       self.capabilities = extract_capabilities(Nokogiri.parse(res.body))
       raise UnknownResponse, "Cannot read rets server capabilities." unless @capabilities
       @capabilities
