@@ -5,6 +5,10 @@ Rakefile
 bin/rets
 lib/rets.rb
 lib/rets/client.rb
+lib/rets/client_progress_reporter.rb
+lib/rets/http_client.rb
+lib/rets/locking_http_client.rb
+lib/rets/measuring_http_client.rb
 lib/rets/metadata.rb
 lib/rets/metadata/containers.rb
 lib/rets/metadata/lookup_type.rb
