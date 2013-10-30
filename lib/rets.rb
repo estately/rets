@@ -31,7 +31,7 @@ module Rets
     attr_reader :capability_name
     def initialize(capability_name)
       @capability_name = capability_name
-      super("unknown capabilitiy #{capability_name}")
+      super("unknown capability #{capability_name}")
     end
   end
 end
