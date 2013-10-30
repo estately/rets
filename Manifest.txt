@@ -21,6 +21,7 @@ lib/rets/parser/multipart.rb
 test/fixtures.rb
 test/helper.rb
 test/test_client.rb
+test/test_locking_http_client.rb
 test/test_metadata.rb
 test/test_parser_compact.rb
 test/test_parser_multipart.rb
