@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    rets (0.4.0.20121120222622)
+    rets (0.5.1.20131030161146)
       httpclient (~> 2.3.0)
       nokogiri (~> 1.5.2)
 
@@ -18,15 +18,15 @@ GEM
     hoe-travis (1.2)
       hoe (~> 3.0)
       travis-lint (~> 1.2)
-    httpclient (2.3.3)
+    httpclient (2.3.4.1)
     json (1.8.0)
     metaclass (0.0.1)
     minitest (5.0.3)
     mocha (0.14.0)
       metaclass (~> 0.0.1)
-    nokogiri (1.5.9)
+    nokogiri (1.5.10)
     rake (10.0.4)
-    rdoc (3.12.2)
+    rdoc (4.0.1)
       json (~> 1.4)
     travis-lint (1.7.0)
       hashr (~> 0.0.22)
@@ -44,7 +44,7 @@ DEPENDENCIES
   hoe-travis
   minitest
   mocha
-  rdoc (~> 3.10)
+  rdoc (~> 4.0)
   rets!
   vcr (~> 2.2.2)
   webmock (~> 1.8.0)
