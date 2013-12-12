@@ -31,7 +31,11 @@ module Rets
       self.logger      = @options[:logger] || FakeLogger.new
       @client_progress = ClientProgressReporter.new(self.logger, options[:stats_collector], options[:stats_prefix])
       @cached_metadata = @options[:metadata]
-      @http = HTTPClient.new
+      if @options[:http_proxy]
+        @http = HTTPClient.new(options.fetch(:http_proxy))
+      else
+        @http = HTTPClient.new
+      end
       @http.set_cookie_store(options[:cookie_store]) if options[:cookie_store]
 
       @http_client = Rets::HttpClient.new(@http, @options, @logger, @login_url)
