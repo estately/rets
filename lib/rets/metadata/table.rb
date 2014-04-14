@@ -33,6 +33,7 @@ module Rets
         puts "      StandardName: #{ table_fragment["StandardName"] }"
         puts "      Units: #{ table_fragment["Units"] }"
         puts "      Searchable: #{ table_fragment["Searchable"] }"
+        puts "      Required: #{table_fragment['Required']}"
       end
 
       def resolve(value)
@@ -67,6 +68,13 @@ module Rets
 
       def print_tree
         puts "    LookupTable: #{name}"
+        puts "      Required: #{table_fragment['Required']}"
+        puts "      Searchable: #{ table_fragment["Searchable"] }"
+        puts "      Units: #{ table_fragment["Units"] }"
+        puts "      ShortName: #{ table_fragment["ShortName"] }"
+        puts "      LongName: #{ table_fragment["LongName"] }"
+        puts "      StandardName: #{ table_fragment["StandardName"] }"
+        puts "      Types:"
 
         lookup_types.each(&:print_tree)
       end
