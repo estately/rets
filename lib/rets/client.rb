@@ -234,11 +234,19 @@ module Rets
       fixed_hash
     end
 
+    def metadata_timestamp
+      capabilities['MetadataTimestamp'] || capabilities['metadatatimestamp']
+    end
+
+    def metadata_version
+      capabilities['MetadataVersion'] || capabilities['metadataversion']
+    end
+
     def metadata
       return @metadata if @metadata
 
       if @cached_metadata && (@options[:skip_metadata_uptodate_check] ||
-          @cached_metadata.current?(capabilities["MetadataTimestamp"], capabilities["MetadataVersion"]))
+          @cached_metadata.current?(metadata_timestamp, metadata_version))
         @client_progress.use_cached_metadata
         self.metadata = @cached_metadata
       else
