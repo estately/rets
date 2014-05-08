@@ -257,7 +257,7 @@ module Rets
       res.body
     end
 
-    # The capabilies as provided by the RETS server during login.
+    # The capabilities as provided by the RETS server during login.
     #
     # Currently, only the path in the endpoint URLs is used[1]. Host,
     # port, other details remaining constant with those provided to
