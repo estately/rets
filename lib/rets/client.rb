@@ -61,7 +61,7 @@ module Rets
     end
 
     def logout
-      unless capabilities["Logout"]
+      unless capabilities["logout"]
         raise NoLogout.new('No logout method found for rets client')
       end
       http_get(capability_url("Logout"))
@@ -238,7 +238,7 @@ module Rets
       return @metadata if @metadata
 
       if @cached_metadata && (@options[:skip_metadata_uptodate_check] ||
-          @cached_metadata.current?(capabilities["MetadataTimestamp"], capabilities["MetadataVersion"]))
+          @cached_metadata.current?(capabilities['metadatatimestamp'], capabilities['metadataversion']))
         @client_progress.use_cached_metadata
         self.metadata = @cached_metadata
       else
@@ -257,7 +257,7 @@ module Rets
       res.body
     end
 
-    # The capabilies as provided by the RETS server during login.
+    # The capabilities as provided by the RETS server during login.
     #
     # Currently, only the path in the endpoint URLs is used[1]. Host,
     # port, other details remaining constant with those provided to
