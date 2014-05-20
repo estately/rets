@@ -210,4 +210,18 @@ class TestClient < MiniTest::Test
     assert_equal response, result
   end
 
+  def test_clean_setup_with_proxy_auth
+    @login_url = 'http://example.com/login'
+    @proxy_url = 'http://example.com/proxy'
+    @proxy_username = 'username'
+    @proxy_password = 'password'
+    HTTPClient.any_instance.expects(:set_proxy_auth).with(@proxy_username, @proxy_password)
+
+    @client = Rets::Client.new(
+      login_url: @login_url,
+      http_proxy: @proxy_url,
+      proxy_username: @proxy_username,
+      proxy_password: @proxy_password
+    )
+  end
 end

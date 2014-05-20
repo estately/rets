@@ -33,6 +33,10 @@ module Rets
       @cached_metadata = @options[:metadata]
       if @options[:http_proxy]
         @http = HTTPClient.new(options.fetch(:http_proxy))
+
+        if @options[:proxy_username]
+          @http.set_proxy_auth(options.fetch(:proxy_username), options.fetch(:proxy_password))
+        end
       else
         @http = HTTPClient.new
       end
