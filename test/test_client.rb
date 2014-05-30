@@ -210,6 +210,14 @@ class TestClient < MiniTest::Test
     assert_equal response, result
   end
 
+  def test_clean_setup_with_receive_timeout
+   HTTPClient.any_instance.expects(:receive_timeout=).with(1234)
+   @client = Rets::Client.new(
+       login_url: 'http://example.com/login',
+       receive_timeout: 1234
+   )
+  end
+
   def test_clean_setup_with_proxy_auth
     @login_url = 'http://example.com/login'
     @proxy_url = 'http://example.com/proxy'
@@ -218,10 +226,11 @@ class TestClient < MiniTest::Test
     HTTPClient.any_instance.expects(:set_proxy_auth).with(@proxy_username, @proxy_password)
 
     @client = Rets::Client.new(
-      login_url: @login_url,
-      http_proxy: @proxy_url,
-      proxy_username: @proxy_username,
-      proxy_password: @proxy_password
+        login_url: @login_url,
+        http_proxy: @proxy_url,
+        proxy_username: @proxy_username,
+        proxy_password: @proxy_password
     )
   end
+
 end

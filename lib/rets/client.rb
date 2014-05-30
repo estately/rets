@@ -40,6 +40,11 @@ module Rets
       else
         @http = HTTPClient.new
       end
+
+      if @options[:receive_timeout]
+        @http.receive_timeout = @options[:receive_timeout]
+      end
+
       @http.set_cookie_store(options[:cookie_store]) if options[:cookie_store]
 
       @http_client = Rets::HttpClient.new(@http, @options, @logger, @login_url)
