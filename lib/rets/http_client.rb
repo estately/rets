@@ -32,6 +32,8 @@ module Rets
     end
 
     def log_http_traffic(method, url, params, headers, &block)
+      # optimization, we don't want to compute log params
+      # if logging is off
       if logger.debug?
         logger.debug "Rets::Client >> #{method} #{url}"
         logger.debug "Rets::Client >> params = #{params.inspect}"
@@ -40,6 +42,9 @@ module Rets
 
       res = block.call
 
+      # optimization, we don't want to compute log params
+      # if logging is off, especially when there is a loop just
+      # for logging
       if logger.debug?
         logger.debug "Rets::Client << Status #{res.status_code}"
         res.headers.each { |k, v| logger.debug "Rets::Client << #{k}: #{v}" }
