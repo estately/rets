@@ -75,7 +75,7 @@ module Rets
       end
       http_get(capability_url("Logout"))
     rescue UnknownResponse => e
-      unless e.message.match?(/expected a 200, but got 401/)
+      unless e.message.match(/expected a 200, but got 401/)
         raise e
       end
     end
