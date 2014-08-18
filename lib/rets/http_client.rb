@@ -7,6 +7,7 @@ module Rets
       @options = options
       @logger = logger
       @login_url = login_url
+      @options.fetch(:ca_certs, []).each {|c| @http.ssl_config.add_trust_ca(c) }
     end
 
     def http_get(url, params=nil, extra_headers={})
