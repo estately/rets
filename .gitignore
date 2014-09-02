@@ -4,3 +4,5 @@ pkg/
 nbproject/*
 nbproject/private/
 /.rvmrc
+/.ruby-version
+/.ruby-gemset
