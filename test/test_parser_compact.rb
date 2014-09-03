@@ -67,7 +67,7 @@ class TestParserCompact < MiniTest::Test
   end
 
   def test_get_count_with_no_matching_records
-    count = Rets::Parser::Compact.get_count(NO_MATCHING_RECORDS)
+    count = Rets::Parser::Compact.get_count(RETS_STATUS_NO_MATCHING_RECORDS)
     assert_equal 0, count
   end
 
