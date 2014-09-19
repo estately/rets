@@ -1,6 +1,7 @@
 module Rets
   module Metadata
     class Resource
+      class MissingRetsClass < RuntimeError; end
       attr_accessor :rets_classes
       attr_accessor :lookup_types
       attr_accessor :key_field
@@ -24,7 +25,12 @@ module Rets
       end
 
       def self.find_rets_classes(metadata, resource)
-        metadata[:class].detect { |c| c.resource == resource.id }.classes
+        class_container = metadata[:class].detect { |c| c.resource == resource.id }
+        if class_container.nil?
+          raise MissingRetsClass.new("No Metadata classes for #{resource.id}")
+        else
+          class_container.classes
+        end
       end
 
       def self.build_lookup_tree(resource, metadata)
@@ -52,12 +58,15 @@ module Rets
         end
       end
 
-      def self.build(resource_fragment, metadata)
+      def self.build(resource_fragment, metadata, logger)
         resource = new(resource_fragment)
 
         resource.lookup_types = build_lookup_tree(resource, metadata)
         resource.rets_classes = build_classes(resource, metadata)
         resource
+      rescue MissingRetsClass => e
+        logger.warn(e.message)
+        nil
       end
 
       def print_tree
