@@ -59,10 +59,6 @@ module Rets
         sources
       end
 
-      def marshal_load(sources)
-        self.sources = sources
-      end
-
       def version
         metadata_types[:system].first.version
       end
