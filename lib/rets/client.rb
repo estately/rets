@@ -339,6 +339,13 @@ module Rets
 
     class ErrorChecker
       def self.check(response)
+        # some RETS servers returns HTTP code 412 when session cookie expired, yet the response body
+        # passes XML check. We need to special case for this situation.
+        # This method is also called from multipart.rb where there are headers and body but no status_code
+        if response.respond_to?(:status_code) && response.status_code == 412
+          raise HttpError, "HTTP status: #{response.status_code}, body: #{response.body}"
+        end
+
         # some RETS servers return success code in XML body but failure code 4xx in http status
         # If xml body is present we ignore http status
 
