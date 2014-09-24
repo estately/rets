@@ -257,7 +257,10 @@ module Rets
       else
         @client_progress.bad_cached_metadata(@cached_metadata)
 
-        raw_metadata = Hash[*Metadata::METADATA_TYPES.map {|type| [type, retrieve_metadata_type(type)] }.flatten]
+        raw_metadata = {}
+        Metadata::METADATA_TYPES.each {|type|
+          raw_metadata[type] = retrieve_metadata_type(type)
+        }
         self.metadata = Metadata::Root.new(raw_metadata)
       end
     end
