@@ -47,23 +47,14 @@ module Rets
       # Sources are the raw xml documents fetched for each metadata type
       # they are stored as a hash with the type names as their keys
       # and the raw xml as the values
-      attr_accessor :sources
+      attr_reader :sources
 
       # fetcher is a proc that inverts control to the client to retrieve metadata
       # types
-      def initialize(&fetcher)
+      def initialize(sources)
         @tree = nil
         @metadata_types = nil # TODO think up a better name ... containers?
-        @sources = {}
-
-        # allow Root's to be built with no fetcher. Makes for easy testing
-        return unless block_given?
-
-        fetch_sources(&fetcher)
-      end
-
-      def fetch_sources(&fetcher)
-        self.sources = Hash[*METADATA_TYPES.map {|type| [type, fetcher.call(type)] }.flatten]
+        @sources = sources
       end
 
       def marshal_dump
