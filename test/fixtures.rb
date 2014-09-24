@@ -27,6 +27,13 @@ COUNT_ONLY = <<XML
 </RETS>
 XML
 
+RETS_STATUS_NO_MATCHING_RECORDS = <<XML
+<?xml version="1.0"?>
+<RETS ReplyCode="0" ReplyText="Operation Successful">
+<RETS-STATUS ReplyCode="20201" ReplyText="No matching records were found" />
+</RETS>
+XML
+
 CAPABILITIES_WITH_WHITESPACE = <<XML
 <RETS ReplyCode="0" ReplyText="Operation Successful">
 <RETS-RESPONSE>

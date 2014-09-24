@@ -66,6 +66,11 @@ class TestParserCompact < MiniTest::Test
     assert_equal 1234, count
   end
 
+  def test_get_count_with_no_matching_records
+    count = Rets::Parser::Compact.get_count(RETS_STATUS_NO_MATCHING_RECORDS)
+    assert_equal 0, count
+  end
+
   def test_parse_example
     rows = Rets::Parser::Compact.parse_document(Nokogiri.parse(SAMPLE_COMPACT))
 
