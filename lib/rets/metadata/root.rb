@@ -49,8 +49,6 @@ module Rets
       # and the raw xml as the values
       attr_reader :sources
 
-      # fetcher is a proc that inverts control to the client to retrieve metadata
-      # types
       def initialize(sources)
         @tree = nil
         @metadata_types = nil # TODO think up a better name ... containers?
@@ -78,11 +76,11 @@ module Rets
       # version was published, or a version number. These values may or may
       # not exist on any given rets server.
       def current?(current_timestamp, current_version)
-	if !current_version.to_s.empty? && !version.to_s.empty?
-	  current_version == version 
-	else
+        if !current_version.to_s.empty? && !version.to_s.empty?
+          current_version == version
+        else
           current_timestamp ? current_timestamp == date : true
-	end
+        end
       end
 
       def build_tree
