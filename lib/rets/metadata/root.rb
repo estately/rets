@@ -49,6 +49,10 @@ module Rets
       # and the raw xml as the values
       attr_accessor :sources
 
+      # Metadata can be unmarshalled from cache. @logger is not set during that process, constructor is not called.
+      # Client code must set it after unmarshalling.
+      attr_accessor :logger
+
       # fetcher is a proc that inverts control to the client to retrieve metadata
       # types
       def initialize(logger, &fetcher)
@@ -89,7 +93,7 @@ module Rets
       # not exist on any given rets server.
       def current?(current_timestamp, current_version)
 	if !current_version.to_s.empty? && !version.to_s.empty?
-	  current_version == version 
+	  current_version == version
 	else
           current_timestamp ? current_timestamp == date : true
 	end
