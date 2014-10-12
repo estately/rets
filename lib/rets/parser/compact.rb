@@ -49,8 +49,14 @@ module Rets
 
       def self.get_count(xml)
         doc = Nokogiri.parse(xml.to_s)
-        doc.at("//COUNT").attr('Records').to_i
+        if node = doc.at("//COUNT")
+          return node.attr('Records').to_i
+        elsif node = doc.at("//RETS-STATUS")
+          # Handle <RETS-STATUS ReplyCode="20201" ReplyText="No matching records were found" />
+          return 0 if node.attr('ReplyCode') == '20201'
+        end
       end
+
     end
   end
 end

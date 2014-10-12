@@ -256,8 +256,7 @@ module Rets
         self.metadata = @cached_metadata
       else
         @client_progress.bad_cached_metadata(@cached_metadata)
-
-        self.metadata = Metadata::Root.new(retrieve_metadata)
+        self.metadata = Metadata::Root.new(logger, retrieve_metadata)
       end
     end
 

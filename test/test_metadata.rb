@@ -1,8 +1,9 @@
 require_relative "helper"
+require 'logger'
 
 class TestMetadata < MiniTest::Test
   def setup
-    @root = Rets::Metadata::Root.new({})
+    @root = Rets::Metadata::Root.new(Logger.new(STDOUT), {})
     $VERBOSE = true
   end
 
@@ -94,7 +95,7 @@ class TestMetadata < MiniTest::Test
 
   def test_metadata_root_metadata_types_constructs_a_hash_of_metadata_types_from_sources
     test_sources = { "X" => "Y", "Z" => "W" }
-    root = Rets::Metadata::Root.new(test_sources)
+    root = Rets::Metadata::Root.new(stub(:logger), test_sources)
     root.stubs(:build_containers => "Y--")
     Nokogiri.stubs(:parse => "Y-")
 
@@ -195,10 +196,28 @@ class TestMetadata < MiniTest::Test
     Rets::Metadata::Resource.stubs(:build_lookup_tree => lookup_types)
     Rets::Metadata::Resource.stubs(:build_classes => classes)
 
-    resource = Rets::Metadata::Resource.build(fragment, metadata)
+    resource = Rets::Metadata::Resource.build(fragment, metadata, Logger.new(STDOUT))
 
     assert_equal(lookup_types, resource.lookup_types)
     assert_equal(classes, resource.rets_classes)
+  end
+
+  def test_resource_build_with_incomplete_classes
+    fragment = { "ResourceID" => "test" }
+
+    lookup_types = stub(:lookup_types)
+    metadata = stub(:metadata)
+
+    Rets::Metadata::Resource.stubs(:build_lookup_tree => lookup_types)
+    Rets::Metadata::Resource.stubs(:build_classes).raises(Rets::Metadata::Resource::MissingRetsClass)
+
+    error_log = StringIO.new
+    resource = Rets::Metadata::Resource.build(fragment, metadata, Logger.new(error_log))
+
+    error_log.rewind
+    error_msg = error_log.read
+    assert error_msg.include?('MissingRetsClass')
+    assert_equal(nil, resource)
   end
 
   def test_resource_find_lookup_containers
@@ -424,7 +443,7 @@ class TestMetadata < MiniTest::Test
 
   def test_root_can_be_serialized
     sources = { :x => "a" }
-    root = Rets::Metadata::Root.new(sources)
+    root = Rets::Metadata::Root.new(stub(:lgoger), sources)
     assert_equal sources, root.marshal_dump
   end
 end

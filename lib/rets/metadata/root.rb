@@ -49,7 +49,14 @@ module Rets
       # and the raw xml as the values
       attr_reader :sources
 
-      def initialize(sources)
+      # Metadata can be unmarshalled from cache. @logger is not set during that process, constructor is not called.
+      # Client code must set it after unmarshalling.
+      attr_reader :logger
+
+      # fetcher is a proc that inverts control to the client to retrieve metadata
+      # types
+      def initialize(logger, sources)
+        @logger = logger
         @tree = nil
         @metadata_types = nil # TODO think up a better name ... containers?
         @sources = sources
@@ -86,8 +93,9 @@ module Rets
 
         resource_containers.each do |resource_container|
           resource_container.rows.each do |resource_fragment|
-            resource = Resource.build(resource_fragment, metadata_types)
-            tree[resource.id.downcase] = resource
+            resource = Resource.build(resource_fragment, metadata_types, @logger)
+            #some mlses list resource types without an associated data, throw those away
+            tree[resource.id.downcase] = resource if resource
           end
         end
 
