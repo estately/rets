@@ -443,7 +443,7 @@ class TestMetadata < MiniTest::Test
 
   def test_root_can_be_serialized
     sources = { :x => "a" }
-    root = Rets::Metadata::Root.new(stub(:lgoger), sources)
+    root = Rets::Metadata::Root.new(stub(:logger), sources)
     assert_equal sources, root.marshal_dump
   end
 
