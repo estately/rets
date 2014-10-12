@@ -446,4 +446,14 @@ class TestMetadata < MiniTest::Test
     root = Rets::Metadata::Root.new(stub(:lgoger), sources)
     assert_equal sources, root.marshal_dump
   end
+
+  def test_root_can_be_unserialized
+    logger = stub(:logger)
+    sources = { :x => "a" }
+
+    root_to_serialize = Rets::Metadata::Root.new(logger, sources)
+    new_root = Rets::Metadata::Root.new(logger, root_to_serialize.marshal_dump)
+
+    assert_equal root_to_serialize.marshal_dump, new_root.marshal_dump
+  end
 end
