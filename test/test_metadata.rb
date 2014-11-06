@@ -3,29 +3,12 @@ require 'logger'
 
 class TestMetadata < MiniTest::Test
   def setup
-    @root = Rets::Metadata::Root.new(Logger.new(STDOUT))
+    @root = Rets::Metadata::Root.new(Logger.new(STDOUT), {})
     $VERBOSE = true
   end
 
   def teardown
     $VERBOSE = false
-  end
-
-  def test_metadata_root_fetch_sources_returns_hash_of_metadata_types
-    types = []
-    fake_fetcher = lambda do |type|
-      types << type
-    end
-
-    @root.fetch_sources(&fake_fetcher)
-
-    assert_equal(Rets::Metadata::METADATA_TYPES, types)
-  end
-
-  def test_metadata_root_intialized_with_block
-    external = false
-    Rets::Metadata::Root.new(Logger.new(STDOUT)) { |source| external = true }
-    assert external
   end
 
   def test_metadata_root_build_tree
@@ -112,10 +95,11 @@ class TestMetadata < MiniTest::Test
 
   def test_metadata_root_metadata_types_constructs_a_hash_of_metadata_types_from_sources
     test_sources = { "X" => "Y", "Z" => "W" }
-    @root.stubs(:sources => test_sources, :build_containers => "Y--")
-    @root.metadata_types = nil
+    root = Rets::Metadata::Root.new(stub(:logger), test_sources)
+    root.stubs(:build_containers => "Y--")
     Nokogiri.stubs(:parse => "Y-")
-    assert_equal({:x => "Y--", :z => "Y--"}, @root.metadata_types)
+
+    assert_equal({:x => "Y--", :z => "Y--"}, root.metadata_types)
   end
 
   def test_metadata_root_build_containers_selects_correct_tags
@@ -459,18 +443,17 @@ class TestMetadata < MiniTest::Test
 
   def test_root_can_be_serialized
     sources = { :x => "a" }
-
-    @root.sources = sources
-
-    assert_equal sources, @root.marshal_dump
+    root = Rets::Metadata::Root.new(stub(:logger), sources)
+    assert_equal sources, root.marshal_dump
   end
 
   def test_root_can_be_unserialized
+    logger = stub(:logger)
     sources = { :x => "a" }
 
-    @root.marshal_load(sources)
+    root_to_serialize = Rets::Metadata::Root.new(logger, sources)
+    new_root = Rets::Metadata::Root.new(logger, root_to_serialize.marshal_dump)
 
-    assert_equal sources, @root.sources
+    assert_equal root_to_serialize.marshal_dump, new_root.marshal_dump
   end
-
 end

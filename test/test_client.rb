@@ -37,21 +37,23 @@ class TestClient < MiniTest::Test
   end
 
   def test_metadata_when_not_initialized_with_metadata
+    new_raw_metadata = stub(:new_raw_metadata)
+
     client = Rets::Client.new(:login_url => "http://example.com")
-    Rets::Metadata::Root.expects(:new)
-    client.metadata
+    client.stubs(:retrieve_metadata).returns(new_raw_metadata)
+
+    assert_same new_raw_metadata, client.metadata.marshal_dump
   end
 
-  def test_initialize_with_old_metadata_cached_gets_new_metadata
+  def test_initialize_with_old_metadata_cached_contstructs_new_metadata_from_request
     metadata = stub(:current? => false)
-    new_metadata = stub(:current? => false)
-    client = Rets::Client.new(:login_url => "http://example.com", :metadata => metadata)
-    client.stubs(:capabilities => {})
-    Rets::Metadata::Root.expects(:new => new_metadata).once
+    new_raw_metadata = stub(:new_raw_metadata)
 
-    assert_same new_metadata, client.metadata
-    # This second call ensures the expectations on Root are met
-    client.metadata
+    client = Rets::Client.new(:login_url => "http://example.com", :metadata => metadata)
+    client.stubs(:capabilities).returns({})
+    client.stubs(:retrieve_metadata).returns(new_raw_metadata)
+
+    assert_same new_raw_metadata, client.metadata.marshal_dump
   end
 
   def test_initialize_with_current_metadata_cached_return_cached_metadata
