@@ -115,7 +115,7 @@ module Rets
       begin
         find_every(opts, resolve)
       rescue AuthorizationFailure, InvalidRequest => e
-        if retries < 3
+        if retries < opts.fetch(:max_retries, 3)
           retries += 1
           @client_progress.find_with_retries_failed_a_retry(e, retries)
           clean_setup
