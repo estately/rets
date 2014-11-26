@@ -12,7 +12,7 @@ Gem::Specification.new do |s|
   s.email = ["opensource@estately.com"]
   s.executables = ["rets"]
   s.extra_rdoc_files = ["CHANGELOG.md", "Manifest.txt", "README.md"]
-  s.files = ["CHANGELOG.md", "Manifest.txt", "README.md", "Rakefile", "bin/rets", "lib/rets.rb", "lib/rets/client.rb", "lib/rets/client_progress_reporter.rb", "lib/rets/http_client.rb", "lib/rets/locking_http_client.rb", "lib/rets/measuring_http_client.rb", "lib/rets/metadata.rb", "lib/rets/metadata/containers.rb", "lib/rets/metadata/lookup_type.rb", "lib/rets/metadata/resource.rb", "lib/rets/metadata/rets_class.rb", "lib/rets/metadata/root.rb", "lib/rets/metadata/table.rb", "lib/rets/parser/compact.rb", "lib/rets/parser/multipart.rb", "test/fixtures.rb", "test/helper.rb", "test/test_client.rb", "test/test_metadata.rb", "test/test_parser_compact.rb", "test/test_parser_multipart.rb", "test/test_locking_http_client.rb", ".gemtest"]
+  s.files = %w(.gemtest CHANGELOG.md Manifest.txt README.md Rakefile bin/rets lib/rets.rb lib/rets/client.rb lib/rets/client_progress_reporter.rb lib/rets/http_client.rb lib/rets/locking_http_client.rb lib/rets/measuring_http_client.rb lib/rets/metadata.rb lib/rets/metadata/containers.rb lib/rets/metadata/lookup_type.rb lib/rets/metadata/resource.rb lib/rets/metadata/rets_class.rb lib/rets/metadata/root.rb lib/rets/metadata/table.rb lib/rets/parser/compact.rb lib/rets/parser/multipart.rb test/fixtures.rb test/helper.rb test/test_client.rb test/test_locking_http_client.rb test/test_metadata.rb test/test_parser_compact.rb test/test_parser_multipart.rb test/vcr_cassettes/unauthorized_response.yml)
   s.homepage = "http://github.com/estately/rets"
   s.rdoc_options = ["--main", "README.md"]
   s.require_paths = ["lib"]
