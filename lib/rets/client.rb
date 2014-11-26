@@ -340,7 +340,7 @@ module Rets
 
     class FakeLogger < Logger
       def initialize
-        super("/dev/null")
+        super(IO::NULL)
       end
     end
 
