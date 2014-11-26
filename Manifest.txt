@@ -25,3 +25,4 @@ test/test_locking_http_client.rb
 test/test_metadata.rb
 test/test_parser_compact.rb
 test/test_parser_multipart.rb
+test/vcr_cassettes/unauthorized_response.yml

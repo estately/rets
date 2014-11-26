@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    rets (0.5.1.20131030161146)
+    rets (0.6.0.20141126152224)
       httpclient (~> 2.3.0)
       nokogiri (~> 1.5.2)
 
