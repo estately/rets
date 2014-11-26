@@ -1,23 +1,23 @@
 # -*- encoding: utf-8 -*-
-# stub: rets 0.5.1.20131030161146 ruby lib
+# stub: rets 0.6.0.20141126151559 ruby lib
 
 Gem::Specification.new do |s|
   s.name = "rets"
-  s.version = "0.5.1.20131030161146"
+  s.version = "0.6.0.20141126151559"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
+  s.require_paths = ["lib"]
   s.authors = ["Estately, Inc. Open Source"]
-  s.date = "2013-10-30"
+  s.date = "2014-11-26"
   s.description = "[![Build Status](https://secure.travis-ci.org/estately/rets.png?branch=master)](http://travis-ci.org/estately/rets)\nA pure-ruby library for fetching data from [RETS] servers.\n\n[RETS]: http://www.rets.org"
   s.email = ["opensource@estately.com"]
   s.executables = ["rets"]
   s.extra_rdoc_files = ["CHANGELOG.md", "Manifest.txt", "README.md"]
-  s.files = %w(.gemtest CHANGELOG.md Manifest.txt README.md Rakefile bin/rets lib/rets.rb lib/rets/client.rb lib/rets/client_progress_reporter.rb lib/rets/http_client.rb lib/rets/locking_http_client.rb lib/rets/measuring_http_client.rb lib/rets/metadata.rb lib/rets/metadata/containers.rb lib/rets/metadata/lookup_type.rb lib/rets/metadata/resource.rb lib/rets/metadata/rets_class.rb lib/rets/metadata/root.rb lib/rets/metadata/table.rb lib/rets/parser/compact.rb lib/rets/parser/multipart.rb test/fixtures.rb test/helper.rb test/test_client.rb test/test_locking_http_client.rb test/test_metadata.rb test/test_parser_compact.rb test/test_parser_multipart.rb test/vcr_cassettes/unauthorized_response.yml)
+  s.files = [".gemtest", "CHANGELOG.md", "Manifest.txt", "README.md", "Rakefile", "bin/rets", "lib/rets.rb", "lib/rets/client.rb", "lib/rets/client_progress_reporter.rb", "lib/rets/http_client.rb", "lib/rets/locking_http_client.rb", "lib/rets/measuring_http_client.rb", "lib/rets/metadata.rb", "lib/rets/metadata/containers.rb", "lib/rets/metadata/lookup_type.rb", "lib/rets/metadata/resource.rb", "lib/rets/metadata/rets_class.rb", "lib/rets/metadata/root.rb", "lib/rets/metadata/table.rb", "lib/rets/parser/compact.rb", "lib/rets/parser/multipart.rb", "test/fixtures.rb", "test/helper.rb", "test/test_client.rb", "test/test_locking_http_client.rb", "test/test_metadata.rb", "test/test_parser_compact.rb", "test/test_parser_multipart.rb", "test/vcr_cassettes/unauthorized_response.yml"]
   s.homepage = "http://github.com/estately/rets"
   s.rdoc_options = ["--main", "README.md"]
-  s.require_paths = ["lib"]
   s.rubyforge_project = "rets"
-  s.rubygems_version = "2.1.10"
+  s.rubygems_version = "2.2.0"
   s.summary = "[![Build Status](https://secure.travis-ci.org/estately/rets.png?branch=master)](http://travis-ci.org/estately/rets) A pure-ruby library for fetching data from [RETS] servers"
   s.test_files = ["test/test_client.rb", "test/test_locking_http_client.rb", "test/test_metadata.rb", "test/test_parser_compact.rb", "test/test_parser_multipart.rb"]
 

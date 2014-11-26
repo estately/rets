@@ -3,7 +3,7 @@ require 'digest/md5'
 require 'nokogiri'
 
 module Rets
-  VERSION = '0.5.1'
+  VERSION = '0.6.0'
 
   MalformedResponse    = Class.new(ArgumentError)
   UnknownResponse      = Class.new(ArgumentError)

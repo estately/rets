@@ -1,3 +1,24 @@
+### 0.6.0 / 2013-10-30
+
+* fix: fix spelling error that created misleading exceptions
+* feature: track stats for http requests sent
+* feature: raise an exception if the login action doesn't return an http 200 status
+* feature: add better class description and more fields to print tree
+* feature: support http proxies
+* feature: customizable http timeouts
+* feature: add logging http headers when in debug mode
+* feature: strip invalid utf8 from responses before parsing
+* fix: don't raise an exception on a 401 after logout
+* fix: treat no matching records status without a count node as a zero count
+* feature: add an option for loading custom ca_certs
+* feature: remove invalid resource types from metadata
+* feature: special case http 412
+* feature: add max_retries option
+
+### 0.5.1 / 2013-10-30
+
+* fix: 0.5.0 was broken, fix gem Manifest to fix gem
+
 ### 0.5.0 / 2013-09-05
 
 * feature: Allow client.count to get integer count
