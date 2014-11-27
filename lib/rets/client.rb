@@ -114,6 +114,9 @@ module Rets
       resolve = opts.delete(:resolve)
       begin
         find_every(opts, resolve)
+      rescue NoRecordsFound
+        @client_progress.no_records_found
+        []
       rescue AuthorizationFailure, InvalidRequest => e
         if retries < opts.fetch(:max_retries, 3)
           retries += 1
@@ -367,7 +370,9 @@ module Rets
             reply_text = (rets_element.attr("ReplyText") || rets_element.attr("replyText")).value
             reply_code = (rets_element.attr("ReplyCode") || rets_element.attr("replyCode")).value.to_i
 
-            if reply_code.nonzero?
+            if reply_code == NoRecordsFound::ERROR_CODE
+              raise NoRecordsFound.new(reply_text)
+            elsif reply_code.nonzero?
               raise InvalidRequest.new(reply_code, reply_text)
             else
               return
