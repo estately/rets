@@ -112,21 +112,29 @@ module Rets
     def find_with_retries(opts = {})
       retries = 0
       resolve = opts.delete(:resolve)
+      find_with_given_retry(retries, resolve, opts)
+    end
+
+    def find_with_given_retry(retries, resolve, opts)
       begin
         find_every(opts, resolve)
-      rescue NoRecordsFound
+      rescue NoRecordsFound => e
         @client_progress.no_records_found
         []
       rescue AuthorizationFailure, InvalidRequest => e
-        if retries < opts.fetch(:max_retries, 3)
-          retries += 1
-          @client_progress.find_with_retries_failed_a_retry(e, retries)
-          clean_setup
-          retry
-        else
-          @client_progress.find_with_retries_exceeded_retry_count(e)
-          raise e
-        end
+        handle_find_failure(retries, resolve, opts, e)
+      end
+    end
+
+    def handle_find_failure(retries, resolve, opts, e)
+      if retries < opts.fetch(:max_retries, 3)
+        retries += 1
+        @client_progress.find_with_retries_failed_a_retry(e, retries)
+        clean_setup
+        find_with_given_retry(retries, resolve, opts)
+      else
+        @client_progress.find_with_retries_exceeded_retry_count(e)
+        raise e
       end
     end
 
