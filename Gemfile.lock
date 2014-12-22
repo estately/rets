@@ -1,9 +1,9 @@
 PATH
   remote: .
   specs:
-    rets (0.6.0.20141126152224)
-      httpclient (~> 2.3.0)
-      nokogiri (~> 1.5.2)
+    rets (0.6.0.20141221225704)
+      httpclient (~> 2.3)
+      nokogiri (~> 1.5)
 
 GEM
   remote: https://rubygems.org/
@@ -21,10 +21,12 @@ GEM
     httpclient (2.3.4.1)
     json (1.8.0)
     metaclass (0.0.1)
+    mini_portile (0.5.2)
     minitest (5.0.3)
     mocha (0.14.0)
       metaclass (~> 0.0.1)
-    nokogiri (1.5.10)
+    nokogiri (1.6.1)
+      mini_portile (~> 0.5.0)
     rake (10.0.4)
     rdoc (4.0.1)
       json (~> 1.4)
@@ -46,5 +48,5 @@ DEPENDENCIES
   mocha
   rdoc (~> 4.0)
   rets!
-  vcr (~> 2.2.2)
-  webmock (~> 1.8.0)
+  vcr (~> 2.2)
+  webmock (~> 1.8)
