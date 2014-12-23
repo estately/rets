@@ -290,7 +290,7 @@ module Rets
     def capability_url(name)
       val = capabilities[name] || capabilities[name.downcase]
 
-      raise UnknownCapability.new(name) unless val
+      raise UnknownCapability.new(name, capabilities.keys) unless val
 
       begin
         if val.downcase.match(/^https?:\/\//)
