@@ -56,9 +56,9 @@ module Rets
       end
     end
 
-    # Attempts to login by making an empty request to the URL
-    # provided in initialize. Returns the capabilities that the
-    # RETS server provides, per http://retsdoc.onconfluence.com/display/rets172/4.10+Capability+URL+List.
+    # Attempts to login by making an empty request to the URL provided in
+    # initialize. Returns the capabilities that the RETS server provides, per
+    # http://www.realtor.org/retsorg.nsf/retsproto1.7d6.pdf#page=34
     def login
       res = http_get(login_url)
       Client::ErrorChecker.check(res)
