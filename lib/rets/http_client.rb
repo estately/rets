@@ -14,7 +14,7 @@ module Rets
       http.set_auth(url, options[:username], options[:password])
       headers = extra_headers.merge(rets_extra_headers)
       res = nil
-      log_http_traffic("POST", url, params, headers) do
+      log_http_traffic("GET", url, params, headers) do
         res = http.get(url, params, headers)
       end
       Client::ErrorChecker.check(res)

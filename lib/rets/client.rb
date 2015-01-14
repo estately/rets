@@ -56,14 +56,13 @@ module Rets
       end
     end
 
-    # Attempts to login by making an empty request to the URL
-    # provided in initialize. Returns the capabilities that the
-    # RETS server provides, per http://retsdoc.onconfluence.com/display/rets172/4.10+Capability+URL+List.
+    # Attempts to login by making an empty request to the URL provided in
+    # initialize. Returns the capabilities that the RETS server provides, per
+    # page 34 of http://www.realtor.org/retsorg.nsf/retsproto1.7d6.pdf#page=34
     def login
       res = http_get(login_url)
-      unless res.status_code == 200
-        raise UnknownResponse, "bad response to login, expected a 200, but got #{res.status_code}. Body was #{res.body}."
-      end
+      Client::ErrorChecker.check(res)
+
       self.capabilities = extract_capabilities(Nokogiri.parse(res.body))
       raise UnknownResponse, "Cannot read rets server capabilities." unless @capabilities
       @capabilities
@@ -306,7 +305,7 @@ module Rets
     def capability_url(name)
       val = capabilities[name] || capabilities[name.downcase]
 
-      raise UnknownCapability.new(name) unless val
+      raise UnknownCapability.new(name, capabilities.keys) unless val
 
       begin
         if val.downcase.match(/^https?:\/\//)
@@ -355,7 +354,7 @@ module Rets
 
     class FakeLogger < Logger
       def initialize
-        super("/dev/null")
+        super(IO::NULL)
       end
     end
 

@@ -17,6 +17,14 @@ A pure-ruby library for fetching data from [RETS] servers.
 [net-http-persistent]: http://seattlerb.rubyforge.org/net-http-persistent/
 [nokogiri]: http://nokogiri.org
 
+## INSTALLATION:
+```
+gem install rets
+
+# or add it to your Gemfile if using Bundler then run bundle install
+gem 'rets'
+```
+
 ## EXAMPLE USAGE:
 
 We need work in this area! There are currently a few guideline examples in the `example` folder on connecting, fetching a property's data, and fetching a property's photos.

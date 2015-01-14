@@ -38,10 +38,11 @@ module Rets
   end
 
   class UnknownCapability < ArgumentError
-    attr_reader :capability_name
-    def initialize(capability_name)
+    attr_reader :capability_name, :capabilities
+    def initialize(capability_name, capabilities=[])
       @capability_name = capability_name
-      super("unknown capability #{capability_name}")
+      @capabilities = capabilities
+      super("unknown capability #{capability_name}, available capabilities #{capabilities}")
     end
   end
 end
