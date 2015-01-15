@@ -119,10 +119,10 @@ module Rets
         find_every(opts, resolve)
       rescue NoRecordsFound => e
         if opts.fetch(:no_records_not_an_error, false)
-          handle_find_failure(retries, resolve, opts, e)
-        else
           @client_progress.no_records_found
           []
+        else
+          handle_find_failure(retries, resolve, opts, e)
         end
       rescue AuthorizationFailure, InvalidRequest => e
         handle_find_failure(retries, resolve, opts, e)
