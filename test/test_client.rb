@@ -81,7 +81,6 @@ class TestClient < MiniTest::Test
     logger.debug "foo"
   end
 
-
   def test_find_first_calls_find_every_with_limit_one
     @client.expects(:find_every).with({:limit => 1, :foo => :bar}, nil).returns([1,2,3])
 
@@ -98,6 +97,18 @@ class TestClient < MiniTest::Test
     assert_raises ArgumentError do
       @client.find(:incorrect, :foo => :bar)
     end
+  end
+
+
+  def test_find_retries_when_receiving_no_records_found
+    @client.stubs(:find_every).raises(Rets::NoRecordsFound.new('')).then.returns([1])
+
+    assert_equal @client.find(:all), [1]
+  end
+
+  def test_find_does_not_retry_when_receiving_no_records_found_with_option
+    @client.stubs(:find_every).raises(Rets::NoRecordsFound.new('')).then.returns([1])
+    assert_equal @client.find(:all, no_records_not_an_error: true), []
   end
 
   def test_find_retries_on_errors

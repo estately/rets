@@ -111,18 +111,33 @@ module Rets
     def find_with_retries(opts = {})
       retries = 0
       resolve = opts.delete(:resolve)
+      find_with_given_retry(retries, resolve, opts)
+    end
+
+    def find_with_given_retry(retries, resolve, opts)
       begin
         find_every(opts, resolve)
-      rescue AuthorizationFailure, InvalidRequest => e
-        if retries < opts.fetch(:max_retries, 3)
-          retries += 1
-          @client_progress.find_with_retries_failed_a_retry(e, retries)
-          clean_setup
-          retry
+      rescue NoRecordsFound => e
+        if opts.fetch(:no_records_not_an_error, false)
+          @client_progress.no_records_found
+          []
         else
-          @client_progress.find_with_retries_exceeded_retry_count(e)
-          raise e
+          handle_find_failure(retries, resolve, opts, e)
         end
+      rescue AuthorizationFailure, InvalidRequest => e
+        handle_find_failure(retries, resolve, opts, e)
+      end
+    end
+
+    def handle_find_failure(retries, resolve, opts, e)
+      if retries < opts.fetch(:max_retries, 3)
+        retries += 1
+        @client_progress.find_with_retries_failed_a_retry(e, retries)
+        clean_setup
+        find_with_given_retry(retries, resolve, opts)
+      else
+        @client_progress.find_with_retries_exceeded_retry_count(e)
+        raise e
       end
     end
 
@@ -366,7 +381,9 @@ module Rets
             reply_text = (rets_element.attr("ReplyText") || rets_element.attr("replyText")).value
             reply_code = (rets_element.attr("ReplyCode") || rets_element.attr("replyCode")).value.to_i
 
-            if reply_code.nonzero?
+            if reply_code == NoRecordsFound::ERROR_CODE
+              raise NoRecordsFound.new(reply_text)
+            elsif reply_code.nonzero?
               raise InvalidRequest.new(reply_code, reply_text)
             else
               return

@@ -28,6 +28,10 @@ module Rets
       @stats.count("#{@stats_prefix}find_with_retries_exceeded_retry_count")
     end
 
+    def no_records_found
+      @logger.info("Rets::Client: No Records Found")
+    end
+
     def could_not_resolve_find_metadata(key)
       @stats.count("#{@stats_prefix}could_not_resolve_find_metadata")
       @logger.warn "Rets::Client: Can't resolve find metadata for #{key.inspect}"
