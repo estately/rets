@@ -11,10 +11,10 @@ A pure-ruby library for fetching data from [RETS] servers.
 
 ## REQUIREMENTS:
 
-* [net-http-persistent]
+* [httpclient]
 * [nokogiri]
 
-[net-http-persistent]: http://seattlerb.rubyforge.org/net-http-persistent/
+[httpclient]: https://github.com/nahi/httpclient
 [nokogiri]: http://nokogiri.org
 
 ## INSTALLATION:
