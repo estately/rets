@@ -1,4 +1,4 @@
-### 0.6.0 / 2013-10-30
+### 0.6.0 / 2014-11-26
 
 * fix: fix spelling error that created misleading exceptions
 * feature: track stats for http requests sent
