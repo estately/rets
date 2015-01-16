@@ -1,3 +1,9 @@
+### 0.7.0 / 2015-01-16
+
+* feature: optionally treat No Records Found as not an error
+* fix: update httpclient version, patches SSL vulnerabilities
+* feature: work around bogus http status codes that don't agree with XML body
+
 ### 0.6.0 / 2014-11-26
 
 * fix: fix spelling error that created misleading exceptions
