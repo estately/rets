@@ -107,13 +107,13 @@ class TestClient < MiniTest::Test
   end
 
   def test_find_does_not_retry_when_receiving_no_records_found_with_option
-    @client.stubs(:find_every).raises(Rets::NoRecordsFound.new('')).then.returns([1])
+    @client.stubs(:find_every).raises(Rets::NoRecordsFound.new(''))
 
     assert_equal [], @client.find(:all, no_records_not_an_error: true)
   end
 
   def test_find_does_not_retry_and_returns_zero_on_count_request_when_receiving_no_records_found_with_option
-    @client.stubs(:find_every).raises(Rets::NoRecordsFound.new('')).then.returns([1])
+    @client.stubs(:find_every).raises(Rets::NoRecordsFound.new(''))
 
     assert_equal 0, @client.find(:all, count: 2, no_records_not_an_error: true)
   end
