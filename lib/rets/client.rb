@@ -120,7 +120,7 @@ module Rets
       rescue NoRecordsFound => e
         if opts.fetch(:no_records_not_an_error, false)
           @client_progress.no_records_found
-          []
+          opts[:count] == COUNT.only ? 0 : []
         else
           handle_find_failure(retries, resolve, opts, e)
         end
