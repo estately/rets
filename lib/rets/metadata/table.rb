@@ -2,7 +2,7 @@ module Rets
   module Metadata
     class TableFactory
       def self.build(table_fragment, resource)
-        enum?(table_fragment) ? LookupTable.new(table_fragment, resource) : Table.new(table_fragment)
+        enum?(table_fragment) ? LookupTable.new(table_fragment, resource) : Table.new(table_fragment, resource)
       end
 
       def self.enum?(table_fragment)
@@ -18,9 +18,11 @@ module Rets
       attr_accessor :name
       attr_accessor :long_name
       attr_accessor :table_fragment
+      attr_accessor :resource
 
-      def initialize(table_fragment)
+      def initialize(table_fragment, resource)
         self.table_fragment = table_fragment
+        self.resource = resource
         self.type = table_fragment["DataType"]
         self.name = table_fragment["SystemName"]
         self.long_name = table_fragment["LongName"]
@@ -28,6 +30,7 @@ module Rets
 
       def print_tree
         puts "    Table: #{name}"
+        puts "      Resource: #{resource.id}"
         puts "      ShortName: #{ table_fragment["ShortName"] }"
         puts "      LongName: #{ table_fragment["LongName"] }"
         puts "      StandardName: #{ table_fragment["StandardName"] }"
@@ -68,6 +71,7 @@ module Rets
 
       def print_tree
         puts "    LookupTable: #{name}"
+        puts "      Resource: #{resource.id}"
         puts "      Required: #{table_fragment['Required']}"
         puts "      Searchable: #{ table_fragment["Searchable"] }"
         puts "      Units: #{ table_fragment["Units"] }"
