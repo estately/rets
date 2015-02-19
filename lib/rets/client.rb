@@ -148,7 +148,9 @@ module Rets
       if opts[:count] == COUNT.only
         Parser::Compact.get_count(res.body)
       else
-        results = Parser::Compact.parse_document(res.body.encode("UTF-8", "binary", :invalid => :replace, :undef => :replace))
+        results = Parser::Compact.parse_document(
+          res.body.encode("UTF-8", res.body.encoding, :invalid => :replace, :undef => :replace)
+        )
         if resolve
           rets_class = find_rets_class(opts[:search_type], opts[:class])
           decorate_results(results, rets_class)

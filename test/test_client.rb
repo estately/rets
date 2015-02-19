@@ -99,6 +99,30 @@ class TestClient < MiniTest::Test
     end
   end
 
+  def test_response_text_encoding_from_ascii
+    @client.stubs(:capability_url).with("Search").returns("search_url")
+
+    response = mock
+    response.stubs(:body).returns(("An ascii string").encode("binary", "UTF-8"))
+    @client.stubs(:http_post).with("search_url", anything).returns(response)
+
+    Rets::Parser::Compact.expects(:parse_document).with("An ascii string")
+
+    @client.find_every({}, false)
+  end
+
+
+  def test_response_text_encoding_from_utf_8
+    @client.stubs(:capability_url).with("Search").returns("search_url")
+
+    response = mock
+    response.stubs(:body).returns("Some string with non-ascii characters ę")
+    @client.stubs(:http_post).with("search_url", anything).returns(response)
+
+    Rets::Parser::Compact.expects(:parse_document).with("Some string with non-ascii characters ę")
+
+    @client.find_every({}, false)
+  end
 
   def test_find_retries_when_receiving_no_records_found
     @client.stubs(:find_every).raises(Rets::NoRecordsFound.new('')).then.returns([1])
