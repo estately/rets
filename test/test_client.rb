@@ -111,7 +111,6 @@ class TestClient < MiniTest::Test
     @client.find_every({}, false)
   end
 
-
   def test_response_text_encoding_from_utf_8
     @client.stubs(:capability_url).with("Search").returns("search_url")
 
@@ -120,6 +119,18 @@ class TestClient < MiniTest::Test
     @client.stubs(:http_post).with("search_url", anything).returns(response)
 
     Rets::Parser::Compact.expects(:parse_document).with("Some string with non-ascii characters ę")
+
+    @client.find_every({}, false)
+  end
+
+  def test_response_text_encoding_from_utf_16
+    @client.stubs(:capability_url).with("Search").returns("search_url")
+
+    response = mock
+    response.stubs(:body).returns("Some string with non-utf-8 characters \xC2")
+    @client.stubs(:http_post).with("search_url", anything).returns(response)
+
+    Rets::Parser::Compact.expects(:parse_document).with("Some string with non-utf-8 characters �")
 
     @client.find_every({}, false)
   end
