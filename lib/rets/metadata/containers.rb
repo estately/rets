@@ -14,8 +14,7 @@ module Rets
         def self.uses(*fields)
           fields.each do |field|
             define_method(field) do
-              instance_variable_get("@#{field}") ||
-                instance_variable_set("@#{field}", extract(fragment, field.to_s.capitalize))
+              fields_hash[field] || fields_hash[field] = extract(fragment, field.to_s.capitalize)
             end
           end
         end
@@ -28,6 +27,12 @@ module Rets
 
         def extract(fragment, attr)
           fragment.attr(attr)
+        end
+
+        private
+
+        def fields_hash
+          @fields ||= {}
         end
 
       end
