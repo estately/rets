@@ -72,13 +72,13 @@ class TestParserCompact < MiniTest::Test
   end
 
   def test_parse_example
-    rows = Rets::Parser::Compact.parse_document(Nokogiri.parse(SAMPLE_COMPACT))
+    rows = Rets::Parser::Compact.parse_document(SAMPLE_COMPACT)
 
     assert_equal "7", rows.first["MetadataEntryID"]
   end
 
   def test_parse_example_2
-    rows = Rets::Parser::Compact.parse_document(Nokogiri.parse(SAMPLE_COMPACT_2))
+    rows = Rets::Parser::Compact.parse_document(SAMPLE_COMPACT_2)
 
     assert_equal "", rows.first["ModTimeStamp"]
   end
