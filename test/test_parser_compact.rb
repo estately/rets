@@ -7,14 +7,6 @@ class TestParserCompact < MiniTest::Test
     end
   end
 
-  def test_parse_document_uses_default_delimiter_when_none_provided
-    #  we assert that the delimeter character getting to parse is a tab
-    #  even though COMPACT defines no delimiter tag
-    Rets::Parser::Compact.expects(:parse).with("A\tB", "1\t2", /\t/)
-    Rets::Parser::Compact.expects(:parse).with("A\tB", "4\t5", /\t/)
-    Rets::Parser::Compact.parse_document(COMPACT)
-  end
-
   def test_parse_document_delegates_to_parse
     result = Rets::Parser::Compact.parse_document(COMPACT)
 
@@ -81,6 +73,12 @@ class TestParserCompact < MiniTest::Test
     rows = Rets::Parser::Compact.parse_document(SAMPLE_COMPACT_2)
 
     assert_equal "", rows.first["ModTimeStamp"]
+  end
+
+  def test_parse_with_changed_delimiter
+    rows = Rets::Parser::Compact.parse_document(CHANGED_DELIMITER)
+
+    assert_equal [{"A" => "1", "B" => "2"}, {"A" => "4", "B" => "5"}], rows
   end
 
 end
