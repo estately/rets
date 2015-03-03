@@ -54,7 +54,6 @@ module Rets
 
           if @data_start
             @results << string
-            # hi doug
           end
         end
       end
