@@ -32,20 +32,14 @@ class TestParserCompact < MiniTest::Test
     columns = "A B C D"
     data    = "1 2"
 
-    assert_equal({"A" => "1", "B" => "2", "C" => "", "D" => ""}, Rets::Parser::Compact.parse(columns, data, / /))
+    assert_equal({"A" => "1", "B" => "2", "C" => "", "D" => ""}, Rets::Parser::Compact.parse(columns, data, ' '))
   end
 
   def test_leading_empty_columns_are_preserved_with_delimiter
     columns = "A\tB\tC\tD"
     data    = "\t\t3\t4" # first two columns are empty data.
 
-    assert_equal({"A" => "", "B" => "", "C" => "3", "D" => "4"}, Rets::Parser::Compact.parse(columns, data, /\t/))
-  end
-
-  def test_parse_only_accepts_regexp
-    assert_raises ArgumentError do
-      Rets::Parser::Compact.parse("a", "b", " ")
-    end
+    assert_equal({"A" => "", "B" => "", "C" => "3", "D" => "4"}, Rets::Parser::Compact.parse(columns, data, "\t"))
   end
 
   def test_parse_empty_document
