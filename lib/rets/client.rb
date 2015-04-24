@@ -377,18 +377,17 @@ module Rets
             xml = Nokogiri::XML.parse(response.body, nil, nil, Nokogiri::XML::ParseOptions::STRICT)
 
             rets_element = xml.xpath("/RETS")
-            if rets_element.empty?
-              return
-            end
-            reply_text = (rets_element.attr("ReplyText") || rets_element.attr("replyText")).value
-            reply_code = (rets_element.attr("ReplyCode") || rets_element.attr("replyCode")).value.to_i
+            unless rets_element.empty?
+              reply_text = (rets_element.attr("ReplyText") || rets_element.attr("replyText")).value
+              reply_code = (rets_element.attr("ReplyCode") || rets_element.attr("replyCode")).value.to_i
 
-            if reply_code == NoRecordsFound::ERROR_CODE
-              raise NoRecordsFound.new(reply_text)
-            elsif reply_code.nonzero?
-              raise InvalidRequest.new(reply_code, reply_text)
-            else
-              return
+              if reply_code == NoRecordsFound::ERROR_CODE
+                raise NoRecordsFound.new(reply_text)
+              elsif reply_code.nonzero?
+                raise InvalidRequest.new(reply_code, reply_text)
+              else
+                return
+              end
             end
           rescue Nokogiri::XML::SyntaxError
             #Not xml
