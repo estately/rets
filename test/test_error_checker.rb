@@ -33,4 +33,15 @@ class TestErrorChecker < MiniTest::Test
     end
   end
 
+  def test_401_with_xhtml_body_is_auth_failure
+    # 401 with xhtml body returns auth failure
+    response = mock
+    response.stubs(:status_code).returns(401)
+    response.stubs(:ok?).returns(false)
+    response.stubs(:body).returns(XHTML_AUTH_FAILURE)
+    assert_raises Rets::AuthorizationFailure do
+      Rets::Client::ErrorChecker.check(response)
+    end
+  end
+
 end
