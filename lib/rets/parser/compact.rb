@@ -6,7 +6,7 @@ module Rets
       InvalidDelimiter = Class.new(ArgumentError)
 
       def self.parse_document(xml)
-        doc = Nokogiri.parse(xml.to_s)
+        doc = Nokogiri.parse(CGI.unescapeHTML(xml.to_s))
 
         delimiter = doc.at("//DELIMITER")
         delimiter = delimiter ? Regexp.new(Regexp.escape(delimiter.attr(:value).to_i.chr)) : TAB
