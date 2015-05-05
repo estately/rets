@@ -205,7 +205,7 @@ SAMPLE_COMPACT_2 = <<XML
     <DATA>		15n1172	ZipCode_f1172		Zip	ZipCo_1172	Zip	50	Character	0	1			0			0		0			0	0		0			0	</DATA>
     <DATA>		15n1177	ADDRESS1_f1177		Address Line 1	ADDRE_1177	Address1	50	Character	0	1			0			0		0			0	0		0			0	</DATA>
     <DATA>		15n1182	MLSYN_f1182		MLS Y/N	MLSYN_1182	MLSYN	1	Character	0	1			0			0		0			0	0		0			0	</DATA>
-    <DATA>		15n1184	OFFICENAME_f1184	Name	Office Name	OFFIC_1184	Office Name	50	Character	0	1			0			0		0			0	0		0			0	</DATA>
+    <DATA>		15n1184	OFFICENAME_f1184	Office Name	Office&#x2019;s Name	OFFIC_1184	Office Name	50	Character	0	1			0			0		0			0	0		0			0	</DATA>
     <DATA>		15n1193	OfficeCode_f1193	OfficeID	Office Code	Offic_1193	Office Code	12	Character	0	1			0			0		0			0	0		0			1	</DATA>
   </METADATA-TABLE>
 </RETS>
