@@ -85,10 +85,4 @@ class TestParserCompact < MiniTest::Test
     assert_equal "", rows.first["ModTimeStamp"]
   end
 
-  def test_parse_html_encoded_chars
-    rows = Rets::Parser::Compact.parse_document(Nokogiri.parse(SAMPLE_COMPACT_2))
-
-    assert_equal "Office Name", rows[13]["StandardName"]
-    assert_equal "Office\u2019s Name", rows[13]["LongName"]
-  end
 end
