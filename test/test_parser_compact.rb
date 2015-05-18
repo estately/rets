@@ -85,4 +85,15 @@ class TestParserCompact < MiniTest::Test
     assert_equal "", rows.first["ModTimeStamp"]
   end
 
+  def test_parse_html_encoded_chars
+    rows = Rets::Parser::Compact.parse_document(SAMPLE_COMPACT_WITH_SPECIAL_CHARS)
+
+    assert_equal "porte-coch\u{E8}re welcomes ", rows.last["PublicRemarksNew"]
+  end
+
+  def test_parse_html_encoded_chars_2
+    rows = Rets::Parser::Compact.parse_document(SAMPLE_COMPACT_WITH_SPECIAL_CHARS_2)
+
+    assert_equal "text with <tag>", rows.last["PublicRemarksNew"]
+  end
 end
