@@ -32,7 +32,7 @@ module Rets
       def self.parse_row(column_names, data, delimiter = TAB)
         raise ArgumentError, "Delimiter must be a regular expression" unless Regexp === delimiter
 
-        data_values = data.split(delimiter)
+        data_values = data.split(delimiter).map { |x| CGI.unescapeHTML(x) }
 
         zipped_key_values = column_names.zip(data_values).map { |k, v| [k.freeze, v.to_s] }
 
