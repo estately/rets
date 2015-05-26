@@ -2,7 +2,7 @@ PATH
   remote: .
   specs:
     rets (0.7.0.20150116133928)
-      httpclient (~> 2.4)
+      httpclient (~> 2.6)
       nokogiri (~> 1.5)
 
 GEM
