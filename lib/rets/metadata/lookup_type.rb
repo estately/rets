@@ -9,8 +9,11 @@ module Rets
         self.long_value  = lookup_type_fragment["LongValue"]
       end
 
-      def print_tree
-        puts "        #{long_value} -> #{value}"
+      # Print the tree to a file
+      #
+      # [out] The file to print to.  Defaults to $stdout.
+      def print_tree(out = $stdout)
+        out.puts "        #{long_value} -> #{value}"
       end
     end
   end

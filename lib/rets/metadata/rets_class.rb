@@ -33,11 +33,16 @@ module Rets
         rets_class
       end
 
-      def print_tree
-        puts "  Class: #{name}"
-        puts "    Visible Name: #{visible_name}"
-        puts "    Description : #{description}"
-        tables.each(&:print_tree)
+      # Print the tree to a file
+      #
+      # [out] The file to print to.  Defaults to $stdout.
+      def print_tree(out = $stdout)
+        out.puts "  Class: #{name}"
+        out.puts "    Visible Name: #{visible_name}"
+        out.puts "    Description : #{description}"
+        tables.each do |table|
+          table.print_tree(out)
+        end
       end
 
       def find_table(name)

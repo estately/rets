@@ -69,10 +69,14 @@ module Rets
         nil
       end
 
-      def print_tree
-        puts "Resource: #{id} (Key Field: #{key_field})"
-
-        rets_classes.each(&:print_tree)
+      # Print the tree to a file
+      #
+      # [out] The file to print to.  Defaults to $stdout.
+      def print_tree(out = $stdout)
+        out.puts "Resource: #{id} (Key Field: #{key_field})"
+        rets_classes.each do |rets_class|
+          rets_class.print_tree(out)
+        end
       end
 
       def find_rets_class(rets_class_name)

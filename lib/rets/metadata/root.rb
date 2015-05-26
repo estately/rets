@@ -106,9 +106,12 @@ module Rets
         @tree ||= build_tree
       end
 
-      def print_tree
+      # Print the tree to a file
+      #
+      # [out] The file to print to.  Defaults to $stdout.
+      def print_tree(out = $stdout)
         tree.each do |name, value|
-          value.print_tree
+          value.print_tree(out)
         end
       end
 
