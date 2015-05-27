@@ -28,6 +28,16 @@ module Rets
     end
   end
 
+  class NoObjectFound < ArgumentError
+    ERROR_CODE = 20403
+    attr_reader :reply_text
+
+    def initialize(reply_text)
+      @reply_text = reply_text
+      super("Got error code #{ERROR_CODE} (#{reply_text})")
+    end
+  end
+
   class InvalidRequest < ArgumentError
     attr_reader :error_code, :reply_text
     def initialize(error_code, reply_text)

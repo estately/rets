@@ -383,6 +383,8 @@ module Rets
 
               if reply_code == NoRecordsFound::ERROR_CODE
                 raise NoRecordsFound.new(reply_text)
+              elsif reply_code == NoObjectFound::ERROR_CODE
+                raise NoObjectFound.new(reply_text)
               elsif reply_code.nonzero?
                 raise InvalidRequest.new(reply_code, reply_text)
               else
