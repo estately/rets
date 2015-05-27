@@ -47,6 +47,7 @@ module Rets
   end
 end
 
+require 'rets/http_client'
 require 'rets/client'
 require 'rets/metadata'
 require 'rets/parser/compact'
