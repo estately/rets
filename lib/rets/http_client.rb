@@ -17,7 +17,7 @@ module Rets
       log_http_traffic("GET", url, params, headers) do
         res = http.get(url, params, headers)
       end
-      Client::ErrorChecker.check(res)
+      Parser::ErrorChecker.check(res)
       res
     end
 
@@ -28,7 +28,7 @@ module Rets
       log_http_traffic("POST", url, params, headers) do
         res = http.post(url, params, headers)
       end
-      Client::ErrorChecker.check(res)
+      Parser::ErrorChecker.check(res)
       res
     end
 
