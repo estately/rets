@@ -42,4 +42,28 @@ class TestErrorChecker < MiniTest::Test
       Rets::Parser::ErrorChecker.check(response)
     end
   end
+
+  def test_no_records_found_failure
+    response = mock
+    response.stubs(:body).returns(RETS_NO_RECORDS_ERROR)
+    assert_raises Rets::NoRecordsFound do
+      Rets::Parser::ErrorChecker.check(response)
+    end
+  end
+
+  def test_no_object_found_failure
+    response = mock
+    response.stubs(:body).returns(RETS_NO_OBJECT_ERROR)
+    assert_raises Rets::NoObjectFound do
+      Rets::Parser::ErrorChecker.check(response)
+    end
+  end
+
+  def test_invalid_request_failure
+    response = mock
+    response.stubs(:body).returns(RETS_INVALID_REQUEST_ERROR)
+    assert_raises Rets::InvalidRequest do
+      Rets::Parser::ErrorChecker.check(response)
+    end
+  end
 end
