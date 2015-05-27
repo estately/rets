@@ -1,6 +1,5 @@
 require 'httpclient'
 require 'logger'
-require_relative 'http_client'
 
 module Rets
   class HttpError < StandardError ; end
