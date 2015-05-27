@@ -60,6 +60,7 @@ end
 require 'rets/http_client'
 require 'rets/client'
 require 'rets/metadata'
+require 'rets/parser/error_checker'
 require 'rets/parser/compact'
 require 'rets/parser/multipart'
 require 'rets/measuring_http_client'

@@ -1,4 +1,16 @@
-RETS_ERROR = <<-XML
+RETS_NO_RECORDS_ERROR = <<-XML
+<?xml version="1.0"?>
+<RETS ReplyCode="20201" ReplyText="Error message">
+</RETS>
+XML
+
+RETS_NO_OBJECT_ERROR = <<-XML
+<?xml version="1.0"?>
+<RETS ReplyCode="20403" ReplyText="Error message">
+</RETS>
+XML
+
+RETS_INVALID_REQUEST_ERROR = <<-XML
 <?xml version="1.0"?>
 <RETS ReplyCode="123" ReplyText="Error message">
 </RETS>
