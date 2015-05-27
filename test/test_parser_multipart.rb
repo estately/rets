@@ -30,7 +30,7 @@ class TestParserMultipart < MiniTest::Test
   end
 
   def test_parse_with_error
-    raw = "\r\n--89467f8e0c6b48158c8f1883910212ec\r\nContent-Type: text/xml\r\nContent-ID: foo\r\nObject-ID: *\r\n\r\n<RETS ReplyCode=\"20403\" ReplyText=\"No Object Found\" />\r\n\r\n--89467f8e0c6b48158c8f1883910212ec--\r\n"
+    raw = "\r\n--89467f8e0c6b48158c8f1883910212ec\r\nContent-Type: text/xml\r\nContent-ID: foo\r\nObject-ID: *\r\n\r\n<RETS ReplyCode=\"999\" ReplyText=\"An Unexplaned Error\" />\r\n\r\n--89467f8e0c6b48158c8f1883910212ec--\r\n"
     boundary = "89467f8e0c6b48158c8f1883910212ec"
     assert_raises Rets::InvalidRequest do
       Rets::Parser::Multipart.parse(raw, boundary)
