@@ -2,7 +2,7 @@ require_relative "helper"
 
 class TestHttpClient < MiniTest::Test
   def setup
-    @cm = WebAgent::CookieManager.new
+    @cm = Rets::CookieManager.new
 
     @http = HTTPClient.new
     @http.cookie_manager = @cm

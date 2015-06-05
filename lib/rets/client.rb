@@ -1,4 +1,3 @@
-require 'httpclient'
 require 'logger'
 
 module Rets
@@ -44,7 +43,7 @@ module Rets
         @http.receive_timeout = @options[:receive_timeout]
       end
 
-      @http.set_cookie_store(options[:cookie_store]) if options[:cookie_store]
+      @http.cookie_manager = Rets::CookieManager.new(options[:cookie_store])
 
       @http_client = Rets::HttpClient.new(@http, @options, @logger, @login_url)
       if options[:http_timing_stats_collector]
