@@ -8,6 +8,7 @@ module Rets
     def initialize(cookies_file = nil, format = HTTPClient::WebAgentSaver, jar = HTTP::CookieJar.new)
       super(cookies_file, format)
       @jar = jar
+      load_cookies if @cookies_file
     end
   end
 end
