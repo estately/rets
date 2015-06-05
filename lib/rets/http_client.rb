@@ -82,7 +82,7 @@ module Rets
     end
 
     def http_cookie(name)
-      @http.cookie_manager.instance_variable_get(:@jar).each(login_url) do |c|
+      @http.cookie_manager.jar.each(login_url) do |c|
         if c.name.downcase == name.downcase
           return c.value
         end

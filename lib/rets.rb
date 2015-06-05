@@ -57,6 +57,7 @@ module Rets
   end
 end
 
+require 'rets/cookie_manager'
 require 'rets/http_client'
 require 'rets/client'
 require 'rets/metadata'
