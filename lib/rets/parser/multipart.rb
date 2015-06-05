@@ -1,6 +1,5 @@
 module Rets
   module Parser
-
     # Inspired by Mail.
     class Multipart
       CRLF = "\r\n"
@@ -33,7 +32,7 @@ module Rets
 
       def self.check_for_invalids_parts!(parts)
         return unless parts.length == 1 && parts.first.headers['content-type'] == 'text/xml'
-        Client::ErrorChecker.check(parts.first)
+        ErrorChecker.check(parts.first)
       end
     end
   end

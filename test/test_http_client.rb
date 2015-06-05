@@ -3,9 +3,14 @@ require_relative "helper"
 class TestHttpClient < MiniTest::Test
   def setup
     @cm = WebAgent::CookieManager.new
-    http = HTTPClient.new
-    http.cookie_manager = @cm
-    @http_client = Rets::HttpClient.new(http, {}, nil, "http://rets.rets.com/somestate/login.aspx")
+
+    @http = HTTPClient.new
+    @http.cookie_manager = @cm
+
+    @logger = Rets::Client::FakeLogger.new
+    @logger.stubs(:debug?).returns(false)
+
+    @http_client = Rets::HttpClient.new(@http, {}, @logger, "http://rets.rets.com/somestate/login.aspx")
   end
 
   def test_http_cookie_with_webagent_cookie
@@ -20,5 +25,25 @@ class TestHttpClient < MiniTest::Test
 
   def test_http_cookie_without_webagent_cookie
     assert_equal nil, @http_client.http_cookie('RETS-Session-ID')
+  end
+
+  def test_http_get_delegates_to_client
+    url = 'foo@example.com'
+    response = stub(:response)
+    response.stubs(:body).returns('response data')
+
+    @http.stubs(:get).with(url, anything, anything).returns(response)
+
+    assert_equal @http_client.http_get(url, {}), response
+  end
+
+  def test_http_post_delegates_to_client
+    url = 'foo@example.com'
+    response = stub(:response)
+    response.stubs(:body).returns('response data')
+
+    @http.stubs(:post).with(url, anything, anything).returns(response)
+
+    assert_equal @http_client.http_post(url, {}), response
   end
 end
