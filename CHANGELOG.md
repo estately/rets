@@ -1,3 +1,12 @@
+### 0.8.0 / 2015-06-09
+
+* reduce memory usage on parsing metadata
+* correctly raise authorization error when given XHTML instead of XML
+* unescape HTML encoded responses
+* make httpclient version requirement more specific
+* add ability to print metadata to a file
+* remove Gemfile.lock from repository
+
 ### 0.7.0 / 2015-01-16
 
 * feature: optionally treat No Records Found as not an error
