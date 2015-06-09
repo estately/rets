@@ -9,7 +9,7 @@ Hoe.plugin :gemspec
 Hoe.spec 'rets' do
   developer 'Estately, Inc. Open Source', 'opensource@estately.com'
 
-  extra_deps << [ "httpclient", "~> 2.4" ]
+  extra_deps << [ "httpclient", "~> 2.4.0" ]
   extra_deps << [ "nokogiri",   "~> 1.5" ]
 
   extra_dev_deps << [ "mocha", "~> 0.11" ]
