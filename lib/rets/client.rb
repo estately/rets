@@ -1,3 +1,4 @@
+require 'http-cookie'
 require 'httpclient'
 require 'logger'
 
