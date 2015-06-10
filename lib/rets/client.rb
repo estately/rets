@@ -109,32 +109,35 @@ module Rets
     alias search find
 
     def find_with_retries(opts = {})
-      retries = 0
+      opts = opts.dup
+      max_retries = opts.delete(:max_retries) || 3
       resolve = opts.delete(:resolve)
-      find_with_given_retry(retries, resolve, opts)
+      find_with_max_retries(max_retries, resolve, opts)
     end
 
-    def find_with_given_retry(retries, resolve, opts)
+    def find_with_max_retries(max_retries, resolve, opts)
       begin
-        find_every(opts, resolve)
+        find_options = opts.dup
+        no_records_not_an_error = find_options.delete(:no_records_not_an_error)
+        find_every(find_options, resolve)
       rescue NoRecordsFound => e
-        if opts.fetch(:no_records_not_an_error, false)
+        if no_records_not_an_error
           @client_progress.no_records_found
           opts[:count] == COUNT.only ? 0 : []
         else
-          handle_find_failure(retries, resolve, opts, e)
+          handle_find_failure(max_retries, resolve, opts, e)
         end
       rescue AuthorizationFailure, InvalidRequest => e
-        handle_find_failure(retries, resolve, opts, e)
+        handle_find_failure(max_retries, resolve, opts, e)
       end
     end
 
-    def handle_find_failure(retries, resolve, opts, e)
-      if retries < opts.fetch(:max_retries, 3)
-        retries += 1
-        @client_progress.find_with_retries_failed_a_retry(e, retries)
+    def handle_find_failure(max_retries, resolve, opts, e)
+      if max_retries > 0
+        max_retries -= 1
+        @client_progress.find_with_retries_failed_a_retry(e, max_retries)
         clean_setup
-        find_with_given_retry(retries, resolve, opts)
+        find_with_max_retries(max_retries, resolve, opts)
       else
         @client_progress.find_with_retries_exceeded_retry_count(e)
         raise e

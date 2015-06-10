@@ -288,4 +288,17 @@ class TestClient < MiniTest::Test
     )
   end
 
+  def test_find_do_not_pass_gem_specific_options_into_http_request
+    @client.stubs(:capability_url).with('Search').returns('search_url')
+    response = mock
+    response.stubs(:body).returns('Some response')
+
+    @client.stubs(:http_post).with do |_, query|
+      internal_options = %w(NoRecordsNotAnError MaxRetries Resolve) & query.keys
+      internal_options.empty?
+    end.returns(response)
+
+    @client.find :all, no_records_not_an_error: true, max_retries: 4, resolve: false
+  end
+
 end
