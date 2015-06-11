@@ -19,8 +19,8 @@ module Rets
       end
     end
 
-    def save_cookie_store(force=nil)
-      @http_client.save_cookie_store(force)
+    def save_cookie_store
+      @http_client.save_cookie_store
     end
 
     def lock_around(&block)
