@@ -249,14 +249,6 @@ class TestClient < MiniTest::Test
     assert_equal "foo", @client.object("1", :foo => :bar)
   end
 
-  def test_metadata_caches
-    metadata = stub(:current? => true)
-    @client.metadata = metadata
-    @client.stubs(:capabilities => {})
-
-    assert_same metadata, @client.metadata, "Should be memoized"
-  end
-
   def test_decorate_result_handles_bad_metadata
     result = {'foo' => 'bar'}
     rets_class = stub
