@@ -1,3 +1,7 @@
+### 0.9.0 / 2015-06-11
+
+* feature: update to httpclient 2.6
+
 ### 0.8.1 / 2015-06-09
 
 * fix: actually make the httpclient version more specific this time
