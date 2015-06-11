@@ -1,3 +1,6 @@
+require 'http-cookie'
+require 'httpclient'
+
 module Rets
   class HttpClient
     attr_reader :http, :options, :logger, :login_url
