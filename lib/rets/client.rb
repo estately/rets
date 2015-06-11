@@ -6,8 +6,6 @@ module Rets
   class HttpError < StandardError ; end
 
   class Client
-    DEFAULT_OPTIONS = {}
-
     COUNT = Struct.new(:exclude, :include, :only).new(0,1,2)
 
     attr_accessor :login_url, :options, :logger
@@ -19,41 +17,14 @@ module Rets
     end
 
     def clean_setup
-      self.options     = DEFAULT_OPTIONS.merge(@options)
-      self.login_url   = self.options[:login_url]
-
-      @cached_metadata   = nil
-      @capabilities      = nil
-      @metadata          = nil
-      @tries             = nil
-      self.capabilities  = nil
-
-      self.logger      = @options[:logger] || FakeLogger.new
-      @client_progress = ClientProgressReporter.new(self.logger, options[:stats_collector], options[:stats_prefix])
-      @cached_metadata = @options[:metadata]
-      if @options[:http_proxy]
-        @http = HTTPClient.new(options.fetch(:http_proxy))
-
-        if @options[:proxy_username]
-          @http.set_proxy_auth(options.fetch(:proxy_username), options.fetch(:proxy_password))
-        end
-      else
-        @http = HTTPClient.new
-      end
-
-      if @options[:receive_timeout]
-        @http.receive_timeout = @options[:receive_timeout]
-      end
-
-      @http.set_cookie_store(options[:cookie_store]) if options[:cookie_store]
-
-      @http_client = Rets::HttpClient.new(@http, @options, @logger, @login_url)
-      if options[:http_timing_stats_collector]
-        @http_client = Rets::MeasuringHttpClient.new(@http_client, options.fetch(:http_timing_stats_collector), options.fetch(:http_timing_stats_prefix))
-      end
-      if options[:lock_around_http_requests]
-        @http_client = Rets::LockingHttpClient.new(@http_client, options.fetch(:locker), options.fetch(:lock_name), options.fetch(:lock_options))
-      end
+      @capabilities    = nil
+      @metadata        = nil
+      @tries           = nil
+      @login_url       = options[:login_url]
+      @logger          = options[:logger] || FakeLogger.new
+      @client_progress = ClientProgressReporter.new(logger, options[:stats_collector], options[:stats_prefix])
+      @cached_metadata = options[:metadata]
+      @http_client     = Rets::HttpClient.from_options(options, logger)
     end
 
     # Attempts to login by making an empty request to the URL provided in
