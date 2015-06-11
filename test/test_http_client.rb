@@ -68,5 +68,29 @@ class TestHttpClient < MiniTest::Test
     def test_http_cookie_with_no_cookies_from_domain
       assert_equal nil, @client.http_cookie('RETS-Session-ID')
     end
+
+    def test_save_cookie_store
+      cookie_file = Tempfile.new('cookie_file').path
+
+      #setup cookie store
+      http_a = HTTPClient.new
+      http_a.set_cookie_store(cookie_file)
+      client_a = Rets::HttpClient.new(http_a, { cookie_store: cookie_file }, nil, "http://rets.rets.com/somestate/login.aspx")
+
+      #add cookie
+      cookie = "RETS-Session-ID=879392834723043209; path=/; domain=rets.rets.com; expires=Wednesday, 31-Dec-2037 12:00:00 GMT"
+      http_a.cookie_manager.parse(cookie, URI.parse("http://www.rets.rets.com"))
+
+      #save cookie
+      client_a.save_cookie_store
+
+      #create new HTTPCLient with same cookie store
+      http_b = HTTPClient.new
+      http_b.set_cookie_store(cookie_file)
+      client_b = Rets::HttpClient.new(http_b, { cookie_store: cookie_file }, nil, "http://rets.rets.com/somestate/login.aspx")
+
+      #check added cookie exists
+      assert_equal "879392834723043209", client_b.http_cookie('RETS-Session-ID')
+    end
   end
 end
