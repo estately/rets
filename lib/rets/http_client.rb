@@ -24,6 +24,7 @@ module Rets
       if options[:receive_timeout]
         http.receive_timeout = options[:receive_timeout]
       end
+
       if options[:cookie_store]
         http.set_cookie_store(options[:cookie_store])
       end
@@ -33,9 +34,11 @@ module Rets
       if options[:http_timing_stats_collector]
         http_client = Rets::MeasuringHttpClient.new(http_client, options.fetch(:http_timing_stats_collector), options.fetch(:http_timing_stats_prefix))
       end
+
       if options[:lock_around_http_requests]
         http_client = Rets::LockingHttpClient.new(http_client, options.fetch(:locker), options.fetch(:lock_name), options.fetch(:lock_options))
       end
+
       http_client
     end
 
