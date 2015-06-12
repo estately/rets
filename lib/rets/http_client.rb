@@ -87,13 +87,10 @@ module Rets
       end
     end
 
-    def save_cookie_store(force=nil)
+    def save_cookie_store
       if options[:cookie_store]
-        if force
-          @http.cookie_manager.save_all_cookies(true, true, true)
-        else
-          @http.save_cookie_store
-        end
+        #save session cookies
+        @http.cookie_manager.save_cookies(true)
       end
     end
 
