@@ -1,17 +1,12 @@
-require 'http-cookie'
-require 'httpclient'
 require 'logger'
 
 module Rets
   class HttpError < StandardError ; end
 
   class Client
-    DEFAULT_OPTIONS = {}
-
     COUNT = Struct.new(:exclude, :include, :only).new(0,1,2)
 
-    attr_accessor :login_url, :options, :logger
-    attr_writer   :capabilities, :metadata
+    attr_accessor :cached_metadata, :client_progress, :logger, :login_url, :options
 
     def initialize(options)
       @options = options
@@ -19,41 +14,14 @@ module Rets
     end
 
     def clean_setup
-      self.options     = DEFAULT_OPTIONS.merge(@options)
-      self.login_url   = self.options[:login_url]
-
-      @cached_metadata   = nil
-      @capabilities      = nil
-      @metadata          = nil
-      @tries             = nil
-      self.capabilities  = nil
-
-      self.logger      = @options[:logger] || FakeLogger.new
-      @client_progress = ClientProgressReporter.new(self.logger, options[:stats_collector], options[:stats_prefix])
-      @cached_metadata = @options[:metadata]
-      if @options[:http_proxy]
-        @http = HTTPClient.new(options.fetch(:http_proxy))
-
-        if @options[:proxy_username]
-          @http.set_proxy_auth(options.fetch(:proxy_username), options.fetch(:proxy_password))
-        end
-      else
-        @http = HTTPClient.new
-      end
-
-      if @options[:receive_timeout]
-        @http.receive_timeout = @options[:receive_timeout]
-      end
-
-      @http.set_cookie_store(options[:cookie_store]) if options[:cookie_store]
-
-      @http_client = Rets::HttpClient.new(@http, @options, @logger, @login_url)
-      if options[:http_timing_stats_collector]
-        @http_client = Rets::MeasuringHttpClient.new(@http_client, options.fetch(:http_timing_stats_collector), options.fetch(:http_timing_stats_prefix))
-      end
-      if options[:lock_around_http_requests]
-        @http_client = Rets::LockingHttpClient.new(@http_client, options.fetch(:locker), options.fetch(:lock_name), options.fetch(:lock_options))
-      end
+      @metadata        = nil
+      @tries           = nil
+      @login_url       = options[:login_url]
+      @cached_metadata = options[:metadata]
+      @capabilities    = options[:capabilities]
+      @logger          = options[:logger] || FakeLogger.new
+      @client_progress = ClientProgressReporter.new(logger, options[:stats_collector], options[:stats_prefix])
+      @http_client     = Rets::HttpClient.from_options(options, logger)
     end
 
     # Attempts to login by making an empty request to the URL provided in
@@ -63,9 +31,11 @@ module Rets
       res = http_get(login_url)
       Parser::ErrorChecker.check(res)
 
-      self.capabilities = extract_capabilities(Nokogiri.parse(res.body))
-      raise UnknownResponse, "Cannot read rets server capabilities." unless @capabilities
-      @capabilities
+      new_capabilities = extract_capabilities(Nokogiri.parse(res.body))
+      unless new_capabilities
+        raise UnknownResponse, "Cannot read rets server capabilities."
+      end
+      new_capabilities
     end
 
     def logout
@@ -119,7 +89,7 @@ module Rets
         find_every(opts, resolve)
       rescue NoRecordsFound => e
         if opts.fetch(:no_records_not_an_error, false)
-          @client_progress.no_records_found
+          client_progress.no_records_found
           opts[:count] == COUNT.only ? 0 : []
         else
           handle_find_failure(retries, resolve, opts, e)
@@ -132,11 +102,11 @@ module Rets
     def handle_find_failure(retries, resolve, opts, e)
       if retries < opts.fetch(:max_retries, 3)
         retries += 1
-        @client_progress.find_with_retries_failed_a_retry(e, retries)
+        client_progress.find_with_retries_failed_a_retry(e, retries)
         clean_setup
         find_with_given_retry(retries, resolve, opts)
       else
-        @client_progress.find_with_retries_exceeded_retry_count(e)
+        client_progress.find_with_retries_exceeded_retry_count(e)
         raise e
       end
     end
@@ -177,7 +147,7 @@ module Rets
           result[key] = table.resolve(value.to_s)
         else
           #can't resolve just leave the value be
-          @client_progress.could_not_resolve_find_metadata(key)
+          client_progress.could_not_resolve_find_metadata(key)
         end
       end
     end
@@ -266,13 +236,13 @@ module Rets
     def metadata
       return @metadata if @metadata
 
-      if @cached_metadata && (@options[:skip_metadata_uptodate_check] ||
-          @cached_metadata.current?(capabilities["MetadataTimestamp"], capabilities["MetadataVersion"]))
-        @client_progress.use_cached_metadata
-        self.metadata = @cached_metadata
+      if cached_metadata && (options[:skip_metadata_uptodate_check] ||
+          cached_metadata.current?(capabilities["MetadataTimestamp"], capabilities["MetadataVersion"]))
+        client_progress.use_cached_metadata
+        @metadata = cached_metadata
       else
-        @client_progress.bad_cached_metadata(@cached_metadata)
-        self.metadata = Metadata::Root.new(logger, retrieve_metadata)
+        client_progress.bad_cached_metadata(cached_metadata)
+        @metadata = Metadata::Root.new(logger, retrieve_metadata)
       end
     end
 
@@ -301,7 +271,7 @@ module Rets
     #
     # [1] In fact, sometimes only a path is returned from the server.
     def capabilities
-      @capabilities || login
+      @capabilities ||= login
     end
 
     def capability_url(name)

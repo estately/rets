@@ -21,9 +21,9 @@ class TestClient < MiniTest::Test
   end
 
   def test_capability_url_returns_parsed_url
-    @client.capabilities = { "foo" => "/foo" }
+    client = Rets::Client.new(:login_url => "http://example.com", :capabilities => { "foo" => "/foo" })
 
-    assert_equal "http://example.com/foo", @client.capability_url("foo")
+    assert_equal "http://example.com/foo", client.capability_url("foo")
   end
 
   def test_capabilities_calls_login_when_nil
@@ -247,14 +247,6 @@ class TestClient < MiniTest::Test
     @client.expects(:fetch_object).with("1", :foo => :bar).returns(response)
 
     assert_equal "foo", @client.object("1", :foo => :bar)
-  end
-
-  def test_metadata_caches
-    metadata = stub(:current? => true)
-    @client.metadata = metadata
-    @client.stubs(:capabilities => {})
-
-    assert_same metadata, @client.metadata, "Should be memoized"
   end
 
   def test_decorate_result_handles_bad_metadata
