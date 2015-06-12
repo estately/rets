@@ -18,10 +18,10 @@ module Rets
       @stats_prefix = stats_prefix
     end
 
-    def find_with_retries_failed_a_retry(exception, retries)
+    def find_with_retries_failed_a_retry(exception, max_retries)
       @stats.count("#{@stats_prefix}find_with_retries_failed_retry")
       @logger.warn("Rets::Client: Failed with message: #{exception.message}")
-      @logger.info("Rets::Client: Retry #{retries}/3")
+      @logger.info("Rets::Client: Retries left #{max_retries}")
     end
 
     def find_with_retries_exceeded_retry_count(exception)
