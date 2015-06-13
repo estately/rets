@@ -73,24 +73,59 @@ class TestHttpClient < MiniTest::Test
       cookie_file = Tempfile.new('cookie_file').path
 
       #setup cookie store
-      http_a = HTTPClient.new
-      http_a.set_cookie_store(cookie_file)
-      client_a = Rets::HttpClient.new(http_a, { cookie_store: cookie_file }, nil, "http://rets.rets.com/somestate/login.aspx")
+      client_a = Rets::HttpClient.from_options({ cookie_store: cookie_file, login_url: "http://rets.rets.com/somestate/login.aspx" }, @logger)
 
       #add cookie
       cookie = "RETS-Session-ID=879392834723043209; path=/; domain=rets.rets.com; expires=Wednesday, 31-Dec-2037 12:00:00 GMT"
-      http_a.cookie_manager.parse(cookie, URI.parse("http://www.rets.rets.com"))
+      client_a.http.cookie_manager.parse(cookie, URI.parse("http://www.rets.rets.com"))
 
       #save cookie
       client_a.save_cookie_store
 
       #create new HTTPCLient with same cookie store
-      http_b = HTTPClient.new
-      http_b.set_cookie_store(cookie_file)
-      client_b = Rets::HttpClient.new(http_b, { cookie_store: cookie_file }, nil, "http://rets.rets.com/somestate/login.aspx")
+      client_b = Rets::HttpClient.from_options({ cookie_store: cookie_file, login_url: "http://rets.rets.com/somestate/login.aspx" }, @logger)
 
       #check added cookie exists
       assert_equal "879392834723043209", client_b.http_cookie('RETS-Session-ID')
+    end
+
+    def test_creates_cookie_store_if_missing_during_initialization
+      p "test_creates_cookie_store_if_missing_during_initialization"
+      cookie_file = Tempfile.new('cookie_file')
+      cookie_file_path = cookie_file.path
+
+      #remove cookie store
+      cookie_file.unlink
+
+      client = Rets::HttpClient.from_options({cookie_store: cookie_file_path}, @logger)
+
+      #add cookie
+      cookie = "RETS-Session-ID=879392834723043209; path=/; domain=rets.rets.com; expires=Wednesday, 31-Dec-2037 12:00:00 GMT"
+      client.http.cookie_manager.parse(cookie, URI.parse("http://www.rets.rets.com"))
+
+      #check added cookie exists
+      assert_equal "879392834723043209", client.http_cookie('RETS-Session-ID')
+    end
+
+    def test_creates_cookie_store_if_missing_during_save
+      p "test_creates_cookie_store_if_missing_during_save"
+      cookie_file = Tempfile.new('cookie_file')
+      cookie_file_path = cookie_file.path
+
+      client = Rets::HttpClient.from_options({cookie_store: cookie_file_path}, @logger)
+
+      #remove cookie store
+      cookie_file.unlink
+
+      #add cookie
+      cookie = "RETS-Session-ID=879392834723043209; path=/; domain=rets.rets.com; expires=Wednesday, 31-Dec-2037 12:00:00 GMT"
+      client.http.cookie_manager.parse(cookie, URI.parse("http://www.rets.rets.com"))
+
+      #save cookie
+      client.save_cookie_store
+
+      #check added cookie exists
+      assert_equal "879392834723043209", client.http_cookie('RETS-Session-ID')
     end
   end
 end
