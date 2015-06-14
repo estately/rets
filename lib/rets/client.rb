@@ -23,6 +23,7 @@ module Rets
       @logger              = options[:logger] || FakeLogger.new
       @client_progress     = ClientProgressReporter.new(logger, options[:stats_collector], options[:stats_prefix])
       @http_client         = Rets::HttpClient.from_options(options, logger)
+      @caching             = Metadata::Caching.make(options)
     end
 
     # Attempts to login by making an empty request to the URL provided in
@@ -236,7 +237,7 @@ module Rets
 
     def metadata
       return @metadata if @metadata
-
+      @cached_metadata ||= @caching.load(@logger)
       if cached_metadata && (options[:skip_metadata_uptodate_check] ||
           cached_metadata.current?(capabilities["MetadataTimestamp"], capabilities["MetadataVersion"]))
         client_progress.use_cached_metadata
@@ -244,7 +245,9 @@ module Rets
       else
         client_progress.bad_cached_metadata(cached_metadata)
         @metadata = Metadata::Root.new(logger, retrieve_metadata)
+        @caching.save(metadata)
       end
+      @metadata
     end
 
     def retrieve_metadata
