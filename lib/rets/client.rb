@@ -5,6 +5,7 @@ module Rets
 
   class Client
     COUNT = Struct.new(:exclude, :include, :only).new(0,1,2)
+    CASE_INSENSITIVE_PROC = Proc.new { |h,k| h.key?(k.downcase) ? h[k.downcase] : nil }
 
     attr_accessor :cached_metadata, :client_progress, :logger, :login_url, :options
 
@@ -14,14 +15,14 @@ module Rets
     end
 
     def clean_setup
-      @metadata        = nil
-      @tries           = nil
-      @login_url       = options[:login_url]
-      @cached_metadata = options[:metadata]
-      @capabilities    = options[:capabilities]
-      @logger          = options[:logger] || FakeLogger.new
-      @client_progress = ClientProgressReporter.new(logger, options[:stats_collector], options[:stats_prefix])
-      @http_client     = Rets::HttpClient.from_options(options, logger)
+      @metadata            = nil
+      @tries               = nil
+      @login_url           = options[:login_url]
+      @cached_metadata     = options[:metadata]
+      @cached_capabilities = options[:capabilities]
+      @logger              = options[:logger] || FakeLogger.new
+      @client_progress     = ClientProgressReporter.new(logger, options[:stats_collector], options[:stats_prefix])
+      @http_client         = Rets::HttpClient.from_options(options, logger)
     end
 
     # Attempts to login by making an empty request to the URL provided in
@@ -271,7 +272,13 @@ module Rets
     #
     # [1] In fact, sometimes only a path is returned from the server.
     def capabilities
-      @capabilities ||= login
+      if @capabilities
+        @capabilities
+      elsif @cached_capabilities
+        @capabilities = add_case_insensitive_default_proc(@cached_capabilities)
+      else
+        @capabilities = login
+      end
     end
 
     def capability_url(name)
@@ -295,15 +302,19 @@ module Rets
     def extract_capabilities(document)
       raw_key_values = document.xpath("/RETS/RETS-RESPONSE").text.strip
 
-      hash = Hash.new{|h,k| h.key?(k.downcase) ? h[k.downcase] : nil }
-
       # ... :(
       # Feel free to make this better. It has a test.
-      raw_key_values.split(/\n/).
+      hash = raw_key_values.split(/\n/).
         map  { |r| r.split(/\=/, 2) }.
-        each { |k,v| hash[k.strip.downcase] = v.strip }
+        each_with_object({}) { |(k,v), h| h[k.strip.downcase] = v.strip }
 
-      hash
+      add_case_insensitive_default_proc(hash)
+    end
+
+    def add_case_insensitive_default_proc(hash)
+      new_hash = hash.dup
+      new_hash.default_proc = CASE_INSENSITIVE_PROC
+      new_hash
     end
 
     def save_cookie_store
