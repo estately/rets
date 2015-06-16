@@ -90,7 +90,6 @@ class TestHttpClient < MiniTest::Test
     end
 
     def test_creates_cookie_store_if_missing_during_initialization
-      p "test_creates_cookie_store_if_missing_during_initialization"
       cookie_file = Tempfile.new('cookie_file')
       cookie_file_path = cookie_file.path
 
@@ -108,7 +107,6 @@ class TestHttpClient < MiniTest::Test
     end
 
     def test_creates_cookie_store_if_missing_during_save
-      p "test_creates_cookie_store_if_missing_during_save"
       cookie_file = Tempfile.new('cookie_file')
       cookie_file_path = cookie_file.path
 
