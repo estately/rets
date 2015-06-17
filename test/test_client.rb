@@ -26,6 +26,12 @@ class TestClient < MiniTest::Test
     assert_equal "http://example.com/foo", client.capability_url("foo")
   end
 
+  def test_cached_capabilities_case_insensitive
+    client = Rets::Client.new(:login_url => "http://example.com", :capabilities => { "foo" => "/foo" })
+
+    assert_equal client.capabilities.default_proc, Rets::Client::CASE_INSENSITIVE_PROC
+  end
+
   def test_capabilities_calls_login_when_nil
     @client.expects(:login)
     @client.capabilities
