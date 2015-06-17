@@ -1,6 +1,8 @@
 module Rets
   module Parser
     class ErrorChecker
+      INVALID_REQUEST_ERROR_MAPPING = Hash[Rets.constants.map {|c| Rets.const_get(c) }.select { |klass| klass.is_a?(Class) && klass < Rets::InvalidRequest }.map {|klass| [klass.const_get('ERROR_CODE'), klass] }]
+
       def self.check(response)
         # some RETS servers returns HTTP code 412 when session cookie expired, yet the response body
         # passes XML check. We need to special case for this situation.
@@ -26,7 +28,12 @@ module Rets
               elsif reply_code == NoObjectFound::ERROR_CODE
                 raise NoObjectFound.new(reply_text)
               elsif reply_code.nonzero?
-                raise InvalidRequest.new(reply_code, reply_text)
+                error_class = INVALID_REQUEST_ERROR_MAPPING[reply_code]
+                if error_class
+                  raise error_class.new(reply_code, reply_text)
+                else
+                  raise InvalidRequest.new(reply_code, reply_text)
+                end
               else
                 return
               end
