@@ -59,11 +59,29 @@ class TestErrorChecker < MiniTest::Test
     end
   end
 
+  Rets::Parser::ErrorChecker::INVALID_REQUEST_ERROR_MAPPING.each do |error_code, error_class|
+    define_method("test_#{error_class}_failure") do
+      response = mock
+      response.stubs(:body).returns(error_body_with_code(error_code))
+      assert_raises error_class do
+        Rets::Parser::ErrorChecker.check(response)
+      end
+    end
+  end
+
   def test_invalid_request_failure
     response = mock
     response.stubs(:body).returns(RETS_INVALID_REQUEST_ERROR)
     assert_raises Rets::InvalidRequest do
       Rets::Parser::ErrorChecker.check(response)
     end
+  end
+
+  def error_body_with_code(code)
+    <<-XML
+<?xml version="1.0"?>
+<RETS ReplyCode="#{code}" ReplyText="Error message">
+</RETS>
+    XML
   end
 end
