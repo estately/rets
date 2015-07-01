@@ -250,9 +250,26 @@ module Rets
     def retrieve_metadata
       raw_metadata = {}
       Metadata::METADATA_TYPES.each {|type|
-        raw_metadata[type] = retrieve_metadata_type(type)
+        raw_metadata[type] = filter_metadata(type, retrieve_metadata_type(type))
       }
       raw_metadata
+    end
+
+    def filter_metadata(metadata_type, xml)
+      return xml unless @options[:metadata_filter]
+
+      types_to_filter = @options[:metadata_filter][:types_to_filter]
+      desired_resources = @options[:metadata_filter][:desired_resources]
+
+      if types_to_filter.include? metadata_type
+        parsed_xml = Nokogiri.parse(xml)
+        parsed_xml.xpath("/RETS/*[starts-with(name(), 'METADATA-')]").reject do |x|
+          desired_resources.include? x.attributes["Resource"].value
+        end.each(&:remove)
+        parsed_xml.to_xml
+      else
+        xml
+      end
     end
 
     def retrieve_metadata_type(type)
