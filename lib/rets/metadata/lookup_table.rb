@@ -1,18 +1,16 @@
 module Rets
   module Metadata
     class LookupTable
-      attr_accessor :resource
-      attr_accessor :lookup_name
-      attr_accessor :name
-      attr_accessor :long_name
-      attr_accessor :table_fragment
+      attr_reader :table_fragment, :resource_id, :name, :lookup_name, :long_name
 
-      def initialize(table_fragment, resource)
-        self.table_fragment = table_fragment
-        self.resource = resource
-        self.name = table_fragment["SystemName"]
-        self.lookup_name = table_fragment["LookupName"]
-        self.long_name = table_fragment["LongName"]
+      def initialize(table_fragment, resource_id)
+        @table_fragment = table_fragment
+
+        @resource_id = resource_id
+
+        @name = table_fragment["SystemName"]
+        @lookup_name = table_fragment["LookupName"]
+        @long_name = table_fragment["LongName"]
       end
 
       def lookup_types

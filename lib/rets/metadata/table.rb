@@ -1,18 +1,15 @@
 module Rets
   module Metadata
     class Table
-      attr_accessor :type
-      attr_accessor :name
-      attr_accessor :long_name
-      attr_accessor :table_fragment
-      attr_accessor :resource
+      attr_reader :table_fragment, :resource_id, :name, :type, :long_name
 
-      def initialize(table_fragment, resource)
-        self.table_fragment = table_fragment
-        self.resource = resource
-        self.type = table_fragment["DataType"]
-        self.name = table_fragment["SystemName"]
-        self.long_name = table_fragment["LongName"]
+      def initialize(table_fragment, resource_id)
+        @table_fragment = table_fragment
+        @resource_id = resource_id
+
+        @name = table_fragment["SystemName"]
+        @type = table_fragment["DataType"]
+        @long_name = table_fragment["LongName"]
       end
 
       # Print the tree to a file
@@ -20,7 +17,7 @@ module Rets
       # [out] The file to print to.  Defaults to $stdout.
       def print_tree(out = $stdout)
         out.puts "    Table: #{name}"
-        out.puts "      Resource: #{resource.id}"
+        out.puts "      Resource: #{resource_id}"
         out.puts "      ShortName: #{ table_fragment["ShortName"] }"
         out.puts "      LongName: #{ table_fragment["LongName"] }"
         out.puts "      StandardName: #{ table_fragment["StandardName"] }"

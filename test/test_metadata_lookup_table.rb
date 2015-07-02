@@ -6,7 +6,7 @@ class TestMetadataLookupTable < MiniTest::Test
 
     lookup_table = Rets::Metadata::LookupTable.new(fragment, "Foo")
 
-    assert_equal("Foo", lookup_table.resource)
+    assert_equal("Foo", lookup_table.resource_id)
     assert_equal("A", lookup_table.name)
     assert_equal("C", lookup_table.lookup_name)
   end

@@ -26,7 +26,7 @@ module Rets
 
         if table_container
           table_container.tables.each do |table_fragment|
-            rets_class.tables << TableFactory.build(table_fragment, resource)
+            rets_class.tables << TableFactory.build(table_fragment, resource.id)
           end
         end
 
