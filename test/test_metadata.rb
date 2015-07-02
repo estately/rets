@@ -143,13 +143,6 @@ class TestMetadata < MiniTest::Test
     #TODO
   end
 
-  def test_resource_initialize
-    fragment = { "ResourceID" => 'r' }
-    resource = Rets::Metadata::Resource.new(fragment)
-    assert_equal('r', resource.id)
-    assert_equal([], resource.rets_classes)
-  end
-
   def test_resource_build_lookup_tree
     metadata = stub(:metadata)
     resource = stub(:resource)
@@ -257,11 +250,9 @@ class TestMetadata < MiniTest::Test
   end
 
   def test_resource_find_rets_class
-    resource = Rets::Metadata::Resource.new({})
-    value = mock(:name => "test")
-
-    resource.expects(:rets_classes).returns([value])
-    assert_equal(value, resource.find_rets_class("test"))
+    rets_class = mock(:name => "test")
+    resource = Rets::Metadata::Resource.new('id', [rets_class], {}, 'key_field')
+    assert_equal(rets_class, resource.find_rets_class("test"))
   end
 
   def test_lookup_type_initialize
