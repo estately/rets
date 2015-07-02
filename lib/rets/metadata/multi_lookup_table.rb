@@ -1,6 +1,6 @@
 module Rets
   module Metadata
-    class LookupTable
+    class MultiLookupTable
       attr_accessor :resource
       attr_accessor :lookup_name
       attr_accessor :name
@@ -44,19 +44,23 @@ module Rets
 
       def resolve(value)
         if value.empty?
-          return value.to_s.strip
+          return []
         end
 
-        #Remove surrounding quotes
-        clean_value  = value.scan(/^["']?(.*?)["']?$/).join
+         value.split(",").map do |v|
 
-        lookup_type = lookup_type(clean_value)
+          #Remove surrounding quotes
+          clean_value  = v.scan(/^["']?(.*?)["']?$/).join
 
-        resolved_value = lookup_type ? lookup_type.long_value : nil
 
-        warn("Discarding unmappable value of #{clean_value.inspect}") if resolved_value.nil? && $VERBOSE
+          lookup_type = lookup_type(clean_value)
 
-        resolved_value.to_s.strip
+          resolved_value = lookup_type ? lookup_type.long_value : nil
+
+          warn("Discarding unmappable value of #{clean_value.inspect}") if resolved_value.nil? && $VERBOSE
+
+          resolved_value.to_s.strip
+        end
       end
     end
   end

@@ -264,6 +264,7 @@ class TestMetadata < MiniTest::Test
     assert_equal('b', lookup_type.short_value)
     assert_equal('c', lookup_type.long_value)
   end
+
   def test_rets_class_find_table
     rets_class = Rets::Metadata::RetsClass.new({}, "resource")
     value = mock(:name => "test")
@@ -313,6 +314,10 @@ class TestMetadata < MiniTest::Test
     assert_equal([], rets_class.tables)
   end
 
+  def test_table_factory_creates_multi_lookup_table
+    assert_instance_of Rets::Metadata::MultiLookupTable, Rets::Metadata::TableFactory.build({"LookupName" => "Foo", "Interpretation" => "LookupMulti"}, nil)
+  end
+
   def test_table_factory_creates_lookup_table
     assert_instance_of Rets::Metadata::LookupTable, Rets::Metadata::TableFactory.build({"LookupName" => "Foo", "Interpretation" => "Lookup"}, nil)
   end
@@ -322,26 +327,24 @@ class TestMetadata < MiniTest::Test
   end
 
   def test_table_factory_enum
-    assert Rets::Metadata::TableFactory.enum?("LookupName" => "Foo",  "Interpretation" => "Lookup")
-    assert !Rets::Metadata::TableFactory.enum?("LookupName" => "",    "Interpretation" => "SomethingElse")
-    assert !Rets::Metadata::TableFactory.enum?("LookupName" => "Foo", "Interpretation" => "")
-    assert !Rets::Metadata::TableFactory.enum?("LookupName" => "",    "Interpretation" => "SomethingElse")
+    assert Rets::Metadata::TableFactory.lookup_table?("LookupName" => "Foo",  "Interpretation" => "Lookup")
+    assert !Rets::Metadata::TableFactory.lookup_table?("LookupName" => "",    "Interpretation" => "SomethingElse")
+    assert !Rets::Metadata::TableFactory.lookup_table?("LookupName" => "Foo", "Interpretation" => "")
+    assert !Rets::Metadata::TableFactory.lookup_table?("LookupName" => "",    "Interpretation" => "SomethingElse")
   end
 
   def test_lookup_table_initialize
-    fragment = { "SystemName" => "A", "Interpretation" => "B", "LookupName" => "C" }
+    fragment = { "SystemName" => "A", "LookupName" => "C" }
 
     lookup_table = Rets::Metadata::LookupTable.new(fragment, "Foo")
 
     assert_equal("Foo", lookup_table.resource)
     assert_equal("A", lookup_table.name)
     assert_equal("C", lookup_table.lookup_name)
-    assert_equal("B", lookup_table.interpretation)
   end
 
   def test_lookup_table_resolve_returns_empty_array_when_value_is_empty_and_is_multi?
-
-    lookup_table = Rets::Metadata::LookupTable.new({}, nil)
+    lookup_table = Rets::Metadata::MultiLookupTable.new({}, nil)
     lookup_table.stubs(:multi? => true)
 
     assert_equal [], lookup_table.resolve("")
@@ -359,7 +362,7 @@ class TestMetadata < MiniTest::Test
   def test_lookup_table_resolve_returns_multi_value_array_when_multi
     fragment = { "Interpretation" => "LookupMulti" }
 
-    lookup_table = Rets::Metadata::LookupTable.new(fragment, nil)
+    lookup_table = Rets::Metadata::MultiLookupTable.new(fragment, nil)
 
     lookup_table.expects(:lookup_type).with("A").returns(mock(:long_value => "Aaa"))
     lookup_table.expects(:lookup_type).with("B").returns(mock(:long_value => "Bbb"))
@@ -371,7 +374,7 @@ class TestMetadata < MiniTest::Test
   def test_lookup_table_resolve_returns_multi_value_array_when_multi_with_quoted_values
     fragment = { "Interpretation" => "LookupMulti" }
 
-    lookup_table = Rets::Metadata::LookupTable.new(fragment, nil)
+    lookup_table = Rets::Metadata::MultiLookupTable.new(fragment, nil)
 
     lookup_table.expects(:lookup_type).with("A").returns(mock(:long_value => "Aaa"))
     lookup_table.expects(:lookup_type).with("B").returns(mock(:long_value => "Bbb"))
@@ -383,7 +386,7 @@ class TestMetadata < MiniTest::Test
   def test_lookup_table_resolve_returns_nil_when_lookup_type_is_not_present_for_multi_value
     fragment = { "Interpretation" => "LookupMulti" }
 
-    lookup_table = Rets::Metadata::LookupTable.new(fragment, nil)
+    lookup_table = Rets::Metadata::MultiLookupTable.new(fragment, nil)
 
     lookup_table.expects(:lookup_type).with("A").returns(mock(:long_value => "Aaa"))
     lookup_table.expects(:lookup_type).with("B").returns(nil)
@@ -396,7 +399,7 @@ class TestMetadata < MiniTest::Test
   # This scenario is unfortunately common.
   def test_lookup_table_resolve_returns_nil_when_lookup_type_is_not_present_for_single_value
 
-    lookup_table = Rets::Metadata::LookupTable.new({}, nil)
+    lookup_table = Rets::Metadata::MultiLookupTable.new({}, nil)
     lookup_table.stubs(:multi? => true)
 
     lookup_table.expects(:lookup_type).with("A").returns(nil)
