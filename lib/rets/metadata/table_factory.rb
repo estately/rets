@@ -5,7 +5,7 @@ module Rets
         if enum?(table_fragment)
           LookupTable.build(table_fragment, resource)
         else
-          Table.new(table_fragment, resource)
+          Table.new(table_fragment, resource.id)
         end
       end
 
