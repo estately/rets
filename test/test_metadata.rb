@@ -11,6 +11,14 @@ class TestMetadata < MiniTest::Test
     $VERBOSE = false
   end
 
+  def test_print_tree
+    resource = Rets::Metadata::Resource.new("Foo", [], {}, "Bar")
+
+    io = StringIO.new
+    resource.print_tree(io)
+    assert_equal io.string, "Resource: Foo (Key Field: Bar)\n"
+  end
+
   def test_metadata_root_build_tree
     resource = stub(:id => "X")
     Rets::Metadata::Resource.stubs(:build => resource)

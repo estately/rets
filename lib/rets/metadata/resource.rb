@@ -5,8 +5,10 @@ module Rets
       attr_reader :id, :rets_classes, :lookup_types, :key_field
 
       def initialize(id, rets_classes, lookup_types, key_field)
+        @id = id
         @rets_classes = rets_classes
         @lookup_types = lookup_types
+        @key_field = key_field
       end
 
       def self.find_lookup_containers(metadata, resource)
