@@ -1,4 +1,16 @@
-RETS_ERROR = <<-XML
+RETS_NO_RECORDS_ERROR = <<-XML
+<?xml version="1.0"?>
+<RETS ReplyCode="20201" ReplyText="Error message">
+</RETS>
+XML
+
+RETS_NO_OBJECT_ERROR = <<-XML
+<?xml version="1.0"?>
+<RETS ReplyCode="20403" ReplyText="Error message">
+</RETS>
+XML
+
+RETS_INVALID_REQUEST_ERROR = <<-XML
 <?xml version="1.0"?>
 <RETS ReplyCode="123" ReplyText="Error message">
 </RETS>
@@ -215,8 +227,41 @@ SAMPLE_COMPACT_2 = <<XML
     <DATA>		15n1172	ZipCode_f1172		Zip	ZipCo_1172	Zip	50	Character	0	1			0			0		0			0	0		0			0	</DATA>
     <DATA>		15n1177	ADDRESS1_f1177		Address Line 1	ADDRE_1177	Address1	50	Character	0	1			0			0		0			0	0		0			0	</DATA>
     <DATA>		15n1182	MLSYN_f1182		MLS Y/N	MLSYN_1182	MLSYN	1	Character	0	1			0			0		0			0	0		0			0	</DATA>
-    <DATA>		15n1184	OFFICENAME_f1184	Name	Office Name	OFFIC_1184	Office Name	50	Character	0	1			0			0		0			0	0		0			0	</DATA>
+    <DATA>		15n1184	OFFICENAME_f1184	Office Name	Office&#x2019;s Name	OFFIC_1184	Office Name	50	Character	0	1			0			0		0			0	0		0			0	</DATA>
     <DATA>		15n1193	OfficeCode_f1193	OfficeID	Office Code	Offic_1193	Office Code	12	Character	0	1			0			0		0			0	0		0			1	</DATA>
   </METADATA-TABLE>
 </RETS>
 XML
+
+HTML_AUTH_FAILURE = <<EOF
+<html><head><title>Apache Tomcat/6.0.26 - Error report</title><style><!--H1 {font-family:Tahoma,Arial,sans-serif;color:white;background-color:#525D76;font-size:22px;} H2 {font-family:Tahoma,Arial,sans-serif;color:white;background-color:#525D76;font-size:16px;} H3 {font-family:Tahoma,Arial,sans-serif;color:white;background-color:#525D76;font-size:14px;} BODY {font-family:Tahoma,Arial,sans-serif;color:black;background-color:white;} B {font-family:Tahoma,Arial,sans-serif;color:white;background-color:#525D76;} P {font-family:Tahoma,Arial,sans-serif;background:white;color:black;font-size:12px;}A {color : black;}A.name {color : black;}HR {color : #525D76;}--></style> </head><body><h1>HTTP Status 401 - </h1><HR size="1" noshade="noshade"><p><b>type</b> Status report</p><p><b>message</b> <u></u></p><p><b>description</b> <u>This request requires HTTP authentication ().</u></p><HR size="1" noshade="noshade"><h3>Apache Tomcat/6.0.26</h3></body></html>
+EOF
+
+XHTML_AUTH_FAILURE = <<EOF
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>401 - Unauthorized: Access is denied due to invalid credentials.</title>
+</head>
+<body>
+<h1>401 - Unauthorized: Access is denied due to invalid credentials.</h1>
+<p>You do not have permission to view this directory or page using the credentials that you supplied.</p>
+</body>
+</html>
+EOF
+
+SAMPLE_COMPACT_WITH_SPECIAL_CHARS = <<EOF
+<RETS ReplyCode=\"0\" ReplyText=\"Operation Success.\">
+  <DELIMITER value=\"09\" />
+  <COLUMNS>	PublicRemarksNew	WindowCoverings	YearBuilt	Zoning	ZoningCompatibleYN	</COLUMNS>
+  <DATA>	porte-coch&amp;#xE8;re welcomes 		1999	00		</DATA>
+</RETS>
+EOF
+
+SAMPLE_COMPACT_WITH_SPECIAL_CHARS_2 = <<EOF
+<RETS ReplyCode=\"0\" ReplyText=\"Operation Success.\">
+  <DELIMITER value=\"09\" />
+  <COLUMNS>	PublicRemarksNew	WindowCoverings	YearBuilt	Zoning	ZoningCompatibleYN	</COLUMNS>
+  <DATA>	text with &lt;tag&gt;		1999	00		</DATA>
+</RETS>
+EOF

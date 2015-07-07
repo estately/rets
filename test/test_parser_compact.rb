@@ -21,25 +21,19 @@ class TestParserCompact < MiniTest::Test
     end
   end
 
-  def test_parse_returns_key_value_pairs
-    result = Rets::Parser::Compact.parse("A\tB", "1\t2")
-
-    assert_equal({"A" => "1", "B" => "2"}, result)
-  end
-
   # RMLS does this. :|
   def test_remaining_columns_produce_empty_string_values
-    columns = "A B C D"
-    data    = "1 2"
+    column_names = "A B C D"
+    data         = "1 2"
 
-    assert_equal({"A" => "1", "B" => "2", "C" => "", "D" => ""}, Rets::Parser::Compact.parse(columns, data, ' '))
+    assert_equal({"A" => "1", "B" => "2", "C" => "", "D" => ""}, Rets::Parser::Compact.parse(column_names, data, ' '))
   end
 
   def test_leading_empty_columns_are_preserved_with_delimiter
-    columns = "A\tB\tC\tD"
-    data    = "\t\t3\t4" # first two columns are empty data.
+    column_names = "A\tB\tC\tD"
+    data         = "\t\t3\t4" # first two columns are empty data.
 
-    assert_equal({"A" => "", "B" => "", "C" => "3", "D" => "4"}, Rets::Parser::Compact.parse(columns, data, "\t"))
+    assert_equal({"A" => "", "B" => "", "C" => "3", "D" => "4"}, Rets::Parser::Compact.parse(column_names, data, "\t"))
   end
 
   def test_parse_empty_document
@@ -75,4 +69,15 @@ class TestParserCompact < MiniTest::Test
     assert_equal [{"A" => "1", "B" => "2"}, {"A" => "4", "B" => "5"}], rows
   end
 
+  def test_parse_html_encoded_chars
+    rows = Rets::Parser::Compact.parse_document(SAMPLE_COMPACT_WITH_SPECIAL_CHARS)
+
+    assert_equal "porte-coch\u{E8}re welcomes ", rows.last["PublicRemarksNew"]
+  end
+
+  def test_parse_html_encoded_chars_2
+    rows = Rets::Parser::Compact.parse_document(SAMPLE_COMPACT_WITH_SPECIAL_CHARS_2)
+
+    assert_equal "text with <tag>", rows.last["PublicRemarksNew"]
+  end
 end

@@ -1,3 +1,20 @@
+### 0.9.0 / 2015-06-11
+
+* feature: update to httpclient 2.6
+
+### 0.8.1 / 2015-06-09
+
+* fix: actually make the httpclient version more specific this time
+
+### 0.8.0 / 2015-06-09
+
+* feature: reduce memory usage on parsing metadata
+* fix: correctly raise authorization error when given XHTML instead of XML
+* fix: unescape HTML encoded responses
+* fix: make httpclient version requirement more specific
+* feature: add ability to print metadata to a file
+* fix: remove Gemfile.lock from repository
+
 ### 0.7.0 / 2015-01-16
 
 * feature: optionally treat No Records Found as not an error

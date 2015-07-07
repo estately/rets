@@ -4,6 +4,7 @@ gemspec
 group :development do
   gem 'hoe'
   gem 'hoe-gemspec'
+  gem 'hoe-git'
 end
 
 group :travis do

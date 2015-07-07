@@ -21,9 +21,15 @@ class TestClient < MiniTest::Test
   end
 
   def test_capability_url_returns_parsed_url
-    @client.capabilities = { "foo" => "/foo" }
+    client = Rets::Client.new(:login_url => "http://example.com", :capabilities => { "foo" => "/foo" })
 
-    assert_equal "http://example.com/foo", @client.capability_url("foo")
+    assert_equal "http://example.com/foo", client.capability_url("foo")
+  end
+
+  def test_cached_capabilities_case_insensitive
+    client = Rets::Client.new(:login_url => "http://example.com", :capabilities => { "foo" => "/foo" })
+
+    assert_equal client.capabilities.default_proc, Rets::Client::CASE_INSENSITIVE_PROC
   end
 
   def test_capabilities_calls_login_when_nil
@@ -99,6 +105,41 @@ class TestClient < MiniTest::Test
     end
   end
 
+  def test_response_text_encoding_from_ascii
+    @client.stubs(:capability_url).with("Search").returns("search_url")
+
+    response = mock
+    response.stubs(:body).returns(("An ascii string").encode("binary", "UTF-8"))
+    @client.stubs(:http_post).with("search_url", anything).returns(response)
+
+    Rets::Parser::Compact.expects(:parse_document).with("An ascii string")
+
+    @client.find_every({}, false)
+  end
+
+  def test_response_text_encoding_from_utf_8
+    @client.stubs(:capability_url).with("Search").returns("search_url")
+
+    response = mock
+    response.stubs(:body).returns("Some string with non-ascii characters \u0119")
+    @client.stubs(:http_post).with("search_url", anything).returns(response)
+
+    Rets::Parser::Compact.expects(:parse_document).with("Some string with non-ascii characters \u0119")
+
+    @client.find_every({}, false)
+  end
+
+  def test_response_text_encoding_from_utf_16
+    @client.stubs(:capability_url).with("Search").returns("search_url")
+
+    response = mock
+    response.stubs(:body).returns("Some string with non-utf-8 characters \xC2")
+    @client.stubs(:http_post).with("search_url", anything).returns(response)
+
+    Rets::Parser::Compact.expects(:parse_document).with("Some string with non-utf-8 characters \uFFFD")
+
+    @client.find_every({}, false)
+  end
 
   def test_find_retries_when_receiving_no_records_found
     @client.stubs(:find_every).raises(Rets::NoRecordsFound.new('')).then.returns([1])
@@ -212,14 +253,6 @@ class TestClient < MiniTest::Test
     @client.expects(:fetch_object).with("1", :foo => :bar).returns(response)
 
     assert_equal "foo", @client.object("1", :foo => :bar)
-  end
-
-  def test_metadata_caches
-    metadata = stub(:current? => true)
-    @client.metadata = metadata
-    @client.stubs(:capabilities => {})
-
-    assert_same metadata, @client.metadata, "Should be memoized"
   end
 
   def test_decorate_result_handles_bad_metadata

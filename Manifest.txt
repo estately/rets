@@ -3,6 +3,9 @@ Manifest.txt
 README.md
 Rakefile
 bin/rets
+example/connect.rb
+example/get-photos.rb
+example/get-property.rb
 lib/rets.rb
 lib/rets/client.rb
 lib/rets/client_progress_reporter.rb
@@ -17,10 +20,13 @@ lib/rets/metadata/rets_class.rb
 lib/rets/metadata/root.rb
 lib/rets/metadata/table.rb
 lib/rets/parser/compact.rb
+lib/rets/parser/error_checker.rb
 lib/rets/parser/multipart.rb
 test/fixtures.rb
 test/helper.rb
 test/test_client.rb
+test/test_error_checker.rb
+test/test_http_client.rb
 test/test_locking_http_client.rb
 test/test_metadata.rb
 test/test_parser_compact.rb

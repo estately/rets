@@ -1,7 +1,7 @@
 module Rets
   module Parser
     class Compact
-      DEFAULT = "\t"
+      DEFAULT_DELIMITER = "\t"
 
       INCLUDE_NULL_FIELDS = -1
 
@@ -64,7 +64,7 @@ module Rets
       # given a string pattern. (It removes leading spaces).
       #
       def self.parse(columns, data, delimiter = nil)
-        delimiter ||= DEFAULT
+        delimiter ||= DEFAULT_DELIMITER
         delimiter = Regexp.new(Regexp.escape(delimiter))
 
         if delimiter == // || delimiter == /,/
@@ -72,9 +72,9 @@ module Rets
         end
 
         column_names = columns.split(delimiter)
-        data_values = data.split(delimiter, INCLUDE_NULL_FIELDS)
+        data_values = data.split(delimiter, INCLUDE_NULL_FIELDS).map { |x| CGI.unescapeHTML(x) }
 
-        zipped_key_values = column_names.zip(data_values).map { |k, v| [k, v.to_s] }
+        zipped_key_values = column_names.zip(data_values).map { |k, v| [k.freeze, v.to_s] }
 
         hash = Hash[*zipped_key_values.flatten]
         hash.reject { |key, value| key.empty? && value.to_s.empty? }
