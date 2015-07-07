@@ -11,6 +11,14 @@ class TestMetadata < MiniTest::Test
     $VERBOSE = false
   end
 
+  def test_print_tree
+    resource = Rets::Metadata::Resource.new("Foo", [], {}, "Bar")
+
+    io = StringIO.new
+    resource.print_tree(io)
+    assert_equal io.string, "Resource: Foo (Key Field: Bar)\n"
+  end
+
   def test_metadata_root_build_tree
     resource = stub(:id => "X")
     Rets::Metadata::Resource.stubs(:build => resource)
@@ -143,13 +151,6 @@ class TestMetadata < MiniTest::Test
     #TODO
   end
 
-  def test_resource_initialize
-    fragment = { "ResourceID" => 'r' }
-    resource = Rets::Metadata::Resource.new(fragment)
-    assert_equal('r', resource.id)
-    assert_equal([], resource.rets_classes)
-  end
-
   def test_resource_build_lookup_tree
     metadata = stub(:metadata)
     resource = stub(:resource)
@@ -257,11 +258,9 @@ class TestMetadata < MiniTest::Test
   end
 
   def test_resource_find_rets_class
-    resource = Rets::Metadata::Resource.new({})
-    value = mock(:name => "test")
-
-    resource.expects(:rets_classes).returns([value])
-    assert_equal(value, resource.find_rets_class("test"))
+    rets_class = mock(:name => "test")
+    resource = Rets::Metadata::Resource.new('id', [rets_class], {}, 'key_field')
+    assert_equal(rets_class, resource.find_rets_class("test"))
   end
 
   def test_lookup_type_initialize
@@ -272,173 +271,6 @@ class TestMetadata < MiniTest::Test
     assert_equal('a', lookup_type.value)
     assert_equal('b', lookup_type.short_value)
     assert_equal('c', lookup_type.long_value)
-  end
-  def test_rets_class_find_table
-    rets_class = Rets::Metadata::RetsClass.new({}, "resource")
-    value = mock(:name => "test")
-
-    rets_class.expects(:tables).returns([value])
-    assert_equal(value, rets_class.find_table("test"))
-  end
-
-  def test_rets_class_find_table_container
-    resource = mock(:id => "a")
-    rets_class = mock(:name => "b")
-    table = mock(:resource => "a", :class => "b")
-
-    metadata = { :table => [table] }
-
-    assert_equal(table, Rets::Metadata::RetsClass.find_table_container(metadata, resource, rets_class))
-  end
-
-  def test_rets_class_build
-    resource = stub(:resource)
-    table_fragment = stub(:fragment)
-    table_container = stub(:tables => [table_fragment])
-    table = stub(:table)
-
-    Rets::Metadata::TableFactory.expects(:build).with(table_fragment, resource).returns(table)
-    Rets::Metadata::RetsClass.expects(:find_table_container).returns(table_container)
-
-    rets_class = Rets::Metadata::RetsClass.build({}, resource, "")
-
-    assert_equal(rets_class.tables, [table])
-  end
-
-  def test_rets_class_build_when_find_table_container_returns_nil
-    new_rets_class = stub(:new_rets_class)
-    Rets::Metadata::RetsClass.stubs(:new => new_rets_class)
-    Rets::Metadata::RetsClass.stubs(:find_table_container => nil)
-    Rets::Metadata::RetsClass.build({}, "", "")
-  end
-
-
-  def test_rets_class_initialize
-    fragment = { "ClassName" => "A" }
-    rets_class = Rets::Metadata::RetsClass.new(fragment, "resource")
-
-    assert_equal("A", rets_class.name)
-    assert_equal("resource", rets_class.resource)
-    assert_equal([], rets_class.tables)
-  end
-
-  def test_table_factory_creates_lookup_table
-    assert_instance_of Rets::Metadata::LookupTable, Rets::Metadata::TableFactory.build({"LookupName" => "Foo", "Interpretation" => "Lookup"}, nil)
-  end
-
-  def test_table_factory_creates_table
-    assert_instance_of Rets::Metadata::Table, Rets::Metadata::TableFactory.build({"LookupName" => "", "Interpretation" => ""}, nil)
-  end
-
-  def test_table_factory_enum
-    assert Rets::Metadata::TableFactory.enum?("LookupName" => "Foo",  "Interpretation" => "Lookup")
-    assert !Rets::Metadata::TableFactory.enum?("LookupName" => "",    "Interpretation" => "SomethingElse")
-    assert !Rets::Metadata::TableFactory.enum?("LookupName" => "Foo", "Interpretation" => "")
-    assert !Rets::Metadata::TableFactory.enum?("LookupName" => "",    "Interpretation" => "SomethingElse")
-  end
-
-  def test_lookup_table_initialize
-    fragment = { "SystemName" => "A", "Interpretation" => "B", "LookupName" => "C" }
-
-    lookup_table = Rets::Metadata::LookupTable.new(fragment, "Foo")
-
-    assert_equal("Foo", lookup_table.resource)
-    assert_equal("A", lookup_table.name)
-    assert_equal("C", lookup_table.lookup_name)
-    assert_equal("B", lookup_table.interpretation)
-  end
-
-  def test_lookup_table_resolve_returns_empty_array_when_value_is_empty_and_is_multi?
-
-    lookup_table = Rets::Metadata::LookupTable.new({}, nil)
-    lookup_table.stubs(:multi? => true)
-
-    assert_equal [], lookup_table.resolve("")
-  end
-
-  def test_lookup_table_resolve_returns_single_value_if_not_multi
-    lookup_table = Rets::Metadata::LookupTable.new({}, nil)
-    lookup_table.stubs(:multi? => false)
-
-    lookup_table.expects(:lookup_type).with("A,B").returns(mock(:long_value => "AaaBbb"))
-
-    assert_equal "AaaBbb", lookup_table.resolve("A,B")
-  end
-
-  def test_lookup_table_resolve_returns_multi_value_array_when_multi
-    fragment = { "Interpretation" => "LookupMulti" }
-
-    lookup_table = Rets::Metadata::LookupTable.new(fragment, nil)
-
-    lookup_table.expects(:lookup_type).with("A").returns(mock(:long_value => "Aaa"))
-    lookup_table.expects(:lookup_type).with("B").returns(mock(:long_value => "Bbb"))
-
-    assert_equal ["Aaa", "Bbb"], lookup_table.resolve("A,B")
-  end
-
-  #Sandicor does this :|
-  def test_lookup_table_resolve_returns_multi_value_array_when_multi_with_quoted_values
-    fragment = { "Interpretation" => "LookupMulti" }
-
-    lookup_table = Rets::Metadata::LookupTable.new(fragment, nil)
-
-    lookup_table.expects(:lookup_type).with("A").returns(mock(:long_value => "Aaa"))
-    lookup_table.expects(:lookup_type).with("B").returns(mock(:long_value => "Bbb"))
-
-    assert_equal ["Aaa", "Bbb"], lookup_table.resolve(%q["A","B"])
-  end
-
-  # This scenario is unfortunately common.
-  def test_lookup_table_resolve_returns_nil_when_lookup_type_is_not_present_for_multi_value
-    fragment = { "Interpretation" => "LookupMulti" }
-
-    lookup_table = Rets::Metadata::LookupTable.new(fragment, nil)
-
-    lookup_table.expects(:lookup_type).with("A").returns(mock(:long_value => "Aaa"))
-    lookup_table.expects(:lookup_type).with("B").returns(nil)
-
-    lookup_table.expects(:warn).with("Discarding unmappable value of #{"B".inspect}")
-
-    assert_equal ["Aaa", ""], lookup_table.resolve("A,B")
-  end
-
-  # This scenario is unfortunately common.
-  def test_lookup_table_resolve_returns_nil_when_lookup_type_is_not_present_for_single_value
-
-    lookup_table = Rets::Metadata::LookupTable.new({}, nil)
-    lookup_table.stubs(:multi? => true)
-
-    lookup_table.expects(:lookup_type).with("A").returns(nil)
-
-    lookup_table.expects(:warn).with("Discarding unmappable value of #{"A".inspect}")
-
-    assert_equal [""], lookup_table.resolve("A")
-  end
-
-  def test_table_initialize
-    fragment = { "DataType" => "A", "SystemName" => "B" }
-
-    table = Rets::Metadata::Table.new(fragment, nil)
-    assert_equal("A", table.type)
-    assert_equal("B", table.name)
-  end
-
-  def test_table_resolve_returns_empty_string_when_value_nil
-    table = Rets::Metadata::Table.new({}, nil)
-
-    assert_equal "", table.resolve(nil)
-  end
-
-  def test_table_resolve_passes_values_straight_through
-    table = Rets::Metadata::Table.new({}, nil)
-
-    assert_equal "Foo", table.resolve("Foo")
-  end
-
-  def test_table_resolve_passes_values_strips_extra_whitspace
-    table = Rets::Metadata::Table.new({}, nil)
-
-    assert_equal "Foo", table.resolve(" Foo ")
   end
 
   def test_root_can_be_serialized
