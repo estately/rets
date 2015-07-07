@@ -81,39 +81,52 @@ module Rets
 
     def find_with_retries(opts = {})
       retries = 0
-      resolve = opts.delete(:resolve)
-      find_with_given_retry(retries, resolve, opts)
+      find_with_given_retry(retries, opts)
     end
 
-    def find_with_given_retry(retries, resolve, opts)
+    def find_with_given_retry(retries, opts)
       begin
-        find_every(opts, resolve)
+        find_every(opts)
       rescue NoRecordsFound => e
         if opts.fetch(:no_records_not_an_error, false)
           client_progress.no_records_found
           opts[:count] == COUNT.only ? 0 : []
         else
-          handle_find_failure(retries, resolve, opts, e)
+          handle_find_failure(retries, opts, e)
         end
       rescue AuthorizationFailure, InvalidRequest => e
-        handle_find_failure(retries, resolve, opts, e)
+        handle_find_failure(retries, opts, e)
       end
     end
 
-    def handle_find_failure(retries, resolve, opts, e)
+    def handle_find_failure(retries, opts, e)
       if retries < opts.fetch(:max_retries, 3)
         retries += 1
         client_progress.find_with_retries_failed_a_retry(e, retries)
         clean_setup
-        find_with_given_retry(retries, resolve, opts)
+        find_with_given_retry(retries, opts)
       else
         client_progress.find_with_retries_exceeded_retry_count(e)
         raise e
       end
     end
 
-    def find_every(opts, resolve)
-      params = {"QueryType" => "DMQL2", "Format" => "COMPACT"}.merge(fixup_keys(opts))
+    def find_every(opts)
+      params = {
+        "SearchType"          => opts[:search_type],
+        "Class"               => opts[:class],
+
+        "Count"               => opts[:count],
+        "Format"              => opts.fetch(:format, "COMPACT"),
+        "Limit"               => opts[:limit],
+        "Offset"              => opts[:offset],
+        "Select"              => opts[:select],
+        "RestrictedIndicator" => opts[:RestrictedIndicator],
+        "StandardNames"       => opts[:standard_name],
+        "Payload"             => opts[:payload],
+        "Query"               => opts[:query],
+        "QueryType"           => opts.fetch(:query_type, "DMQL2"),
+      }
       res = http_post(capability_url("Search"), params)
 
       if opts[:count] == COUNT.only
@@ -122,7 +135,7 @@ module Rets
         results = Parser::Compact.parse_document(
           res.body.encode("UTF-8", res.body.encoding, :invalid => :replace, :undef => :replace)
         )
-        if resolve
+        if opts[:resolve]
           rets_class = find_rets_class(opts[:search_type], opts[:class])
           decorate_results(results, rets_class)
         else
@@ -219,19 +232,6 @@ module Rets
       }
 
       http_post(capability_url("GetObject"), params, extra_headers)
-    end
-
-    # Changes keys to be camel cased, per the RETS standard for queries.
-    def fixup_keys(hash)
-      fixed_hash = {}
-
-      hash.each do |key, value|
-        camel_cased_key = key.to_s.capitalize.gsub(/_(\w)/) { $1.upcase }
-
-        fixed_hash[camel_cased_key] = value
-      end
-
-      fixed_hash
     end
 
     def metadata

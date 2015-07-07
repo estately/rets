@@ -114,7 +114,7 @@ class TestClient < MiniTest::Test
 
     Rets::Parser::Compact.expects(:parse_document).with("An ascii string")
 
-    @client.find_every({}, false)
+    @client.find_every({})
   end
 
   def test_response_text_encoding_from_utf_8
@@ -126,7 +126,7 @@ class TestClient < MiniTest::Test
 
     Rets::Parser::Compact.expects(:parse_document).with("Some string with non-ascii characters \u0119")
 
-    @client.find_every({}, false)
+    @client.find_every({})
   end
 
   def test_response_text_encoding_from_utf_16
@@ -138,7 +138,7 @@ class TestClient < MiniTest::Test
 
     Rets::Parser::Compact.expects(:parse_document).with("Some string with non-utf-8 characters \uFFFD")
 
-    @client.find_every({}, false)
+    @client.find_every({})
   end
 
   def test_find_retries_when_receiving_no_records_found
@@ -164,21 +164,12 @@ class TestClient < MiniTest::Test
     @client.find(:all, :foo => :bar)
   end
 
-  def test_find_retries_on_errors_preserves_resolve
-    @client.stubs(:find_every).raises(Rets::AuthorizationFailure.new(401, 'Not Authorized')).then.raises(Rets::InvalidRequest.new(20134, 'Not Found')).then.with({:foo => :bar}, true).returns([])
-    @client.find(:all, {:foo => :bar, :resolve => true})
-  end
-
   def test_find_eventually_reraises_errors
     @client.stubs(:find_every).raises(Rets::AuthorizationFailure.new(401, 'Not Authorized'))
+
     assert_raises Rets::AuthorizationFailure do
       @client.find(:all, :foo => :bar)
     end
-  end
-
-  def test_fixup_keys
-    assert_equal({ "Foo" => "bar" },    @client.fixup_keys(:foo => "bar"))
-    assert_equal({ "FooFoo" => "bar" }, @client.fixup_keys(:foo_foo => "bar"))
   end
 
   def test_all_objects_calls_objects
