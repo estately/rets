@@ -3,7 +3,10 @@ require_relative "helper"
 class TestMetadataResource < MiniTest::Test
   def test_resource_initialize
     fragment = { "ResourceID" => 'r' }
-    resource = Rets::Metadata::Resource.new(fragment)
+    lookup_types = {}
+
+    resource = Rets::Metadata::Resource.new(lookup_types, fragment)
+
     assert_equal('r', resource.id)
     assert_equal([], resource.rets_classes)
   end
@@ -79,25 +82,33 @@ class TestMetadataResource < MiniTest::Test
   end
 
   def test_resource_find_lookup_containers
-    resource = stub(:id => "id")
-    metadata = { :lookup => [stub(:resource => "id"), stub(:resource => "id"), stub(:resource => "a")] }
+    resource_id = "id"
+    metadata = {
+      :lookup => [
+        stub(:resource => resource_id),
+        stub(:resource => resource_id),
+        stub(:resource => "a")
+      ]
+    }
 
-    lookup_containers = Rets::Metadata::Resource.find_lookup_containers(metadata, resource)
+    lookup_containers = Rets::Metadata::Resource.find_lookup_containers(metadata, resource_id)
 
     assert_equal(2, lookup_containers.size)
     assert_equal(["id", "id"], lookup_containers.map(&:resource))
   end
 
   def test_resource_find_lookup_type_containers
-    resource = stub(:id => "id")
-    metadata = { :lookup_type => [stub(:resource => "id", :lookup => "look"),
-                                  stub(:resource => "id", :lookup => "look"),
-                                  stub(:resource => "id", :lookup => "not_look"),
-                                  stub(:resource => "a",  :lookup => "look"),
-                                  stub(:resource => "a",  :lookup => "not_look")
-                                 ]}
-
-    lookup_type_containers = Rets::Metadata::Resource.find_lookup_type_containers(metadata, resource, "look")
+    resource_id = "id"
+    metadata = {
+      :lookup_type => [
+        stub(:resource => resource_id, :lookup => "look"),
+        stub(:resource => resource_id, :lookup => "look"),
+        stub(:resource => resource_id, :lookup => "not_look"),
+        stub(:resource => "a",         :lookup => "look"),
+        stub(:resource => "a",         :lookup => "not_look")
+      ]
+    }
+    lookup_type_containers = Rets::Metadata::Resource.find_lookup_type_containers(metadata, resource_id, "look")
 
     assert_equal(2, lookup_type_containers.size)
     assert_equal(["id", "id"], lookup_type_containers.map(&:resource))
@@ -115,7 +126,7 @@ class TestMetadataResource < MiniTest::Test
   end
 
   def test_resource_find_rets_class
-    resource = Rets::Metadata::Resource.new({})
+    resource = Rets::Metadata::Resource.new({}, {})
     value = mock(:name => "test")
 
     resource.expects(:rets_classes).returns([value])
