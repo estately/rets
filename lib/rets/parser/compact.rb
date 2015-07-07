@@ -34,7 +34,7 @@ module Rets
           when 'COLUMNS'
             @columns_start = true
           when 'DATA'
-            @data_start = true
+            @result_index = @results.size
           end
         end
 
@@ -43,7 +43,7 @@ module Rets
           when 'COLUMNS'
             @columns_start = false
           when 'DATA'
-            @data_start = false
+            @result_index = nil
           end
         end
 
@@ -52,8 +52,9 @@ module Rets
             @columns = string
           end
 
-          if @data_start
-            @results << string
+          if @result_index
+            @results[@result_index] ||= ''
+            @results[@result_index] << string
           end
         end
       end
