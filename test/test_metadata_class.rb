@@ -20,12 +20,12 @@ class TestMetadataClass < MiniTest::Test
   end
 
   def test_rets_class_build
-    resource = stub(:resource)
+    resource = stub(:id => "id", :lookup_types => [])
     table_fragment = stub(:fragment)
     table_container = stub(:tables => [table_fragment])
     table = stub(:table)
 
-    Rets::Metadata::TableFactory.expects(:build).with(table_fragment, resource).returns(table)
+    Rets::Metadata::TableFactory.expects(:build).with(table_fragment, anything, anything).returns(table)
     Rets::Metadata::RetsClass.expects(:find_table_container).returns(table_container)
 
     rets_class = Rets::Metadata::RetsClass.build({}, resource, "")
