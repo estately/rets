@@ -1,3 +1,5 @@
+# coding: utf-8
+
 module Rets
   module Parser
     class Compact
