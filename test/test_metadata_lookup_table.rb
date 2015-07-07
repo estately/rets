@@ -20,18 +20,18 @@ class TestMetadataLookupTable < MiniTest::Test
   end
 
   def test_lookup_table_resolve_returns_empty_array_when_value_is_empty_and_is_multi?
-    lookup_table = Rets::Metadata::LookupTable.new("Foo", [], {})
-    lookup_table.stubs(:multi? => true)
+    fragment = { "Interpretation" => "LookupMulti" }
+    lookup_table = Rets::Metadata::LookupTable.new("Foo", [], fragment)
 
     assert_equal [], lookup_table.resolve("")
   end
 
   def test_lookup_table_resolve_returns_single_value_if_not_multi
+    fragment = {}
     lookup_types = [
       Rets::Metadata::LookupType.new("Value" => "A,B", "LongValue" => "AaaBbb")
     ]
-    lookup_table = Rets::Metadata::LookupTable.new("Foo", lookup_types, {})
-    lookup_table.stubs(:multi? => false)
+    lookup_table = Rets::Metadata::LookupTable.new("Foo", lookup_types, fragment)
 
     assert_equal "AaaBbb", lookup_table.resolve("A,B")
   end
