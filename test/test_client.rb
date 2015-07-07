@@ -88,6 +88,18 @@ class TestClient < MiniTest::Test
   end
 
   def test_find_first_calls_find_every_with_limit_one
+    assert_raises ArgumentError do
+      @client.find_every({})
+    end
+    assert_raises ArgumentError do
+      @client.find_every(:search_type => "Foo")
+    end
+    assert_raises ArgumentError do
+      @client.find_every(:class => "Bar")
+    end
+  end
+
+  def test_find_first_calls_find_every_with_limit_one
     @client.expects(:find_every).with({:limit => 1, :foo => :bar}, nil).returns([1,2,3])
 
     assert_equal 1, @client.find(:first, :foo => :bar, :limit => 5), "User-specified limit should be ignored"
@@ -114,7 +126,7 @@ class TestClient < MiniTest::Test
 
     Rets::Parser::Compact.expects(:parse_document).with("An ascii string")
 
-    @client.find_every({})
+    @client.find_every(:search_type => "Foo", :class => "Bar")
   end
 
   def test_response_text_encoding_from_utf_8
@@ -126,7 +138,7 @@ class TestClient < MiniTest::Test
 
     Rets::Parser::Compact.expects(:parse_document).with("Some string with non-ascii characters \u0119")
 
-    @client.find_every({})
+    @client.find_every(:search_type => "Foo", :class => "Bar")
   end
 
   def test_response_text_encoding_from_utf_16
@@ -138,7 +150,7 @@ class TestClient < MiniTest::Test
 
     Rets::Parser::Compact.expects(:parse_document).with("Some string with non-utf-8 characters \uFFFD")
 
-    @client.find_every({})
+    @client.find_every(:search_type => "Foo", :class => "Bar")
   end
 
   def test_find_retries_when_receiving_no_records_found

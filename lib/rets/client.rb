@@ -112,9 +112,12 @@ module Rets
     end
 
     def find_every(opts)
+      raise ArgumentError.new("missing option :search_type (provide the name of a RETS resource)") unless opts[:search_type]
+      raise ArgumentError.new("missing option :class (provide the name of a RETS class)") unless opts[:class]
+
       params = {
-        "SearchType"          => opts[:search_type],
-        "Class"               => opts[:class],
+        "SearchType"          => opts.fetch(:search_type),
+        "Class"               => opts.fetch(:class),
 
         "Count"               => opts[:count],
         "Format"              => opts.fetch(:format, "COMPACT"),
