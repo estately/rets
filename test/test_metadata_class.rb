@@ -2,7 +2,7 @@ require_relative "helper"
 
 class TestMetadataClass < MiniTest::Test
   def test_rets_class_find_table
-    rets_class = Rets::Metadata::RetsClass.new({}, "resource")
+    rets_class = Rets::Metadata::RetsClass.new({})
     value = mock(:name => "test")
 
     rets_class.expects(:tables).returns([value])
@@ -10,25 +10,27 @@ class TestMetadataClass < MiniTest::Test
   end
 
   def test_rets_class_find_table_container
-    resource = mock(:id => "a")
+    resource_id = "a"
     rets_class = mock(:name => "b")
-    table = mock(:resource => "a", :class => "b")
+    table = mock(:resource => resource_id, :class => "b")
 
     metadata = { :table => [table] }
 
-    assert_equal(table, Rets::Metadata::RetsClass.find_table_container(metadata, resource, rets_class))
+    assert_equal(table, Rets::Metadata::RetsClass.find_table_container(metadata, resource_id, rets_class))
   end
 
   def test_rets_class_build
-    resource = stub(:id => "id", :lookup_types => [])
+    resource_id = "id"
+    lookup_types = []
+
     table_fragment = stub(:fragment)
     table_container = stub(:tables => [table_fragment])
     table = stub(:table)
 
-    Rets::Metadata::TableFactory.expects(:build).with(table_fragment, anything, anything).returns(table)
+    Rets::Metadata::TableFactory.expects(:build).with(table_fragment, resource_id, lookup_types).returns(table)
     Rets::Metadata::RetsClass.expects(:find_table_container).returns(table_container)
 
-    rets_class = Rets::Metadata::RetsClass.build({}, resource, "")
+    rets_class = Rets::Metadata::RetsClass.build({}, resource_id, lookup_types, "")
 
     assert_equal(rets_class.tables, [table])
   end
@@ -37,15 +39,14 @@ class TestMetadataClass < MiniTest::Test
     new_rets_class = stub(:new_rets_class)
     Rets::Metadata::RetsClass.stubs(:new => new_rets_class)
     Rets::Metadata::RetsClass.stubs(:find_table_container => nil)
-    Rets::Metadata::RetsClass.build({}, "", "")
+    Rets::Metadata::RetsClass.build({}, "resource_id", [], "")
   end
 
   def test_rets_class_initialize
     fragment = { "ClassName" => "A" }
-    rets_class = Rets::Metadata::RetsClass.new(fragment, "resource")
+    rets_class = Rets::Metadata::RetsClass.new(fragment)
 
     assert_equal("A", rets_class.name)
-    assert_equal("resource", rets_class.resource)
     assert_equal([], rets_class.tables)
   end
 end

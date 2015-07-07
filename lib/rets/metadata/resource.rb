@@ -51,7 +51,7 @@ module Rets
 
       def self.build_classes(resource, metadata)
         find_rets_classes(metadata, resource).map do |rets_class_fragment|
-          RetsClass.build(rets_class_fragment, resource, metadata)
+          RetsClass.build(rets_class_fragment, resource.id, resource.lookup_types, metadata)
         end
       end
 

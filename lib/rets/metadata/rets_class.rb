@@ -5,28 +5,26 @@ module Rets
       attr_accessor :name
       attr_accessor :visible_name
       attr_accessor :description
-      attr_accessor :resource
 
-      def initialize(rets_class_fragment, resource)
-        self.resource = resource
+      def initialize(rets_class_fragment)
         self.tables = []
         self.name = rets_class_fragment["ClassName"]
         self.visible_name = rets_class_fragment["VisibleName"]
         self.description = rets_class_fragment["Description"]
       end
 
-      def self.find_table_container(metadata, resource, rets_class)
-        metadata[:table].detect { |t| t.resource == resource.id && t.class == rets_class.name }
+      def self.find_table_container(metadata, resource_id, rets_class)
+        metadata[:table].detect { |t| t.resource == resource_id && t.class == rets_class.name }
       end
 
-      def self.build(rets_class_fragment, resource, metadata)
-        rets_class = new(rets_class_fragment, resource)
+      def self.build(rets_class_fragment, resource_id, lookup_types, metadata)
+        rets_class = new(rets_class_fragment)
 
-        table_container = find_table_container(metadata, resource, rets_class)
+        table_container = find_table_container(metadata, resource_id, rets_class)
 
         if table_container
           table_container.tables.each do |table_fragment|
-            rets_class.tables << TableFactory.build(table_fragment, resource.id, resource.lookup_types)
+            rets_class.tables << TableFactory.build(table_fragment, resource_id, lookup_types)
           end
         end
 
