@@ -2,13 +2,11 @@ module Rets
   module Metadata
     class Resource
       class MissingRetsClass < RuntimeError; end
-      attr_accessor :rets_classes
+      attr_reader :lookup_types, :rets_classes, :id, :key_field
 
-      attr_reader :lookup_types, :id, :key_field
-
-      def initialize(lookup_types, resource)
-        self.rets_classes = []
+      def initialize(lookup_types, rets_classes, resource)
         @lookup_types = lookup_types
+        @rets_classes = rets_classes
 
         @id = resource["ResourceID"]
         @key_field = resource["KeyField"]
@@ -22,10 +20,10 @@ module Rets
         metadata[:lookup_type].select { |ltc| ltc.resource == resource_id && ltc.lookup == lookup_name }
       end
 
-      def self.find_rets_classes(metadata, resource)
-        class_container = metadata[:class].detect { |c| c.resource == resource.id }
+      def self.find_rets_classes(metadata, resource_id)
+        class_container = metadata[:class].detect { |c| c.resource == resource_id }
         if class_container.nil?
-          raise MissingRetsClass.new("No Metadata classes for #{resource.id}")
+          raise MissingRetsClass.new("No Metadata classes for #{resource_id}")
         else
           class_container.classes
         end
@@ -49,19 +47,17 @@ module Rets
         lookup_types
       end
 
-      def self.build_classes(resource, metadata)
-        find_rets_classes(metadata, resource).map do |rets_class_fragment|
-          RetsClass.build(rets_class_fragment, resource.id, resource.lookup_types, metadata)
+      def self.build_classes(resource_id, lookup_types, metadata)
+        find_rets_classes(metadata, resource_id).map do |rets_class_fragment|
+          RetsClass.build(rets_class_fragment, resource_id, lookup_types, metadata)
         end
       end
 
       def self.build(resource_fragment, metadata, logger)
         resource_id = resource_fragment["ResourceID"]
         lookup_types = build_lookup_tree(resource_id, metadata)
-
-        resource = new(lookup_types, resource_fragment)
-        resource.rets_classes = build_classes(resource, metadata)
-        resource
+        rets_classes = build_classes(resource_id, lookup_types, metadata)
+        new(lookup_types, rets_classes, resource_fragment)
       rescue MissingRetsClass => e
         logger.warn(e.message)
         nil

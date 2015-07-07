@@ -2,13 +2,15 @@ require_relative "helper"
 
 class TestMetadataResource < MiniTest::Test
   def test_resource_initialize
-    fragment = { "ResourceID" => 'r' }
     lookup_types = {}
+    rets_classes = []
+    fragment = { "ResourceID" => 'r' }
 
-    resource = Rets::Metadata::Resource.new(lookup_types, fragment)
+    resource = Rets::Metadata::Resource.new(lookup_types, rets_classes, fragment)
 
+    assert_equal(lookup_types, resource.lookup_types)
+    assert_equal(rets_classes, resource.rets_classes)
     assert_equal('r', resource.id)
-    assert_equal([], resource.rets_classes)
   end
 
   def test_resource_build_lookup_tree
@@ -35,15 +37,17 @@ class TestMetadataResource < MiniTest::Test
   end
 
   def test_resource_build_classes
-    resource = stub(:resource)
+    resource_id = "id"
+    lookup_types = []
+
     metadata = stub(:metadata)
     rets_class = stub(:rets_class)
     rets_class_fragment = stub(:rets_class_fragment)
 
-    Rets::Metadata::RetsClass.expects(:build).with(rets_class_fragment, resource, metadata).returns(rets_class)
-    Rets::Metadata::Resource.expects(:find_rets_classes).with(metadata, resource).returns([rets_class_fragment])
+    Rets::Metadata::RetsClass.expects(:build).with(rets_class_fragment, resource_id, lookup_types, metadata).returns(rets_class)
+    Rets::Metadata::Resource.expects(:find_rets_classes).with(metadata, resource_id).returns([rets_class_fragment])
 
-    classes = Rets::Metadata::Resource.build_classes(resource, metadata)
+    classes = Rets::Metadata::Resource.build_classes(resource_id, lookup_types, metadata)
     assert_equal([rets_class], classes)
   end
 
@@ -115,22 +119,18 @@ class TestMetadataResource < MiniTest::Test
   end
 
   def test_resource_find_rets_classes
-    resource = stub(:id => "id")
     rets_classes = stub(:rets_classes)
 
     metadata = { :class => [stub(:resource => "id", :classes => rets_classes),
                             stub(:resource => "id", :classes => rets_classes),
                             stub(:resource => "a")]}
 
-    assert_equal(rets_classes, Rets::Metadata::Resource.find_rets_classes(metadata, resource))
+    assert_equal(rets_classes, Rets::Metadata::Resource.find_rets_classes(metadata, "id"))
   end
 
   def test_resource_find_rets_class
-    resource = Rets::Metadata::Resource.new({}, {})
-    value = mock(:name => "test")
-
-    resource.expects(:rets_classes).returns([value])
-    assert_equal(value, resource.find_rets_class("test"))
+    rets_class = Rets::Metadata::RetsClass.new("ClassName" => 'test')
+    resource = Rets::Metadata::Resource.new({}, [rets_class], {})
+    assert_equal(rets_class, resource.find_rets_class("test"))
   end
-
 end
