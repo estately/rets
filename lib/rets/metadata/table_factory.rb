@@ -3,7 +3,7 @@ module Rets
     class TableFactory
       def self.build(table_fragment, resource)
         if enum?(table_fragment)
-          LookupTable.build(table_fragment, resource)
+          LookupTable.build(table_fragment, resource.id, resource.lookup_types)
         else
           Table.new(table_fragment, resource.id)
         end

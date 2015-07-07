@@ -14,10 +14,10 @@ module Rets
         @table_fragment = table_fragment
       end
 
-      def self.build(table_fragment, resource)
+      def self.build(table_fragment, resource_id, lookup_types)
         lookup_name = table_fragment["LookupName"]
-        lookup_types = resource.lookup_types[lookup_name]
-        new(resource.id, lookup_types, table_fragment)
+        lookup_types = lookup_types[lookup_name]
+        new(resource_id, lookup_types, table_fragment)
       end
 
       def multi?
