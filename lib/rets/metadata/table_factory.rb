@@ -2,7 +2,11 @@ module Rets
   module Metadata
     class TableFactory
       def self.build(table_fragment, resource)
-        enum?(table_fragment) ? LookupTable.new(table_fragment, resource) : Table.new(table_fragment, resource)
+        if enum?(table_fragment)
+          LookupTable.build(table_fragment, resource)
+        else
+          Table.new(table_fragment, resource)
+        end
       end
 
       def self.enum?(table_fragment)

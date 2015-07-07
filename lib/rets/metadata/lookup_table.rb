@@ -1,28 +1,27 @@
 module Rets
   module Metadata
     class LookupTable
-      attr_accessor :resource
-      attr_accessor :lookup_name
-      attr_accessor :name
-      attr_accessor :interpretation
-      attr_accessor :long_name
-      attr_accessor :table_fragment
+      attr_reader :resource_id, :lookup_types
+      attr_reader :name, :long_name, :interpretation, :table_fragment
 
-      def initialize(table_fragment, resource)
-        self.table_fragment = table_fragment
-        self.resource = resource
-        self.name = table_fragment["SystemName"]
-        self.interpretation = table_fragment["Interpretation"]
-        self.lookup_name = table_fragment["LookupName"]
-        self.long_name = table_fragment["LongName"]
+      def initialize(resource_id, lookup_types, table_fragment)
+        @resource_id = resource_id
+        @lookup_types = lookup_types
+
+        @name = table_fragment["SystemName"]
+        @long_name = table_fragment["LongName"]
+        @interpretation = table_fragment["Interpretation"]
+        @table_fragment = table_fragment
+      end
+
+      def self.build(table_fragment, resource)
+        lookup_name = table_fragment["LookupName"]
+        lookup_types = resource.lookup_types[lookup_name]
+        new(resource.id, lookup_types, table_fragment)
       end
 
       def multi?
         interpretation == "LookupMulti"
-      end
-
-      def lookup_types
-        resource.lookup_types[lookup_name]
       end
 
       # Print the tree to a file
