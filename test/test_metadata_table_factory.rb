@@ -2,7 +2,9 @@ require_relative "helper"
 
 class TestMetadataTableFactory < MiniTest::Test
   def test_table_fragments_produce_the_correct_types
-    resource_id = 'Resource'
+    resource = mock
+    resource.stubs(:id).returns('Resource')
+    resource.stubs(:lookup_types).returns({})
 
     test_cases = {
       {"LookupName" => "Foo", "Interpretation"  => "Bar"}           => Rets::Metadata::Table,
@@ -15,7 +17,7 @@ class TestMetadataTableFactory < MiniTest::Test
     }
 
     test_cases.each do |table_fragment, expected_klass|
-      assert_instance_of expected_klass, Rets::Metadata::TableFactory.build(table_fragment, resource_id)
+      assert_instance_of expected_klass, Rets::Metadata::TableFactory.build(table_fragment, resource)
     end
   end
 end

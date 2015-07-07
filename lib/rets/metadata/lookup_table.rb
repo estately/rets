@@ -1,20 +1,15 @@
 module Rets
   module Metadata
     class LookupTable
-      attr_reader :table_fragment, :resource_id, :name, :lookup_name, :long_name
+      attr_reader :table_fragment, :lookup_types, :resource_id, :name, :long_name
 
-      def initialize(table_fragment, resource_id)
+      def initialize(table_fragment, lookup_types, resource_id)
         @table_fragment = table_fragment
-
+        @lookup_types = lookup_types
         @resource_id = resource_id
 
         @name = table_fragment["SystemName"]
-        @lookup_name = table_fragment["LookupName"]
         @long_name = table_fragment["LongName"]
-      end
-
-      def lookup_types
-        resource.lookup_types[lookup_name]
       end
 
       # Print the tree to a file
@@ -22,7 +17,7 @@ module Rets
       # [out] The file to print to.  Defaults to $stdout.
       def print_tree(out = $stdout)
         out.puts "    LookupTable: #{name}"
-        out.puts "      Resource: #{resource.id}"
+        out.puts "      Resource: #{resource_id}"
         out.puts "      Required: #{table_fragment['Required']}"
         out.puts "      Searchable: #{ table_fragment["Searchable"] }"
         out.puts "      Units: #{ table_fragment["Units"] }"
