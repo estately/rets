@@ -1,34 +1,38 @@
 module Rets
   module Metadata
     class RetsClass
-      attr_accessor :tables
-      attr_accessor :name
-      attr_accessor :visible_name
-      attr_accessor :description
+      attr_reader :name, :visible_name, :description, :tables
 
-      def initialize(rets_class_fragment)
-        self.tables = []
-        self.name = rets_class_fragment["ClassName"]
-        self.visible_name = rets_class_fragment["VisibleName"]
-        self.description = rets_class_fragment["Description"]
+      def initialize(name, visible_name, description, tables)
+        @name = name
+        @visible_name = visible_name
+        @description = description
+
+        @tables = tables
       end
 
-      def self.find_table_container(metadata, resource_id, rets_class)
-        metadata[:table].detect { |t| t.resource == resource_id && t.class == rets_class.name }
+      def self.find_table_container(metadata, resource_id, class_name)
+        metadata[:table].detect { |t| t.resource == resource_id && t.class == class_name }
+      end
+
+      def self.builds_tables(table_container, resource_id, lookup_types)
+        if table_container
+          table_container.tables.map do |table_fragment|
+            TableFactory.build(table_fragment, resource_id, lookup_types)
+          end
+        else
+          []
+        end
       end
 
       def self.build(rets_class_fragment, resource_id, lookup_types, metadata)
-        rets_class = new(rets_class_fragment)
+        class_name = rets_class_fragment["ClassName"]
+        visible_name = rets_class_fragment["VisibleName"]
+        description = rets_class_fragment["Description"]
 
-        table_container = find_table_container(metadata, resource_id, rets_class)
-
-        if table_container
-          table_container.tables.each do |table_fragment|
-            rets_class.tables << TableFactory.build(table_fragment, resource_id, lookup_types)
-          end
-        end
-
-        rets_class
+        table_container = find_table_container(metadata, resource_id, class_name)
+        tables = builds_tables(table_container, resource_id, lookup_types)
+        new(class_name, visible_name, description, tables)
       end
 
       # Print the tree to a file
