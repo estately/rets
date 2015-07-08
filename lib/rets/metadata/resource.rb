@@ -2,14 +2,12 @@ module Rets
   module Metadata
     class Resource
       class MissingRetsClass < RuntimeError; end
-      attr_reader :lookup_types, :rets_classes, :id, :key_field
+      attr_reader :rets_classes, :id, :key_field
 
-      def initialize(lookup_types, rets_classes, resource)
-        @lookup_types = lookup_types
+      def initialize(id, key_field, rets_classes)
+        @id = id
+        @key_field = key_field
         @rets_classes = rets_classes
-
-        @id = resource["ResourceID"]
-        @key_field = resource["KeyField"]
       end
 
       def self.find_lookup_containers(metadata, resource_id)
@@ -55,9 +53,12 @@ module Rets
 
       def self.build(resource_fragment, metadata, logger)
         resource_id = resource_fragment["ResourceID"]
+        key_field = resource_fragment["KeyField"]
+
         lookup_types = build_lookup_tree(resource_id, metadata)
         rets_classes = build_classes(resource_id, lookup_types, metadata)
-        new(lookup_types, rets_classes, resource_fragment)
+
+        new(resource_id, key_field, rets_classes)
       rescue MissingRetsClass => e
         logger.warn(e.message)
         nil

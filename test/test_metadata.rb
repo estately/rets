@@ -7,8 +7,8 @@ class TestMetadata < MiniTest::Test
 
   def test_print_tree
     hoa_lookup_types = [
-      Rets::Metadata::LookupType.new({ "LongValue" => "Quarterly", "Value" => "Q" }),
-      Rets::Metadata::LookupType.new({ "LongValue" => "Annually", "Value" => "A" }),
+      Rets::Metadata::LookupType.new("LongValue" => "Quarterly", "Value" => "Q"),
+      Rets::Metadata::LookupType.new("LongValue" => "Annually", "Value" => "A"),
     ]
 
     table_fragment = {
@@ -21,6 +21,7 @@ class TestMetadata < MiniTest::Test
       "LongName" => "Square Footage",
       "StandardName" => "Sqft",
     }
+
     lookup_table_fragment = {
       "Required" => "N",
       "Searchable" => "Y",
@@ -43,9 +44,7 @@ class TestMetadata < MiniTest::Test
       Rets::Metadata::RetsClass.new("T100", "Prop", "some description", tables)
     ]
 
-    resource_fragment = { "ResourceID" => resource_id, "KeyField" => "matrix_unique_key", }
-
-    resource = Rets::Metadata::Resource.new([], rets_classes, resource_fragment)
+    resource = Rets::Metadata::Resource.new(resource_id, "matrix_unique_key", rets_classes)
 
     io = StringIO.new
     resource.print_tree(io)

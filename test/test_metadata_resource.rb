@@ -1,18 +1,6 @@
 require_relative "helper"
 
 class TestMetadataResource < MiniTest::Test
-  def test_resource_initialize
-    lookup_types = {}
-    rets_classes = []
-    fragment = { "ResourceID" => 'r' }
-
-    resource = Rets::Metadata::Resource.new(lookup_types, rets_classes, fragment)
-
-    assert_equal(lookup_types, resource.lookup_types)
-    assert_equal(rets_classes, resource.rets_classes)
-    assert_equal('r', resource.id)
-  end
-
   def test_resource_build_lookup_tree
     metadata = stub(:metadata)
     resource = stub(:resource)
@@ -63,7 +51,6 @@ class TestMetadataResource < MiniTest::Test
 
     resource = Rets::Metadata::Resource.build(fragment, metadata, Logger.new(STDOUT))
 
-    assert_equal(lookup_types, resource.lookup_types)
     assert_equal(classes, resource.rets_classes)
   end
 
@@ -130,7 +117,7 @@ class TestMetadataResource < MiniTest::Test
 
   def test_resource_find_rets_class
     rets_class = Rets::Metadata::RetsClass.new('test', '', '', [])
-    resource = Rets::Metadata::Resource.new({}, [rets_class], {})
+    resource = Rets::Metadata::Resource.new('', '', [rets_class])
     assert_equal(rets_class, resource.find_rets_class("test"))
   end
 end
