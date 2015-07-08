@@ -29,7 +29,7 @@ module Rets
       # [out] The file to print to.  Defaults to $stdout.
       def print_tree(out = $stdout)
         out.puts "    LookupTable: #{name}"
-        out.puts "      Resource: #{resource.id}"
+        out.puts "      Resource: #{resource_id}"
         out.puts "      Required: #{table_fragment['Required']}"
         out.puts "      Searchable: #{ table_fragment["Searchable"] }"
         out.puts "      Units: #{ table_fragment["Units"] }"

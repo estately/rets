@@ -255,3 +255,29 @@ SAMPLE_COMPACT_WITH_SPECIAL_CHARS_2 = <<EOF
   <DATA>	text with &lt;tag&gt;		1999	00		</DATA>
 </RETS>
 EOF
+
+EXAMPLE_METADATA_TREE = <<EOF
+Resource: Properties (Key Field: matrix_unique_key)
+  Class: T100
+    Visible Name: Prop
+    Description : some description
+    Table: L_1
+      Resource: Properties
+      ShortName: Sq
+      LongName: Square Footage
+      StandardName: Sqft
+      Units: Meters
+      Searchable: Y
+      Required: N
+    LookupTable: L_10
+      Resource: Properties
+      Required: N
+      Searchable: Y
+      Units: 
+      ShortName: HF
+      LongName: HOA Frequency
+      StandardName: HOA F
+      Types:
+        Quarterly -> Q
+        Annually -> A
+EOF
