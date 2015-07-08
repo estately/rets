@@ -21,9 +21,15 @@ class TestClient < MiniTest::Test
   end
 
   def test_capability_url_returns_parsed_url
-    @client.capabilities = { "foo" => "/foo" }
+    client = Rets::Client.new(:login_url => "http://example.com", :capabilities => { "foo" => "/foo" })
 
-    assert_equal "http://example.com/foo", @client.capability_url("foo")
+    assert_equal "http://example.com/foo", client.capability_url("foo")
+  end
+
+  def test_cached_capabilities_case_insensitive
+    client = Rets::Client.new(:login_url => "http://example.com", :capabilities => { "foo" => "/foo" })
+
+    assert_equal client.capabilities.default_proc, Rets::Client::CASE_INSENSITIVE_PROC
   end
 
   def test_capabilities_calls_login_when_nil
@@ -82,6 +88,18 @@ class TestClient < MiniTest::Test
   end
 
   def test_find_first_calls_find_every_with_limit_one
+    assert_raises ArgumentError do
+      @client.find_every({})
+    end
+    assert_raises ArgumentError do
+      @client.find_every(:search_type => "Foo")
+    end
+    assert_raises ArgumentError do
+      @client.find_every(:class => "Bar")
+    end
+  end
+
+  def test_find_first_calls_find_every_with_limit_one
     @client.expects(:find_every).with({:limit => 1, :foo => :bar}, nil).returns([1,2,3])
 
     assert_equal 1, @client.find(:first, :foo => :bar, :limit => 5), "User-specified limit should be ignored"
@@ -108,7 +126,7 @@ class TestClient < MiniTest::Test
 
     Rets::Parser::Compact.expects(:parse_document).with("An ascii string")
 
-    @client.find_every({}, false)
+    @client.find_every(:search_type => "Foo", :class => "Bar")
   end
 
   def test_response_text_encoding_from_utf_8
@@ -120,7 +138,7 @@ class TestClient < MiniTest::Test
 
     Rets::Parser::Compact.expects(:parse_document).with("Some string with non-ascii characters \u0119")
 
-    @client.find_every({}, false)
+    @client.find_every(:search_type => "Foo", :class => "Bar")
   end
 
   def test_response_text_encoding_from_utf_16
@@ -132,7 +150,7 @@ class TestClient < MiniTest::Test
 
     Rets::Parser::Compact.expects(:parse_document).with("Some string with non-utf-8 characters \uFFFD")
 
-    @client.find_every({}, false)
+    @client.find_every(:search_type => "Foo", :class => "Bar")
   end
 
   def test_find_retries_when_receiving_no_records_found
@@ -158,21 +176,12 @@ class TestClient < MiniTest::Test
     @client.find(:all, :foo => :bar)
   end
 
-  def test_find_retries_on_errors_preserves_resolve
-    @client.stubs(:find_every).raises(Rets::AuthorizationFailure.new(401, 'Not Authorized')).then.raises(Rets::InvalidRequest.new(20134, 'Not Found')).then.with({:foo => :bar}, true).returns([])
-    @client.find(:all, {:foo => :bar, :resolve => true})
-  end
-
   def test_find_eventually_reraises_errors
     @client.stubs(:find_every).raises(Rets::AuthorizationFailure.new(401, 'Not Authorized'))
+
     assert_raises Rets::AuthorizationFailure do
       @client.find(:all, :foo => :bar)
     end
-  end
-
-  def test_fixup_keys
-    assert_equal({ "Foo" => "bar" },    @client.fixup_keys(:foo => "bar"))
-    assert_equal({ "FooFoo" => "bar" }, @client.fixup_keys(:foo_foo => "bar"))
   end
 
   def test_all_objects_calls_objects
@@ -247,14 +256,6 @@ class TestClient < MiniTest::Test
     @client.expects(:fetch_object).with("1", :foo => :bar).returns(response)
 
     assert_equal "foo", @client.object("1", :foo => :bar)
-  end
-
-  def test_metadata_caches
-    metadata = stub(:current? => true)
-    @client.metadata = metadata
-    @client.stubs(:capabilities => {})
-
-    assert_same metadata, @client.metadata, "Should be memoized"
   end
 
   def test_decorate_result_handles_bad_metadata

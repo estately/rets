@@ -1,16 +1,12 @@
-require 'http-cookie'
-require 'httpclient'
 require 'logger'
 
 module Rets
   class HttpError < StandardError ; end
   class Client
-    DEFAULT_OPTIONS = {}
-
     COUNT = Struct.new(:exclude, :include, :only).new(0,1,2)
+    CASE_INSENSITIVE_PROC = Proc.new { |h,k| h.key?(k.downcase) ? h[k.downcase] : nil }
 
-    attr_accessor :login_url, :options, :logger
-    attr_writer   :capabilities, :metadata
+    attr_accessor :cached_metadata, :client_progress, :logger, :login_url, :options
 
     def initialize(options)
       @options = options
@@ -18,41 +14,14 @@ module Rets
     end
 
     def clean_setup
-      self.options     = DEFAULT_OPTIONS.merge(@options)
-      self.login_url   = self.options[:login_url]
-
-      @cached_metadata   = nil
-      @capabilities      = nil
-      @metadata          = nil
-      @tries             = nil
-      self.capabilities  = nil
-
-      self.logger      = @options[:logger] || FakeLogger.new
-      @client_progress = ClientProgressReporter.new(self.logger, options[:stats_collector], options[:stats_prefix])
-      @cached_metadata = @options[:metadata]
-      if @options[:http_proxy]
-        @http = HTTPClient.new(options.fetch(:http_proxy))
-
-        if @options[:proxy_username]
-          @http.set_proxy_auth(options.fetch(:proxy_username), options.fetch(:proxy_password))
-        end
-      else
-        @http = HTTPClient.new
-      end
-
-      if @options[:receive_timeout]
-        @http.receive_timeout = @options[:receive_timeout]
-      end
-
-      @http.set_cookie_store(options[:cookie_store]) if options[:cookie_store]
-
-      @http_client = Rets::HttpClient.new(@http, @options, @logger, @login_url)
-      if options[:http_timing_stats_collector]
-        @http_client = Rets::MeasuringHttpClient.new(@http_client, options.fetch(:http_timing_stats_collector), options.fetch(:http_timing_stats_prefix))
-      end
-      if options[:lock_around_http_requests]
-        @http_client = Rets::LockingHttpClient.new(@http_client, options.fetch(:locker), options.fetch(:lock_name), options.fetch(:lock_options))
-      end
+      @metadata            = nil
+      @tries               = nil
+      @login_url           = options[:login_url]
+      @cached_metadata     = options[:metadata]
+      @cached_capabilities = options[:capabilities]
+      @logger              = options[:logger] || FakeLogger.new
+      @client_progress     = ClientProgressReporter.new(logger, options[:stats_collector], options[:stats_prefix])
+      @http_client         = Rets::HttpClient.from_options(options, logger)
     end
 
     # Attempts to login by making an empty request to the URL provided in
@@ -62,9 +31,11 @@ module Rets
       res = http_get(login_url)
       Parser::ErrorChecker.check(res)
 
-      self.capabilities = extract_capabilities(Nokogiri.parse(res.body))
-      raise UnknownResponse, "Cannot read rets server capabilities." unless @capabilities
-      @capabilities
+      new_capabilities = extract_capabilities(Nokogiri.parse(res.body))
+      unless new_capabilities
+        raise UnknownResponse, "Cannot read rets server capabilities."
+      end
+      new_capabilities
     end
 
     def logout
@@ -109,56 +80,72 @@ module Rets
 
     def find_with_retries(opts = {})
       retries = 0
-      resolve = opts.delete(:resolve)
-      find_with_given_retry(retries, resolve, opts)
+      find_with_given_retry(retries, opts)
     end
 
-    def find_with_given_retry(retries, resolve, opts)
+    def find_with_given_retry(retries, opts)
       begin
-        find_every(opts, resolve)
+        find_every(opts)
       rescue NoRecordsFound => e
         if opts.fetch(:no_records_not_an_error, false)
-          @client_progress.no_records_found
+          client_progress.no_records_found
           opts[:count] == COUNT.only ? 0 : []
         else
-          handle_find_failure(retries, resolve, opts, e)
+          handle_find_failure(retries, opts, e)
         end
       rescue AuthorizationFailure, InvalidRequest => e
-        handle_find_failure(retries, resolve, opts, e)
+        handle_find_failure(retries, opts, e)
       end
     end
 
-    def handle_find_failure(retries, resolve, opts, e)
+    def handle_find_failure(retries, opts, e)
       if retries < opts.fetch(:max_retries, 3)
         retries += 1
-        @client_progress.find_with_retries_failed_a_retry(e, retries)
+        client_progress.find_with_retries_failed_a_retry(e, retries)
         clean_setup
-        find_with_given_retry(retries, resolve, opts)
+        find_with_given_retry(retries, opts)
       else
-        @client_progress.find_with_retries_exceeded_retry_count(e)
+        client_progress.find_with_retries_exceeded_retry_count(e)
         raise e
       end
     end
 
-    def find_every(opts, resolve)
-      params = {"QueryType" => "DMQL2", "Format" => "COMPACT"}.merge(fixup_keys(opts))
+    def find_every(opts)
+      raise ArgumentError.new("missing option :search_type (provide the name of a RETS resource)") unless opts[:search_type]
+      raise ArgumentError.new("missing option :class (provide the name of a RETS class)") unless opts[:class]
+
+      params = {
+        "SearchType"          => opts.fetch(:search_type),
+        "Class"               => opts.fetch(:class),
+
+        "Count"               => opts[:count],
+        "Format"              => opts.fetch(:format, "COMPACT"),
+        "Limit"               => opts[:limit],
+        "Offset"              => opts[:offset],
+        "Select"              => opts[:select],
+        "RestrictedIndicator" => opts[:RestrictedIndicator],
+        "StandardNames"       => opts[:standard_name],
+        "Payload"             => opts[:payload],
+        "Query"               => opts[:query],
+        "QueryType"           => opts.fetch(:query_type, "DMQL2"),
+      }
       res = http_post(capability_url("Search"), params)
 
       case opts[:count]
       when COUNT.only
         Response::Count.new(Parser::Compact.get_count(res.body))
       when COUNT.include
-        Response::RecordsAndCount.new(parse_records(opts, resolve, res.body), Parser::Compact.get_count(res.body))
+        Response::RecordsAndCount.new(parse_records(opts, res.body), Parser::Compact.get_count(res.body))
       else
-        Response::Records.new(parse_records(opts, resolve, res.body))
+        Response::Records.new(parse_records(opts, res.body))
       end
     end
 
-    def parse_records(opts, resolve, response_string)
+    def parse_records(opts, response_string)
       results = Parser::Compact.parse_document(
         response_string.encode("UTF-8", response_string.encoding, :invalid => :replace, :undef => :replace)
       )
-      if resolve
+      if opts[:resolve]
         rets_class = find_rets_class(opts[:search_type], opts[:class])
         decorate_results(results, rets_class)
       else
@@ -183,7 +170,7 @@ module Rets
           result[key] = table.resolve(value.to_s)
         else
           #can't resolve just leave the value be
-          @client_progress.could_not_resolve_find_metadata(key)
+          client_progress.could_not_resolve_find_metadata(key)
         end
       end
     end
@@ -256,29 +243,16 @@ module Rets
       http_post(capability_url("GetObject"), params, extra_headers)
     end
 
-    # Changes keys to be camel cased, per the RETS standard for queries.
-    def fixup_keys(hash)
-      fixed_hash = {}
-
-      hash.each do |key, value|
-        camel_cased_key = key.to_s.capitalize.gsub(/_(\w)/) { $1.upcase }
-
-        fixed_hash[camel_cased_key] = value
-      end
-
-      fixed_hash
-    end
-
     def metadata
       return @metadata if @metadata
 
-      if @cached_metadata && (@options[:skip_metadata_uptodate_check] ||
-          @cached_metadata.current?(capabilities["MetadataTimestamp"], capabilities["MetadataVersion"]))
-        @client_progress.use_cached_metadata
-        self.metadata = @cached_metadata
+      if cached_metadata && (options[:skip_metadata_uptodate_check] ||
+          cached_metadata.current?(capabilities["MetadataTimestamp"], capabilities["MetadataVersion"]))
+        client_progress.use_cached_metadata
+        @metadata = cached_metadata
       else
-        @client_progress.bad_cached_metadata(@cached_metadata)
-        self.metadata = Metadata::Root.new(logger, retrieve_metadata)
+        client_progress.bad_cached_metadata(cached_metadata)
+        @metadata = Metadata::Root.new(logger, retrieve_metadata)
       end
     end
 
@@ -307,7 +281,13 @@ module Rets
     #
     # [1] In fact, sometimes only a path is returned from the server.
     def capabilities
-      @capabilities || login
+      if @capabilities
+        @capabilities
+      elsif @cached_capabilities
+        @capabilities = add_case_insensitive_default_proc(@cached_capabilities)
+      else
+        @capabilities = login
+      end
     end
 
     def capability_url(name)
@@ -331,15 +311,19 @@ module Rets
     def extract_capabilities(document)
       raw_key_values = document.xpath("/RETS/RETS-RESPONSE").text.strip
 
-      hash = Hash.new{|h,k| h.key?(k.downcase) ? h[k.downcase] : nil }
-
       # ... :(
       # Feel free to make this better. It has a test.
-      raw_key_values.split(/\n/).
+      hash = raw_key_values.split(/\n/).
         map  { |r| r.split(/\=/, 2) }.
-        each { |k,v| hash[k.strip.downcase] = v.strip }
+        each_with_object({}) { |(k,v), h| h[k.strip.downcase] = v.strip }
 
-      hash
+      add_case_insensitive_default_proc(hash)
+    end
+
+    def add_case_insensitive_default_proc(hash)
+      new_hash = hash.dup
+      new_hash.default_proc = CASE_INSENSITIVE_PROC
+      new_hash
     end
 
     def save_cookie_store

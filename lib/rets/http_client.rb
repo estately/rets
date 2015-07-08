@@ -1,3 +1,6 @@
+require 'http-cookie'
+require 'httpclient'
+
 module Rets
   class HttpClient
     attr_reader :http, :options, :logger, :login_url
@@ -8,6 +11,45 @@ module Rets
       @logger = logger
       @login_url = login_url
       @options.fetch(:ca_certs, []).each {|c| @http.ssl_config.add_trust_ca(c) }
+    end
+
+    def self.from_options(options, logger)
+      if options[:http_proxy]
+        http = HTTPClient.new(options.fetch(:http_proxy))
+
+        if options[:proxy_username]
+          http.set_proxy_auth(options.fetch(:proxy_username), options.fetch(:proxy_password))
+        end
+      else
+        http = HTTPClient.new
+      end
+
+      if options[:receive_timeout]
+        http.receive_timeout = options[:receive_timeout]
+      end
+
+      if options[:cookie_store]
+        ensure_cookie_store_exists! options[:cookie_store]
+        http.set_cookie_store(options[:cookie_store])
+      end
+
+      http_client = new(http, options, logger, options[:login_url])
+
+      if options[:http_timing_stats_collector]
+        http_client = Rets::MeasuringHttpClient.new(http_client, options.fetch(:http_timing_stats_collector), options.fetch(:http_timing_stats_prefix))
+      end
+
+      if options[:lock_around_http_requests]
+        http_client = Rets::LockingHttpClient.new(http_client, options.fetch(:locker), options.fetch(:lock_name), options.fetch(:lock_options))
+      end
+
+      http_client
+    end
+
+    def self.ensure_cookie_store_exists!(cookie_store)
+      unless File.exist? cookie_store
+        FileUtils.touch(cookie_store)
+      end
     end
 
     def http_get(url, params=nil, extra_headers={})
