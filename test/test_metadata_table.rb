@@ -1,14 +1,6 @@
 require_relative "helper"
 
 class TestMetadataTable < MiniTest::Test
-  def test_table_initialize
-    fragment = { "DataType" => "A", "SystemName" => "B" }
-
-    table = Rets::Metadata::Table.new(fragment, "resource_id")
-    assert_equal("A", table.type)
-    assert_equal("B", table.name)
-  end
-
   def test_table_resolve_returns_empty_string_when_value_nil
     table = Rets::Metadata::Table.new({}, "resource_id")
 

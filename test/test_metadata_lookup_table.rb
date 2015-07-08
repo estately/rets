@@ -9,16 +9,6 @@ class TestMetadataLookupTable < MiniTest::Test
     $VERBOSE = false
   end
 
-  def test_lookup_table_initialize
-    fragment = { "SystemName" => "A", "Interpretation" => "B" }
-
-    lookup_table = Rets::Metadata::LookupTable.new("Foo", [], fragment)
-
-    assert_equal("Foo", lookup_table.resource_id)
-    assert_equal("A", lookup_table.name)
-    assert_equal("B", lookup_table.interpretation)
-  end
-
   def test_lookup_table_resolve_returns_empty_array_when_value_is_empty_and_is_multi?
     fragment = { "Interpretation" => "LookupMulti" }
     lookup_table = Rets::Metadata::LookupTable.new("Foo", [], fragment)

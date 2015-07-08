@@ -1,17 +1,13 @@
 module Rets
   module Metadata
     class Table
-
-      attr_reader :table_fragment, :resource_id
-      attr_reader :type, :name, :long_name
+      attr_reader :table_fragment, :resource_id, :name
 
       def initialize(table_fragment, resource_id)
         @table_fragment = table_fragment
         @resource_id = resource_id
 
-        @type = table_fragment["DataType"]
         @name = table_fragment["SystemName"]
-        @long_name = table_fragment["LongName"]
       end
 
       # Print the tree to a file
