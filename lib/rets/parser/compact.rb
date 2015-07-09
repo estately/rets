@@ -9,7 +9,12 @@ module Rets
         doc = Nokogiri.parse(xml.to_s)
 
         delimiter = doc.at("//DELIMITER")
-        delimiter = delimiter ? Regexp.new(Regexp.escape(delimiter.attr(:value).to_i.chr)) : TAB
+        if delimiter
+          value = delimiter.attr(:value) || delimiter.attr("Value")
+          delimiter = Regexp.new(Regexp.escape(value.to_i.chr))
+        else
+          delimiter = TAB
+        end
 
         if delimiter == // || delimiter == /,/
           raise InvalidDelimiter, "Empty or invalid delimiter found, unable to parse."
