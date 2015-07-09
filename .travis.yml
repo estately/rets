@@ -9,3 +9,5 @@ before_script:
 notifications:
   email:
     - opensource@estately.com
+sudo: false
+cache: bundler
