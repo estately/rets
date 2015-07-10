@@ -82,8 +82,8 @@ class TestParserCompact < MiniTest::Test
   end
 
   def test_parse_property_with_lots_of_columns
-    rows = Rets::Parser::Compact.parse_document(SAMPLE_PROPERTY_WITH_LOTS_OF_COLUMNS)
-    assert_equal 805, rows.first.keys.size
-    assert_equal 805.times.map { |x| "K#{x}" }.zip(805.times.map { |x| "V#{x}" }).to_h, rows.first
+    row = Rets::Parser::Compact.parse_document(SAMPLE_PROPERTY_WITH_LOTS_OF_COLUMNS).first
+    assert_equal 800, row.keys.size
+    assert_equal 800.times.map { |x| "K%03d" % x }, row.keys
   end
 end

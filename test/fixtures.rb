@@ -269,7 +269,7 @@ EOF
 SAMPLE_PROPERTY_WITH_LOTS_OF_COLUMNS = <<EOF
 <RETS ReplyCode=\"0\" ReplyText=\"Operation Success.\">
   <DELIMITER value=\"09\" />
-  <COLUMNS>\t#{805.times.map { |x| "K#{x}" }.join("\t") }\t</COLUMNS>
-  <DATA>\t#{805.times.map { |x| "V#{x}" }.join("\t") }\t</DATA>
+  <COLUMNS>\t#{800.times.map { |x| "K%03d" % x }.join("\t") }\t</COLUMNS>
+  <DATA>\t\t</DATA>
 </RETS>
 EOF
