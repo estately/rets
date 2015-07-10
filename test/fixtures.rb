@@ -265,3 +265,11 @@ SAMPLE_COMPACT_WITH_SPECIAL_CHARS_2 = <<EOF
   <DATA>	text with &lt;tag&gt;		1999	00		</DATA>
 </RETS>
 EOF
+
+SAMPLE_PROPERTY_WITH_LOTS_OF_COLUMNS = <<EOF
+<RETS ReplyCode=\"0\" ReplyText=\"Operation Success.\">
+  <DELIMITER value=\"09\" />
+  <COLUMNS>\t#{805.times.map { |x| "K#{x}" }.join("\t") }\t</COLUMNS>
+  <DATA>\t#{805.times.map { |x| "V#{x}" }.join("\t") }\t</DATA>
+</RETS>
+EOF

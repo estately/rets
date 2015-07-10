@@ -23,7 +23,8 @@ module Rets
 
         def initialize
           @results = []
-          @columns = []
+          @columns = ''
+          @result_index = nil
           @delimiter = nil
           @columns_start = false
           @data_start = false
@@ -51,7 +52,7 @@ module Rets
 
         def characters string
           if @columns_start
-            @columns = string
+            @columns << string
           end
 
           if @result_index
