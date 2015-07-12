@@ -130,7 +130,7 @@ module Rets
         "Payload"             => opts[:payload],
         "Query"               => opts[:query],
         "QueryType"           => opts.fetch(:query_type, "DMQL2"),
-      }
+      }.reject { |k,v| v.nil? }
       res = http_post(capability_url("Search"), params)
 
       if opts[:count] == COUNT.only
