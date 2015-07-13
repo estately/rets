@@ -7,14 +7,6 @@ class TestParserCompact < MiniTest::Test
     end
   end
 
-  def test_parse_document_uses_default_delimiter_when_none_provided
-    #  we assert that the delimeter character getting to parse is a tab
-    #  even though COMPACT defines no delimiter tag
-    Rets::Parser::Compact.expects(:parse_row).with(%w(A B), "1\t2", /\t/)
-    Rets::Parser::Compact.expects(:parse_row).with(%w(A B), "4\t5", /\t/)
-    Rets::Parser::Compact.parse_document(COMPACT)
-  end
-
   def test_parse_document_delegates_to_parse
     result = Rets::Parser::Compact.parse_document(COMPACT)
 
@@ -29,33 +21,19 @@ class TestParserCompact < MiniTest::Test
     end
   end
 
-  def test_parse_returns_key_value_pairs
-    result = Rets::Parser::Compact.parse_row(%w(A B), "1\t2")
-
-    assert_equal({"A" => "1", "B" => "2"}, result)
-  end
-
   # RMLS does this. :|
   def test_remaining_columns_produce_empty_string_values
-    column_names = %w(A B C D)
+    column_names = "A B C D"
     data         = "1 2"
 
-    assert_equal({"A" => "1", "B" => "2", "C" => "", "D" => ""},
-                 Rets::Parser::Compact.parse_row(column_names, data, / /))
+    assert_equal({"A" => "1", "B" => "2", "C" => "", "D" => ""}, Rets::Parser::Compact.parse(column_names, data, ' '))
   end
 
   def test_leading_empty_columns_are_preserved_with_delimiter
-    column_names = %w(A B C D)
+    column_names = "A\tB\tC\tD"
     data         = "\t\t3\t4" # first two columns are empty data.
 
-    assert_equal({"A" => "", "B" => "", "C" => "3", "D" => "4"},
-                 Rets::Parser::Compact.parse_row(column_names, data, /\t/))
-  end
-
-  def test_parse_only_accepts_regexp
-    assert_raises ArgumentError do
-      Rets::Parser::Compact.parse_row(["a"], "b", " ")
-    end
+    assert_equal({"A" => "", "B" => "", "C" => "3", "D" => "4"}, Rets::Parser::Compact.parse(column_names, data, "\t"))
   end
 
   def test_parse_empty_document
@@ -74,15 +52,21 @@ class TestParserCompact < MiniTest::Test
   end
 
   def test_parse_example
-    rows = Rets::Parser::Compact.parse_document(Nokogiri.parse(SAMPLE_COMPACT))
+    rows = Rets::Parser::Compact.parse_document(SAMPLE_COMPACT)
 
     assert_equal "7", rows.first["MetadataEntryID"]
   end
 
   def test_parse_example_2
-    rows = Rets::Parser::Compact.parse_document(Nokogiri.parse(SAMPLE_COMPACT_2))
+    rows = Rets::Parser::Compact.parse_document(SAMPLE_COMPACT_2)
 
     assert_equal "", rows.first["ModTimeStamp"]
+  end
+
+  def test_parse_with_changed_delimiter
+    rows = Rets::Parser::Compact.parse_document(CHANGED_DELIMITER)
+
+    assert_equal [{"A" => "1", "B" => "2"}, {"A" => "4", "B" => "5"}], rows
   end
 
   def test_parse_html_encoded_chars
@@ -95,5 +79,11 @@ class TestParserCompact < MiniTest::Test
     rows = Rets::Parser::Compact.parse_document(SAMPLE_COMPACT_WITH_SPECIAL_CHARS_2)
 
     assert_equal "text with <tag>", rows.last["PublicRemarksNew"]
+  end
+
+  def test_parse_property_with_lots_of_columns
+    row = Rets::Parser::Compact.parse_document(SAMPLE_PROPERTY_WITH_LOTS_OF_COLUMNS).first
+    assert_equal 800, row.keys.size
+    assert_equal 800.times.map { |x| "K%03d" % x }, row.keys
   end
 end

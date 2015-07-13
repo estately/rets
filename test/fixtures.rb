@@ -65,6 +65,16 @@ INVALID_DELIMETER = <<-XML
 </METADATA>
 XML
 
+CHANGED_DELIMITER = <<-XML
+<?xml version="1.0"?>
+<METADATA-RESOURCE Version="01.72.10306" Date="2011-03-15T19:51:22">
+  <DELIMITER value="45" />
+  <COLUMNS>A-B</COLUMNS>
+  <DATA>1-2</DATA>
+  <DATA>4-5</DATA>
+</METADATA>
+XML
+
 COMPACT = <<-XML
 <?xml version="1.0"?>
 <METADATA-RESOURCE Version="01.72.10306" Date="2011-03-15T19:51:22">
@@ -253,6 +263,14 @@ SAMPLE_COMPACT_WITH_SPECIAL_CHARS_2 = <<EOF
   <DELIMITER value=\"09\" />
   <COLUMNS>	PublicRemarksNew	WindowCoverings	YearBuilt	Zoning	ZoningCompatibleYN	</COLUMNS>
   <DATA>	text with &lt;tag&gt;		1999	00		</DATA>
+</RETS>
+EOF
+
+SAMPLE_PROPERTY_WITH_LOTS_OF_COLUMNS = <<EOF
+<RETS ReplyCode=\"0\" ReplyText=\"Operation Success.\">
+  <DELIMITER value=\"09\" />
+  <COLUMNS>\t#{800.times.map { |x| "K%03d" % x }.join("\t") }\t</COLUMNS>
+  <DATA>\t\t</DATA>
 </RETS>
 EOF
 
