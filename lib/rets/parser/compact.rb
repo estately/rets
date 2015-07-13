@@ -1,26 +1,64 @@
+# coding: utf-8
+
 module Rets
   module Parser
     class Compact
-      TAB = /\t/
+      DEFAULT_DELIMITER = "\t"
+
+      INCLUDE_NULL_FIELDS = -1
 
       InvalidDelimiter = Class.new(ArgumentError)
 
       def self.parse_document(xml)
-        doc = Nokogiri.parse(xml.to_s)
+        doc = SaxParser.new
+        parser = Nokogiri::XML::SAX::Parser.new(doc)
+        io = StringIO.new(xml.to_s)
 
-        delimiter = doc.at("//DELIMITER")
-        delimiter = delimiter ? Regexp.new(Regexp.escape(delimiter.attr(:value).to_i.chr)) : TAB
+        parser.parse(io)
+        doc.results.map {|r| parse(doc.columns, r, doc.delimiter) }
+      end
 
-        if delimiter == // || delimiter == /,/
-          raise InvalidDelimiter, "Empty or invalid delimiter found, unable to parse."
+      class SaxParser < Nokogiri::XML::SAX::Document
+        attr_reader :results, :columns, :delimiter
+
+        def initialize
+          @results = []
+          @columns = ''
+          @result_index = nil
+          @delimiter = nil
+          @columns_start = false
+          @data_start = false
         end
 
-        column_node  = doc.at("//COLUMNS")
-        column_names = column_node.nil? ? [] : column_node.text.split(delimiter)
+        def start_element name, attrs=[]
+          case name
+          when 'DELIMITER'
+            @delimiter = attrs.last.last.to_i.chr
+          when 'COLUMNS'
+            @columns_start = true
+          when 'DATA'
+            @result_index = @results.size
+          end
+        end
 
-        rows = doc.xpath("//DATA")
-        rows.map do |data|
-          self.parse_row(column_names, data.text, delimiter)
+        def end_element name
+          case name
+          when 'COLUMNS'
+            @columns_start = false
+          when 'DATA'
+            @result_index = nil
+          end
+        end
+
+        def characters string
+          if @columns_start
+            @columns << string
+          end
+
+          if @result_index
+            @results[@result_index] ||= ''
+            @results[@result_index] << string
+          end
         end
       end
 
@@ -29,10 +67,16 @@ module Rets
       # Delimiter must be a regexp because String#split behaves differently when
       # given a string pattern. (It removes leading spaces).
       #
-      def self.parse_row(column_names, data, delimiter = TAB)
-        raise ArgumentError, "Delimiter must be a regular expression" unless Regexp === delimiter
+      def self.parse(columns, data, delimiter = nil)
+        delimiter ||= DEFAULT_DELIMITER
+        delimiter = Regexp.new(Regexp.escape(delimiter))
 
-        data_values = data.split(delimiter).map { |x| CGI.unescapeHTML(x) }
+        if delimiter == // || delimiter == /,/
+          raise Rets::Parser::Compact::InvalidDelimiter, "Empty or invalid delimiter found, unable to parse."
+        end
+
+        column_names = columns.split(delimiter)
+        data_values = data.split(delimiter, INCLUDE_NULL_FIELDS).map { |x| CGI.unescapeHTML(x) }
 
         zipped_key_values = column_names.zip(data_values).map { |k, v| [k.freeze, v.to_s] }
 
