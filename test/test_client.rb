@@ -37,6 +37,16 @@ class TestClient < MiniTest::Test
     @client.capabilities
   end
 
+  def test_capabilities_does_not_call_login_after_login
+    response = mock
+    response.stubs(:body).returns(CAPABILITIES)
+    @client.stubs(:http_get).returns(response)
+    @client.login
+
+    @client.expects(:login).never
+    @client.capabilities
+  end
+
   def test_tries_increments_with_each_call
     assert_equal 1, @client.tries
     assert_equal 2, @client.tries
