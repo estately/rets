@@ -2,8 +2,8 @@ require_relative "helper"
 
 class TestDefaultResolver < MiniTest::Test
   def setup
-    client_progress = Rets::ClientProgressReporter.new(Rets::Client::FakeLogger.new, nil, nil)
-    @resolver = Rets::DefaultResolver.new(client_progress)
+    @client_progress = Rets::ClientProgressReporter.new(Rets::Client::FakeLogger.new, nil, nil)
+    @resolver = Rets::DefaultResolver.new
   end
 
   def test_decorate_result_handles_bad_metadata
@@ -12,7 +12,7 @@ class TestDefaultResolver < MiniTest::Test
     rets_class = stub
     rets_class.expects(:find_table).with('table_name').returns(nil)
 
-    response = @resolver.decorate_result(result, rets_class)
+    response = @resolver.decorate_result(result, rets_class, @client_progress)
 
     assert_equal response, result
   end
@@ -26,6 +26,6 @@ class TestDefaultResolver < MiniTest::Test
     rets_class = stub
     rets_class.expects(:find_table).with('table_name').returns(rets_table)
 
-    assert_equal @resolver.decorate_result(result, rets_class), { 'table_name' => 'long_value' }
+    assert_equal @resolver.decorate_result(result, rets_class, @client_progress), { 'table_name' => 'long_value' }
   end
 end

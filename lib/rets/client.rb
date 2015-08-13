@@ -22,7 +22,7 @@ module Rets
       @cached_capabilities = options[:capabilities]
       @logger              = options[:logger] || FakeLogger.new
       @client_progress     = ClientProgressReporter.new(logger, options[:stats_collector], options[:stats_prefix])
-      @resolver            = options.fetch(:resolver, DefaultResolver.new(client_progress))
+      @resolver            = options.fetch(:resolver, DefaultResolver)
       @http_client         = Rets::HttpClient.from_options(options, logger)
       @caching             = Metadata::Caching.make(options)
     end
@@ -142,7 +142,7 @@ module Rets
         )
         if opts[:resolve]
           rets_class = find_rets_class(opts[:search_type], opts[:class])
-          resolver.resolve(results, rets_class)
+          resolver.resolve(results, rets_class, client_progress)
         else
           results
         end

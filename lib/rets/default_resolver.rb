@@ -2,17 +2,13 @@ module Rets
   class DefaultResolver
     attr_reader :client_progress
 
-    def initialize(client_progress)
-      @client_progress = client_progress
-    end
-
-    def resolve(results, rets_class)
+    def resolve(results, rets_class, client_progress)
       results.map do |result|
         decorate_result(result, rets_class)
       end
     end
 
-    def decorate_result(result, rets_class)
+    def decorate_result(result, rets_class, client_progress)
       result.each do |key, value|
         table = rets_class.find_table(key)
         if table
