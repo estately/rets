@@ -1,7 +1,7 @@
 module Rets
   module Metadata
     class LookupTable
-      attr_reader :resource_id, :lookup_types, :table_fragment, :name
+      attr_reader :resource_id, :lookup_types, :table_fragment, :name, :long_name
 
       def initialize(resource_id, lookup_types, table_fragment)
         @resource_id = resource_id
@@ -9,6 +9,7 @@ module Rets
 
         @table_fragment = table_fragment
         @name = table_fragment["SystemName"]
+        @long_name = table_fragment["LongName"]
       end
 
       def self.build(table_fragment, resource_id, lookup_types)
@@ -31,7 +32,7 @@ module Rets
         out.puts "      Searchable: #{ table_fragment["Searchable"] }"
         out.puts "      Units: #{ table_fragment["Units"] }"
         out.puts "      ShortName: #{ table_fragment["ShortName"] }"
-        out.puts "      LongName: #{ table_fragment["LongName"] }"
+        out.puts "      LongName: #{ long_name }"
         out.puts "      StandardName: #{ table_fragment["StandardName"] }"
         out.puts "      Types:"
 
