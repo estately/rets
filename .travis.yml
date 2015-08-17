@@ -2,7 +2,10 @@ language: ruby
 rvm:
 - 2.2.2
 - 2.1.6
+- 2.0.0
 - 1.9.3
+- ruby-head
+- jruby
 before_script:
 - gem install hoe-travis --no-rdoc --no-ri
 - bundle exec rake travis:before -t
@@ -11,3 +14,9 @@ notifications:
     - opensource@estately.com
 sudo: false
 cache: bundler
+matrix:
+  allow_failures:
+    - rvm: ruby-head
+    - rvm: jruby
+    - rvm: 2.0.0
+  fast_finish: true

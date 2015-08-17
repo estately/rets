@@ -37,7 +37,7 @@ module Rets
       unless new_capabilities
         raise UnknownResponse, "Cannot read rets server capabilities."
       end
-      new_capabilities
+      @capabilities = new_capabilities
     end
 
     def logout
@@ -283,7 +283,7 @@ module Rets
       elsif @cached_capabilities
         @capabilities = add_case_insensitive_default_proc(@cached_capabilities)
       else
-        @capabilities = login
+        login
       end
     end
 
