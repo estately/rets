@@ -2,46 +2,39 @@ module Rets
   module Metadata
     class Resource
       class MissingRetsClass < RuntimeError; end
-      attr_accessor :rets_classes
-      attr_accessor :lookup_types
-      attr_accessor :key_field
+      attr_reader :rets_classes, :id, :key_field
 
-      attr_accessor :id
-
-      def initialize(resource)
-        self.rets_classes = []
-        self.lookup_types = {}
-
-        self.id = resource["ResourceID"]
-        self.key_field = resource["KeyField"]
+      def initialize(id, key_field, rets_classes)
+        @id = id
+        @key_field = key_field
+        @rets_classes = rets_classes
       end
 
-      def self.find_lookup_containers(metadata, resource)
-        metadata[:lookup].select { |lc| lc.resource == resource.id }
+      def self.find_lookup_containers(metadata, resource_id)
+        metadata[:lookup].select { |lc| lc.resource == resource_id }
       end
 
-      def self.find_lookup_type_containers(metadata, resource, lookup_name)
-        metadata[:lookup_type].select { |ltc| ltc.resource == resource.id && ltc.lookup == lookup_name }
+      def self.find_lookup_type_containers(metadata, resource_id, lookup_name)
+        metadata[:lookup_type].select { |ltc| ltc.resource == resource_id && ltc.lookup == lookup_name }
       end
 
-      def self.find_rets_classes(metadata, resource)
-        class_container = metadata[:class].detect { |c| c.resource == resource.id }
+      def self.find_rets_classes(metadata, resource_id)
+        class_container = metadata[:class].detect { |c| c.resource == resource_id }
         if class_container.nil?
-          raise MissingRetsClass.new("No Metadata classes for #{resource.id}")
+          raise MissingRetsClass.new("No Metadata classes for #{resource_id}")
         else
           class_container.classes
         end
       end
 
-      def self.build_lookup_tree(resource, metadata)
+      def self.build_lookup_tree(resource_id, metadata)
         lookup_types = Hash.new {|h, k| h[k] = Array.new }
 
-        find_lookup_containers(metadata, resource).each do |lookup_container|
+        find_lookup_containers(metadata, resource_id).each do |lookup_container|
           lookup_container.lookups.each do |lookup_fragment|
             lookup_name = lookup_fragment["LookupName"]
 
-            find_lookup_type_containers(metadata, resource, lookup_name).each do |lookup_type_container|
-
+            find_lookup_type_containers(metadata, resource_id, lookup_name).each do |lookup_type_container|
               lookup_type_container.lookup_types.each do |lookup_type_fragment|
                 lookup_types[lookup_name] << LookupType.new(lookup_type_fragment)
               end
@@ -52,18 +45,20 @@ module Rets
         lookup_types
       end
 
-      def self.build_classes(resource, metadata)
-        find_rets_classes(metadata, resource).map do |rets_class_fragment|
-          RetsClass.build(rets_class_fragment, resource, metadata)
+      def self.build_classes(resource_id, lookup_types, metadata)
+        find_rets_classes(metadata, resource_id).map do |rets_class_fragment|
+          RetsClass.build(rets_class_fragment, resource_id, lookup_types, metadata)
         end
       end
 
       def self.build(resource_fragment, metadata, logger)
-        resource = new(resource_fragment)
+        resource_id = resource_fragment["ResourceID"]
+        key_field = resource_fragment["KeyField"]
 
-        resource.lookup_types = build_lookup_tree(resource, metadata)
-        resource.rets_classes = build_classes(resource, metadata)
-        resource
+        lookup_types = build_lookup_tree(resource_id, metadata)
+        rets_classes = build_classes(resource_id, lookup_types, metadata)
+
+        new(resource_id, key_field, rets_classes)
       rescue MissingRetsClass => e
         logger.warn(e.message)
         nil

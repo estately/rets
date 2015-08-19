@@ -273,3 +273,29 @@ SAMPLE_PROPERTY_WITH_LOTS_OF_COLUMNS = <<EOF
   <DATA>\t\t</DATA>
 </RETS>
 EOF
+
+EXAMPLE_METADATA_TREE = <<EOF
+Resource: Properties (Key Field: matrix_unique_key)
+  Class: T100
+    Visible Name: Prop
+    Description : some description
+    Table: L_1
+      Resource: Properties
+      ShortName: Sq
+      LongName: Square Footage
+      StandardName: Sqft
+      Units: Meters
+      Searchable: Y
+      Required: N
+    LookupTable: L_10
+      Resource: Properties
+      Required: N
+      Searchable: Y
+      Units: 
+      ShortName: HF
+      LongName: HOA Frequency
+      StandardName: HOA F
+      Types:
+        Quarterly -> Q
+        Annually -> A
+EOF
