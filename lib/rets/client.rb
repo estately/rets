@@ -2,7 +2,6 @@ require 'logger'
 
 module Rets
   class HttpError < StandardError ; end
-
   class Client
     COUNT = Struct.new(:exclude, :include, :only).new(0,1,2)
     CASE_INSENSITIVE_PROC = Proc.new { |h,k| h.key?(k.downcase) ? h[k.downcase] : nil }
@@ -133,18 +132,25 @@ module Rets
       }.reject { |k,v| v.nil? }
       res = http_post(capability_url("Search"), params)
 
-      if opts[:count] == COUNT.only
-        Parser::Compact.get_count(res.body)
+      case opts[:count]
+      when COUNT.only
+        Response::Count.new(Parser::Compact.get_count(res.body))
+      when COUNT.include
+        Response::RecordsAndCount.new(parse_records(opts, res.body), Parser::Compact.get_count(res.body))
       else
-        results = Parser::Compact.parse_document(
-          res.body.encode("UTF-8", res.body.encoding, :invalid => :replace, :undef => :replace)
-        )
-        if opts[:resolve]
-          rets_class = find_rets_class(opts[:search_type], opts[:class])
-          decorate_results(results, rets_class)
-        else
-          results
-        end
+        Response::Records.new(parse_records(opts, res.body))
+      end
+    end
+
+    def parse_records(opts, response_string)
+      results = Parser::Compact.parse_document(
+        response_string.encode("UTF-8", response_string.encoding, :invalid => :replace, :undef => :replace)
+      )
+      if opts[:resolve]
+        rets_class = find_rets_class(opts[:search_type], opts[:class])
+        decorate_results(results, rets_class)
+      else
+        results
       end
     end
 

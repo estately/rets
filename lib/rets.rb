@@ -9,6 +9,12 @@ module Rets
   UnknownResponse      = Class.new(ArgumentError)
   NoLogout             = Class.new(ArgumentError)
 
+  module Response
+    Count = Struct.new(:count)
+    Records = Struct.new(:rows)
+    RecordsAndCount = Struct.new(:rows, :count)
+  end
+
   class AuthorizationFailure < ArgumentError
     attr_reader :status, :body
     def initialize(status, body)
