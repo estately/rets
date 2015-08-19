@@ -1,20 +1,19 @@
 module Rets
   module Metadata
     class TableFactory
+
       def self.build(table_fragment, resource_id, lookup_types)
-        if enum?(table_fragment)
-          LookupTable.build(table_fragment, resource_id, lookup_types)
-        else
+        if table_fragment["LookupName"].empty?
           Table.new(table_fragment, resource_id)
+        else
+          if table_fragment["Interpretation"] == "LookupMulti"
+            MultiLookupTable.build(table_fragment, resource_id, lookup_types)
+          else
+            LookupTable.build(table_fragment, resource_id, lookup_types)
+          end
         end
       end
 
-      def self.enum?(table_fragment)
-        lookup_value   = table_fragment["LookupName"].strip
-        interpretation = table_fragment["Interpretation"].strip
-
-        interpretation =~ /Lookup/ && !lookup_value.empty?
-      end
     end
   end
 end

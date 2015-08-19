@@ -1,6 +1,6 @@
 module Rets
   module Metadata
-    class LookupTable
+    class MultiLookupTable
       attr_reader :resource_id, :lookup_types, :table_fragment, :name, :long_name
 
       def initialize(resource_id, lookup_types, table_fragment)
@@ -22,7 +22,7 @@ module Rets
       #
       # [out] The file to print to.  Defaults to $stdout.
       def print_tree(out = $stdout)
-        out.puts "    LookupTable: #{name}"
+        out.puts "    MultiLookupTable: #{name}"
         out.puts "      Resource: #{resource_id}"
         out.puts "      Required: #{table_fragment['Required']}"
         out.puts "      Searchable: #{ table_fragment["Searchable"] }"
@@ -43,22 +43,27 @@ module Rets
 
       def resolve(value)
         if value.empty?
-          return value.to_s.strip
+          return []
         end
 
-        #Remove surrounding quotes
-        clean_value  = value.scan(/^["']?(.*?)["']?$/).join
+        values = value.split(",")
+
+        values = values.map do |v|
+
+          #Remove surrounding quotes
+          clean_value  = v.scan(/^["']?(.*?)["']?$/).join
 
 
-        lookup_type = lookup_type(clean_value)
+          lookup_type = lookup_type(clean_value)
 
-        resolved_value = lookup_type ? lookup_type.long_value : nil
+          resolved_value = lookup_type ? lookup_type.long_value : nil
 
-        if resolved_value.nil? && $VERBOSE
-          warn("Discarding unmappable value of #{clean_value.inspect}")
+          if resolved_value.nil? && $VERBOSE
+            warn("Discarding unmappable value of #{clean_value.inspect}")
+          end
+
+          resolved_value.to_s.strip
         end
-
-        resolved_value.to_s.strip
       end
     end
   end

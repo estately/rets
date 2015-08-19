@@ -298,4 +298,15 @@ Resource: Properties (Key Field: matrix_unique_key)
       Types:
         Quarterly -> Q
         Annually -> A
+    MultiLookupTable: L_11
+      Resource: Properties
+      Required: N
+      Searchable: Y
+      Units: 
+      ShortName: HFs
+      LongName: HOA Frequencies
+      StandardName: HOA Fs
+      Types:
+        Quarterly -> Q
+        Annually -> A
 EOF
