@@ -5,6 +5,7 @@ require 'nokogiri'
 module Rets
   VERSION = '0.9.0'
 
+  HttpError            = Class.new(StandardError)
   MalformedResponse    = Class.new(ArgumentError)
   UnknownResponse      = Class.new(ArgumentError)
   NoLogout             = Class.new(ArgumentError)

@@ -1,8 +1,6 @@
 require 'logger'
 
 module Rets
-  class HttpError < StandardError ; end
-
   class Client
     COUNT = Struct.new(:exclude, :include, :only).new(0,1,2)
     CASE_INSENSITIVE_PROC = Proc.new { |h,k| h.key?(k.downcase) ? h[k.downcase] : nil }
@@ -95,7 +93,7 @@ module Rets
         else
           handle_find_failure(retries, opts, e)
         end
-      rescue AuthorizationFailure, InvalidRequest => e
+      rescue AuthorizationFailure, InvalidRequest, HttpError => e
         handle_find_failure(retries, opts, e)
       end
     end
