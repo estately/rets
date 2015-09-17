@@ -266,6 +266,9 @@ module Rets
                         "ID"     => "0"
                       })
       res.body
+    rescue Rets::InvalidRequest => e
+      puts e.to_s
+      return ""  
     end
 
     # The capabilies as provided by the RETS server during login.
