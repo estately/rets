@@ -183,15 +183,24 @@ class TestClient < MiniTest::Test
 
   def test_find_retries_on_errors
     @client.stubs(:find_every).raises(Rets::AuthorizationFailure.new(401, 'Not Authorized')).then.raises(Rets::InvalidRequest.new(20134, 'Not Found')).then.returns([])
+    @client.stubs(:login)
     @client.find(:all, :foo => :bar)
   end
 
   def test_find_eventually_reraises_errors
     @client.stubs(:find_every).raises(Rets::AuthorizationFailure.new(401, 'Not Authorized'))
+    @client.stubs(:login)
 
     assert_raises Rets::AuthorizationFailure do
       @client.find(:all, :foo => :bar)
     end
+  end
+
+  def test_find_logs_in_after_auth_error
+    @client.stubs(:find_every).raises(Rets::AuthorizationFailure.new(401, 'Not Authorized')).then.returns(["foo"])
+
+    @client.expects(:login)
+    @client.find(:all, :foo => :bar)
   end
 
   def test_all_objects_calls_objects
