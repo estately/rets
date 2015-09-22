@@ -93,7 +93,10 @@ module Rets
         else
           handle_find_failure(retries, opts, e)
         end
-      rescue AuthorizationFailure, InvalidRequest, HttpError => e
+      rescue InvalidRequest, HttpError => e
+        handle_find_failure(retries, opts, e)
+      rescue AuthorizationFailure => e
+        login
         handle_find_failure(retries, opts, e)
       end
     end
