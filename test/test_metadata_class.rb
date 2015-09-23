@@ -3,14 +3,14 @@ require_relative "helper"
 class TestMetadataClass < MiniTest::Test
   def test_rets_class_find_table
     table = Rets::Metadata::Table.new({ "SystemName" => 'test' }, 'resource_id')
-    rets_class = Rets::Metadata::RetsClass.new('class_name', 'visible_name', 'description', [table])
+    rets_class = Rets::Metadata::RetsClass.new('class_name', 'visible_name', 'standard name', 'description', [table])
 
     assert_equal table, rets_class.find_table("test")
   end
 
   def test_rets_class_find_lookup_table
     table = Rets::Metadata::LookupTable.new('resource_id', [], { "SystemName" => 'test' })
-    rets_class = Rets::Metadata::RetsClass.new('class_name', 'visible_name', 'description', [table])
+    rets_class = Rets::Metadata::RetsClass.new('class_name', 'visible_name', 'standard name', 'description', [table])
 
     assert_equal table, rets_class.find_table("test")
   end
