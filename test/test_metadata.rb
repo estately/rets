@@ -41,7 +41,7 @@ class TestMetadata < MiniTest::Test
     ]
 
     rets_classes = [
-      Rets::Metadata::RetsClass.new("T100", "Prop", "some description", tables)
+      Rets::Metadata::RetsClass.new("T100", "Prop", "standard name", "some description", tables)
     ]
 
     resource = Rets::Metadata::Resource.new(resource_id, "matrix_unique_key", rets_classes)

@@ -116,7 +116,7 @@ class TestMetadataResource < MiniTest::Test
   end
 
   def test_resource_find_rets_class
-    rets_class = Rets::Metadata::RetsClass.new('test', '', '', [])
+    rets_class = Rets::Metadata::RetsClass.new('test', '', '', '', [])
     resource = Rets::Metadata::Resource.new('', '', [rets_class])
     assert_equal(rets_class, resource.find_rets_class("test"))
   end
