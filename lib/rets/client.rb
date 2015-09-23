@@ -236,7 +236,7 @@ module Rets
       http_post(capability_url("GetObject"), params, extra_headers)
     end
 
-    def metadata
+    def metadata(types=nil)
       return @metadata if @metadata
       @cached_metadata ||= @caching.load(@logger)
       if cached_metadata && (options[:skip_metadata_uptodate_check] ||
@@ -245,15 +245,15 @@ module Rets
         @metadata = cached_metadata
       else
         client_progress.bad_cached_metadata(cached_metadata)
-        @metadata = Metadata::Root.new(logger, retrieve_metadata)
+        @metadata = Metadata::Root.new(logger, retrieve_metadata(types))
         @caching.save(metadata)
       end
       @metadata
     end
 
-    def retrieve_metadata
+    def retrieve_metadata(types=nil)
       raw_metadata = {}
-      Metadata::METADATA_TYPES.each {|type|
+      (types || Metadata::METADATA_TYPES).each {|type|
         raw_metadata[type] = retrieve_metadata_type(type)
       }
       raw_metadata
@@ -266,9 +266,6 @@ module Rets
                         "ID"     => "0"
                       })
       res.body
-    rescue Rets::InvalidRequest => e
-      puts e.to_s
-      return ""  
     end
 
     # The capabilies as provided by the RETS server during login.
