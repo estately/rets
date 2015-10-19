@@ -1,5 +1,5 @@
 # coding: utf-8
-
+require 'cgi'
 module Rets
   module Parser
     class Compact
