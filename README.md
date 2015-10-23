@@ -75,7 +75,7 @@ JSON or YAML instead, or define your own serialization mechanism, using the
 
     client = Rets::Client.new(
       ...
-      metadata_serializer: Rets::Metadata::JsonSerializer
+      metadata_serializer: Rets::Metadata::JsonSerializer.new
     )
 
 The built-in serializers are:
