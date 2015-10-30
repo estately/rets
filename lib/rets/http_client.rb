@@ -28,6 +28,10 @@ module Rets
         http.receive_timeout = options[:receive_timeout]
       end
 
+      if options[:cookie_manager]
+        http.cookie_manager = options[:cookie_manager]
+      end
+
       if options[:cookie_store]
         ensure_cookie_store_exists! options[:cookie_store]
         http.set_cookie_store(options[:cookie_store])

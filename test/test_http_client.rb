@@ -129,4 +129,12 @@ class CookieManagement < MiniTest::Test
     #check added cookie exists
     assert_equal "879392834723043209", client.http_cookie('RETS-Session-ID')
   end
+
+  def test_accepts_custom_cookie_manager_from_options
+    client = Rets::HttpClient.from_options({cookie_manager: TestCookieManager.new}, @logger)
+    assert_equal client.http.cookie_manager.class, TestCookieManager
+  end
+end
+
+class TestCookieManager < HTTPClient::CookieManager
 end
