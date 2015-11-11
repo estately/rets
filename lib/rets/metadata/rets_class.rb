@@ -50,7 +50,7 @@ module Rets
       end
 
       def find_table(name)
-        tables.detect { |value| value.name == name }
+        tables.detect { |value| value.name.downcase == name.downcase }
       end
     end
   end
