@@ -28,9 +28,7 @@ module Rets
         http.receive_timeout = options[:receive_timeout]
       end
 
-      if options[:lock_cookie_files]
-        http.cookie_manager = HTTPClient::CookieManager.new(nil, LockingCookieSaver)
-      end
+      http.cookie_manager = HTTPClient::CookieManager.new(nil, LockingCookieSaver)
 
       if options[:cookie_store]
         ensure_cookie_store_exists! options[:cookie_store]
