@@ -203,10 +203,11 @@ module Rets
 
         return parts
       else
+        logger.debug "Rets::Client: Found 1 part (the whole body)"
+
         # fake a multipart for interface compatibility
         headers = {}
-        response.headers.each { |k,v| headers[k] = v[0] }
-
+        response.headers.each { |k,v| headers[k.downcase] = v }
         part = Parser::Multipart::Part.new(headers, response.body)
 
         return [part]
