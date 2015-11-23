@@ -256,7 +256,7 @@ class TestClient < MiniTest::Test
   def test_create_parts_from_response_returns_a_single_part_when_not_multipart_response
     response = {}
     response.stubs(:header => { "content-type" => ['text/plain']})
-    response.stubs(:headers => { "content-type" => ['text/plain']})
+    response.stubs(:headers => { "Content-Type" => 'text/plain'})
     response.stubs(:body => "fakebody")
 
     parts = @client.create_parts_from_response(response)
