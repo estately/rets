@@ -180,7 +180,7 @@ module Rets
     def objects(object_ids, opts = {})
       response = case object_ids
         when String then fetch_object(object_ids, opts)
-        when Array  then fetch_object(object_ids.join(","), opts)
+        when Array  then fetch_object(object_ids.join(":"), opts)
         else raise ArgumentError, "Expected instance of String or Array, but got #{object_ids.inspect}."
       end
 

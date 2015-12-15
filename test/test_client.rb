@@ -217,10 +217,10 @@ class TestClient < MiniTest::Test
   end
 
   def test_objects_handle_array_argument
-    @client.expects(:fetch_object).with("1,2", :foo => :bar)
+    @client.expects(:fetch_object).with("1:2:3", :foo => :bar)
     @client.stubs(:create_parts_from_response)
 
-    @client.objects([1,2], :foo => :bar)
+    @client.objects([1,2,3], :foo => :bar)
   end
 
   def test_objects_raises_on_other_arguments
