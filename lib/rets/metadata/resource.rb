@@ -2,12 +2,13 @@ module Rets
   module Metadata
     class Resource
       class MissingRetsClass < RuntimeError; end
-      attr_reader :rets_classes, :id, :key_field
+      attr_reader :id, :key_field, :rets_classes, :rets_objects
 
-      def initialize(id, key_field, rets_classes)
+      def initialize(id, key_field, rets_classes, rets_objects)
         @id = id
         @key_field = key_field
         @rets_classes = rets_classes
+        @rets_objects = rets_objects
       end
 
       def self.find_lookup_containers(metadata, resource_id)
@@ -25,6 +26,10 @@ module Rets
         else
           class_container.classes
         end
+      end
+
+      def self.find_rets_objects(metadata, resource_id)
+        metadata[:object].select { |object| object.resource == resource_id }.map(&:objects).flatten
       end
 
       def self.build_lookup_tree(resource_id, metadata)
@@ -51,14 +56,21 @@ module Rets
         end
       end
 
+      def self.build_objects(resource_id, metadata)
+        find_rets_objects(metadata, resource_id).map do |rets_object_fragment|
+          RetsObject.build(rets_object_fragment)
+        end
+      end
+
       def self.build(resource_fragment, metadata, logger)
         resource_id = resource_fragment["ResourceID"]
         key_field = resource_fragment["KeyField"]
 
         lookup_types = build_lookup_tree(resource_id, metadata)
         rets_classes = build_classes(resource_id, lookup_types, metadata)
+        rets_objects = build_objects(resource_id, metadata)
 
-        new(resource_id, key_field, rets_classes)
+        new(resource_id, key_field, rets_classes, rets_objects)
       rescue MissingRetsClass => e
         logger.warn(e.message)
         nil
@@ -71,6 +83,9 @@ module Rets
         out.puts "Resource: #{id} (Key Field: #{key_field})"
         rets_classes.each do |rets_class|
           rets_class.print_tree(out)
+        end
+        rets_objects.each do |rets_object|
+          rets_object.print_tree(out)
         end
       end
 
