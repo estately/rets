@@ -39,19 +39,36 @@ class TestMetadataResource < MiniTest::Test
     assert_equal([rets_class], classes)
   end
 
+  def test_resource_build_objects
+    resource_id = "id"
+
+    metadata = stub(:metadata)
+    rets_object = stub(:rets_object)
+    rets_object_fragment = stub(:rets_object_fragment)
+
+    Rets::Metadata::RetsObject.expects(:build).with(rets_object_fragment).returns(rets_object)
+    Rets::Metadata::Resource.expects(:find_rets_objects).with(metadata, resource_id).returns([rets_object_fragment])
+
+    objects = Rets::Metadata::Resource.build_objects(resource_id, metadata)
+    assert_equal([rets_object], objects)
+  end
+
   def test_resource_build
     fragment = { "ResourceID" => "test" }
 
     lookup_types = stub(:lookup_types)
     classes = stub(:classes)
+    objects = stub(:classes)
     metadata = stub(:metadata)
 
     Rets::Metadata::Resource.stubs(:build_lookup_tree => lookup_types)
     Rets::Metadata::Resource.stubs(:build_classes => classes)
+    Rets::Metadata::Resource.stubs(:build_objects => objects)
 
     resource = Rets::Metadata::Resource.build(fragment, metadata, Logger.new(STDOUT))
 
     assert_equal(classes, resource.rets_classes)
+    assert_equal(objects, resource.rets_objects)
   end
 
   def test_resource_build_with_incomplete_classes
@@ -117,7 +134,7 @@ class TestMetadataResource < MiniTest::Test
 
   def test_resource_find_rets_class
     rets_class = Rets::Metadata::RetsClass.new('test', '', '', '', [])
-    resource = Rets::Metadata::Resource.new('', '', [rets_class])
+    resource = Rets::Metadata::Resource.new('', '', [rets_class], [])
     assert_equal(rets_class, resource.find_rets_class("test"))
   end
 end

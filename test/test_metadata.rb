@@ -44,7 +44,11 @@ class TestMetadata < MiniTest::Test
       Rets::Metadata::RetsClass.new("T100", "Prop", "standard name", "some description", tables)
     ]
 
-    resource = Rets::Metadata::Resource.new(resource_id, "matrix_unique_key", rets_classes)
+    rets_objects = [
+      Rets::Metadata::RetsObject.new("Photo", "photo/jpg", "photo description")
+    ]
+
+    resource = Rets::Metadata::Resource.new(resource_id, "matrix_unique_key", rets_classes, rets_objects)
 
     io = StringIO.new
     resource.print_tree(io)
