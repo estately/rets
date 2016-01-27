@@ -183,15 +183,24 @@ class TestClient < MiniTest::Test
 
   def test_find_retries_on_errors
     @client.stubs(:find_every).raises(Rets::AuthorizationFailure.new(401, 'Not Authorized')).then.raises(Rets::InvalidRequest.new(20134, 'Not Found')).then.returns([])
+    @client.stubs(:login)
     @client.find(:all, :foo => :bar)
   end
 
   def test_find_eventually_reraises_errors
     @client.stubs(:find_every).raises(Rets::AuthorizationFailure.new(401, 'Not Authorized'))
+    @client.stubs(:login)
 
     assert_raises Rets::AuthorizationFailure do
       @client.find(:all, :foo => :bar)
     end
+  end
+
+  def test_find_logs_in_after_auth_error
+    @client.stubs(:find_every).raises(Rets::AuthorizationFailure.new(401, 'Not Authorized')).then.returns(["foo"])
+
+    @client.expects(:login)
+    @client.find(:all, :foo => :bar)
   end
 
   def test_all_objects_calls_objects
@@ -208,10 +217,10 @@ class TestClient < MiniTest::Test
   end
 
   def test_objects_handle_array_argument
-    @client.expects(:fetch_object).with("1,2", :foo => :bar)
+    @client.expects(:fetch_object).with("1:2:3", :foo => :bar)
     @client.stubs(:create_parts_from_response)
 
-    @client.objects([1,2], :foo => :bar)
+    @client.objects([1,2,3], :foo => :bar)
   end
 
   def test_objects_raises_on_other_arguments
@@ -247,7 +256,7 @@ class TestClient < MiniTest::Test
   def test_create_parts_from_response_returns_a_single_part_when_not_multipart_response
     response = {}
     response.stubs(:header => { "content-type" => ['text/plain']})
-    response.stubs(:headers => { "content-type" => ['text/plain']})
+    response.stubs(:headers => { "Content-Type" => 'text/plain'})
     response.stubs(:body => "fakebody")
 
     parts = @client.create_parts_from_response(response)

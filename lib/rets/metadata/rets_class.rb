@@ -1,12 +1,13 @@
 module Rets
   module Metadata
     class RetsClass
-      attr_reader :name, :visible_name, :description, :tables
+      attr_reader :name, :visible_name, :standard_name, :description, :tables
 
-      def initialize(name, visible_name, description, tables)
+      def initialize(name, visible_name, standard_name, description, tables)
         @name = name
         @visible_name = visible_name
         @description = description
+        @standard_name = standard_name
 
         @tables = tables
       end
@@ -28,11 +29,12 @@ module Rets
       def self.build(rets_class_fragment, resource_id, lookup_types, metadata)
         class_name = rets_class_fragment["ClassName"]
         visible_name = rets_class_fragment["VisibleName"]
+        standard_name = rets_class_fragment["StandardName"]
         description = rets_class_fragment["Description"]
 
         table_container = find_table_container(metadata, resource_id, class_name)
         tables = builds_tables(table_container, resource_id, lookup_types)
-        new(class_name, visible_name, description, tables)
+        new(class_name, visible_name, standard_name, description, tables)
       end
 
       # Print the tree to a file
@@ -48,7 +50,7 @@ module Rets
       end
 
       def find_table(name)
-        tables.detect { |value| value.name == name }
+        tables.detect { |value| value.name.downcase == name.downcase }
       end
     end
   end

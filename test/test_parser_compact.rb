@@ -51,6 +51,11 @@ class TestParserCompact < MiniTest::Test
     assert_equal 0, count
   end
 
+  def test_get_count_with_unrecognized_document
+    count = Rets::Parser::Compact.get_count("")
+    assert_equal 0, count
+  end
+
   def test_parse_example
     rows = Rets::Parser::Compact.parse_document(SAMPLE_COMPACT)
 

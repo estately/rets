@@ -1,8 +1,6 @@
 require 'logger'
 
 module Rets
-  class HttpError < StandardError ; end
-
   class Client
     COUNT = Struct.new(:exclude, :include, :only).new(0,1,2)
     CASE_INSENSITIVE_PROC = Proc.new { |h,k| h.key?(k.downcase) ? h[k.downcase] : nil }
@@ -95,7 +93,10 @@ module Rets
         else
           handle_find_failure(retries, opts, e)
         end
-      rescue AuthorizationFailure, InvalidRequest => e
+      rescue InvalidRequest, HttpError => e
+        handle_find_failure(retries, opts, e)
+      rescue AuthorizationFailure => e
+        login
         handle_find_failure(retries, opts, e)
       end
     end
@@ -179,7 +180,7 @@ module Rets
     def objects(object_ids, opts = {})
       response = case object_ids
         when String then fetch_object(object_ids, opts)
-        when Array  then fetch_object(object_ids.join(","), opts)
+        when Array  then fetch_object(object_ids.join(":"), opts)
         else raise ArgumentError, "Expected instance of String or Array, but got #{object_ids.inspect}."
       end
 
@@ -202,10 +203,11 @@ module Rets
 
         return parts
       else
+        logger.debug "Rets::Client: Found 1 part (the whole body)"
+
         # fake a multipart for interface compatibility
         headers = {}
-        response.headers.each { |k,v| headers[k] = v[0] }
-
+        response.headers.each { |k,v| headers[k.downcase] = v }
         part = Parser::Multipart::Part.new(headers, response.body)
 
         return [part]
@@ -238,7 +240,7 @@ module Rets
       http_post(capability_url("GetObject"), params, extra_headers)
     end
 
-    def metadata
+    def metadata(types=nil)
       return @metadata if @metadata
       @cached_metadata ||= @caching.load(@logger)
       if cached_metadata && (options[:skip_metadata_uptodate_check] ||
@@ -247,15 +249,15 @@ module Rets
         @metadata = cached_metadata
       else
         client_progress.bad_cached_metadata(cached_metadata)
-        @metadata = Metadata::Root.new(logger, retrieve_metadata)
+        @metadata = Metadata::Root.new(logger, retrieve_metadata(types))
         @caching.save(metadata)
       end
       @metadata
     end
 
-    def retrieve_metadata
+    def retrieve_metadata(types=nil)
       raw_metadata = {}
-      Metadata::METADATA_TYPES.each {|type|
+      (types || Metadata::METADATA_TYPES).each {|type|
         raw_metadata[type] = retrieve_metadata_type(type)
       }
       raw_metadata
