@@ -1,3 +1,22 @@
+### 0.10.0 / 2016-02-29
+
+* fix: ensure cookie store exists #133
+* feature: make cached capabilities case insensitive #136
+* feature: add specific classes for each rets error #137
+* feature: whitelist RETS search options #142
+* feature: simplify metadata caching #134
+* feature: use a SAX parser #98
+* fix: save capabilities to avoid double logins #148
+* feature: login on authorization error #155
+* add basic support for DataDictionary feeds #156
+* fix: count always returns a number #161
+* feature: make lookup tables case insensitive #163
+* feature: update to httpclient 2.7 #165
+* fix: getObject now works with non-multipart responses #166
+* fix: getObject works with multiple ids #167
+* feature: store rets object metadata #168
+* feature: add a code of conduct #171
+
 ### 0.9.0 / 2015-06-11
 
 * feature: update to httpclient 2.6
