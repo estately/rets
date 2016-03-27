@@ -8,9 +8,10 @@ class TestMetadataObject < MiniTest::Test
     object_type = "type"
 
     object_fragment = {
-        "VisibleName" => name,
-        "MIMEType"    => mime_type,
-        "Description" => description,
+      "ObjectType" => object_type,
+      "VisibleName" => name,
+      "MIMEType"    => mime_type,
+      "Description" => description,
     }
 
     assert_equal(
