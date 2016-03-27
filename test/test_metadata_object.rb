@@ -5,6 +5,7 @@ class TestMetadataObject < MiniTest::Test
     name = "Name"
     mime_type = "mimetype"
     description = "description"
+    object_type = "type"
 
     object_fragment = {
         "VisibleName" => name,
@@ -14,7 +15,10 @@ class TestMetadataObject < MiniTest::Test
 
     assert_equal(
       Rets::Metadata::RetsObject.build(object_fragment),
-      Rets::Metadata::RetsObject.new(name, mime_type, description)
+      Rets::Metadata::RetsObject.new(object_type, name, mime_type, description)
+    )
+  end
+
   def test_rets_object_building_not_case_dependent
     object_fragment = {
       "MiMeTyPe" => "image/jpeg"

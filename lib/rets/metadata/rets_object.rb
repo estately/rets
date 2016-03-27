@@ -1,12 +1,13 @@
 module Rets
   module Metadata
     class RetsObject
-      attr_reader :name, :mime_type, :description
+      attr_reader :name, :mime_type, :description, :type
 
-      def initialize(name, mime_type, description)
+      def initialize(type, name, mime_type, description)
         @name = name
         @mime_type = mime_type
         @description = description
+        @type = type
       end
 
       def self.build(rets_object_fragment)
@@ -14,12 +15,14 @@ module Rets
         name = rets_object_fragment["visiblename"]
         mime_type = rets_object_fragment["mimetype"]
         description = rets_object_fragment["description"]
-        new(object_type, name, mime_type, description)
+        type = rets_object_fragment['objecttype']
+        new(type, name, mime_type, description)
       end
 
       def print_tree(out = $stdout)
-        out.puts "  Object: #{name}"
-        out.puts "    MimeType: #{mime_type}"
+        out.puts "  Object: #{type}"
+        out.puts "    Visible Name: #{name}"
+        out.puts "    Mime Type: #{mime_type}"
         out.puts "    Description: #{description}"
       end
 

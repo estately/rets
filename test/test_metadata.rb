@@ -58,7 +58,7 @@ class TestMetadata < MiniTest::Test
     ]
 
     rets_objects = [
-      Rets::Metadata::RetsObject.new("Photo", "photo/jpg", "photo description")
+      Rets::Metadata::RetsObject.new("HiRes", "Photo", "photo/jpg", "photo description")
     ]
 
     resource = Rets::Metadata::Resource.new(resource_id, "matrix_unique_key", rets_classes, rets_objects)
