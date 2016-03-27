@@ -10,10 +10,11 @@ module Rets
       end
 
       def self.build(rets_object_fragment)
-        name = rets_object_fragment["VisibleName"]
-        mime_type = rets_object_fragment["MIMEType"]
-        description = rets_object_fragment["Description"]
-        new(name, mime_type, description)
+        rets_object_fragment = downcase_hash_keys(rets_object_fragment)
+        name = rets_object_fragment["visiblename"]
+        mime_type = rets_object_fragment["mimetype"]
+        description = rets_object_fragment["description"]
+        new(object_type, name, mime_type, description)
       end
 
       def print_tree(out = $stdout)
@@ -26,6 +27,11 @@ module Rets
         name == other.name &&
           mime_type == other.mime_type &&
           description == other.description
+      end
+
+      private
+      def self.downcase_hash_keys(hash)
+        Hash[hash.map { |k, v| [k.downcase, v] }]
       end
     end
   end
