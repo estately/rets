@@ -15,6 +15,7 @@ module Rets
     def clean_setup
       @metadata            = nil
       @tries               = nil
+      @capabilities        = nil
       @login_url           = options[:login_url]
       @cached_metadata     = options[:metadata]
       @cached_capabilities = options[:capabilities]
