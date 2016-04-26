@@ -187,11 +187,16 @@ class TestClient < MiniTest::Test
     @client.find(:all, :foo => :bar)
   end
 
-  def test_find_eventually_reraises_errors
-    @client.stubs(:find_every).raises(Rets::AuthorizationFailure.new(401, 'Not Authorized'))
+  def test_find_eventually_reraises_first_error
+    @client.stubs(:find_every).raises(
+      Rets::InvalidRequest.new(20134, 'Not Found')
+    ).then.raises(
+      Rets::AuthorizationFailure.new(401, 'Not Authorized')
+    )
+
     @client.stubs(:login)
 
-    assert_raises Rets::AuthorizationFailure do
+    assert_raises Rets::InvalidRequest do
       @client.find(:all, :foo => :bar)
     end
   end
