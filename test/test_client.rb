@@ -129,38 +129,27 @@ class TestClient < MiniTest::Test
 
   def test_response_text_encoding_from_ascii
     @client.stubs(:capability_url).with("Search").returns("search_url")
-
     response = mock
-    response.stubs(:body).returns(("An ascii string").encode("binary", "UTF-8"))
-    @client.stubs(:http_post).with("search_url", anything).returns(response)
+    response.stubs(:body).returns("An ascii string".encode("binary", "UTF-8"))
 
-    Rets::Parser::Compact.expects(:parse_document).with("An ascii string")
-
-    @client.find_every(:search_type => "Foo", :class => "Bar")
+    assert_equal @client.clean_response(response).body, "An ascii string"
   end
 
   def test_response_text_encoding_from_utf_8
     @client.stubs(:capability_url).with("Search").returns("search_url")
-
     response = mock
     response.stubs(:body).returns("Some string with non-ascii characters \u0119")
-    @client.stubs(:http_post).with("search_url", anything).returns(response)
 
-    Rets::Parser::Compact.expects(:parse_document).with("Some string with non-ascii characters \u0119")
+    assert_equal @client.clean_response(response).body, "Some string with non-ascii characters \u0119"
 
-    @client.find_every(:search_type => "Foo", :class => "Bar")
   end
 
   def test_response_text_encoding_from_utf_16
     @client.stubs(:capability_url).with("Search").returns("search_url")
-
     response = mock
     response.stubs(:body).returns("Some string with non-utf-8 characters \xC2")
-    @client.stubs(:http_post).with("search_url", anything).returns(response)
 
-    Rets::Parser::Compact.expects(:parse_document).with("Some string with non-utf-8 characters \uFFFD")
-
-    @client.find_every(:search_type => "Foo", :class => "Bar")
+    assert_equal @client.clean_response(response).body, "Some string with non-utf-8 characters \uFFFD"
   end
 
   def test_find_retries_when_receiving_no_records_found
