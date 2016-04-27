@@ -132,7 +132,7 @@ module Rets
         "Query"               => opts[:query],
         "QueryType"           => opts.fetch(:query_type, "DMQL2"),
       }.reject { |k,v| v.nil? }
-      res = http_post(capability_url("Search"), params)
+      res = clean_response(http_post(capability_url("Search"), params))
 
       if opts[:count] == COUNT.only
         Parser::Compact.get_count(res.body)
@@ -269,7 +269,7 @@ module Rets
                         "Type"   => "METADATA-#{type}",
                         "ID"     => "0"
                       })
-      res.body
+      clean_response(res.body)
     end
 
     # The capabilies as provided by the RETS server during login.
@@ -339,7 +339,7 @@ module Rets
     end
 
     def http_post(url, params, extra_headers = {})
-      clean_response(@http_client.http_post(url, params, extra_headers))
+      @http_client.http_post(url, params, extra_headers)
     end
 
     def tries
