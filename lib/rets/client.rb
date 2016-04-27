@@ -138,7 +138,7 @@ module Rets
         Parser::Compact.get_count(res.body)
       else
         results = Parser::Compact.parse_document(
-          res.body.encode("UTF-8", res.body.encoding, :invalid => :replace, :undef => :replace)
+          res.body
         )
         if opts[:resolve]
           rets_class = find_rets_class(opts[:search_type], opts[:class])
@@ -330,11 +330,16 @@ module Rets
     end
 
     def http_get(url, params=nil, extra_headers={})
-      @http_client.http_get(url, params, extra_headers)
+      clean_response(@http_client.http_get(url, params, extra_headers))
+    end
+
+    def clean_response(res)
+      res.body.encode!("UTF-8", res.body.encoding, :invalid => :replace, :undef => :replace)
+      res
     end
 
     def http_post(url, params, extra_headers = {})
-      @http_client.http_post(url, params, extra_headers)
+      clean_response(@http_client.http_post(url, params, extra_headers))
     end
 
     def tries
