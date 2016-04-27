@@ -97,7 +97,7 @@ class TestClient < MiniTest::Test
     logger.debug "foo"
   end
 
-  def test_find_first_calls_find_every_with_limit_one
+  def test_find_every_raises_on_missing_required_arguments
     assert_raises ArgumentError do
       @client.find_every({})
     end

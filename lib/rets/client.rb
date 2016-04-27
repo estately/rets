@@ -9,6 +9,7 @@ module Rets
 
     def initialize(options)
       @options = options
+      @capabilities = nil
       clean_setup
     end
 
