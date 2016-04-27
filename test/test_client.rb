@@ -132,7 +132,7 @@ class TestClient < MiniTest::Test
     response = mock
     response.stubs(:body).returns("An ascii string".encode("binary", "UTF-8"))
 
-    assert_equal @client.clean_response(response), "An ascii string"
+    assert_equal @client.clean_response(response).body, "An ascii string"
   end
 
   def test_response_text_encoding_from_utf_8
@@ -140,7 +140,7 @@ class TestClient < MiniTest::Test
     response = mock
     response.stubs(:body).returns("Some string with non-ascii characters \u0119")
 
-    assert_equal @client.clean_response(response), "Some string with non-ascii characters \u0119"
+    assert_equal @client.clean_response(response).body, "Some string with non-ascii characters \u0119"
 
   end
 
@@ -149,7 +149,7 @@ class TestClient < MiniTest::Test
     response = mock
     response.stubs(:body).returns("Some string with non-utf-8 characters \xC2")
 
-    assert_equal @client.clean_response(response), "Some string with non-utf-8 characters \uFFFD"
+    assert_equal @client.clean_response(response).body, "Some string with non-utf-8 characters \uFFFD"
   end
 
   def test_find_retries_when_receiving_no_records_found
