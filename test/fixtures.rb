@@ -309,7 +309,8 @@ Resource: Properties (Key Field: matrix_unique_key)
       Types:
         Quarterly -> Q
         Annually -> A
-  Object: Photo
-    MimeType: photo/jpg
+  Object: HiRes
+    Visible Name: Photo
+    Mime Type: photo/jpg
     Description: photo description
 EOF
