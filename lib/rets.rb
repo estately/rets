@@ -3,7 +3,7 @@ require 'digest/md5'
 require 'nokogiri'
 
 module Rets
-  VERSION = '0.10.0'
+  VERSION = '0.10.1'
 
   HttpError            = Class.new(StandardError)
   MalformedResponse    = Class.new(ArgumentError)

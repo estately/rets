@@ -1,5 +1,6 @@
 # coding: utf-8
 require 'cgi'
+
 module Rets
   module Parser
     class Compact
@@ -76,12 +77,30 @@ module Rets
         end
 
         column_names = columns.split(delimiter)
-        data_values = data.split(delimiter, INCLUDE_NULL_FIELDS).map { |x| CGI.unescapeHTML(x) }
+        data_values = data.split(delimiter, INCLUDE_NULL_FIELDS).map do |x|
+          safely_decode_character_references!(x)
+          CGI.unescape_html(x)
+        end
 
         zipped_key_values = column_names.zip(data_values).map { |k, v| [k.freeze, v.to_s] }
 
         hash = Hash[*zipped_key_values.flatten]
         hash.reject { |key, value| key.empty? && value.to_s.empty? }
+      end
+
+      def self.safely_decode_character_references!(string)
+        string.gsub!(/&#(x)?([\h]+);/) do
+          if $2
+            base = $1 == "x" ? 16 : 10
+            int = Integer($2, base)
+            begin
+              int.chr(Encoding::UTF_8)
+            rescue RangeError
+              ""
+            end
+          end
+        end
+        string
       end
 
       def self.get_count(xml)

@@ -266,6 +266,14 @@ SAMPLE_COMPACT_WITH_SPECIAL_CHARS_2 = <<EOF
 </RETS>
 EOF
 
+SAMPLE_COMPACT_WITH_DOUBLY_ENCODED_BAD_CHARACTER_REFERENCES = <<EOF
+<RETS ReplyCode=\"0\" ReplyText=\"Operation Success.\">
+  <DELIMITER value=\"09\" />
+  <COLUMNS>	PublicRemarksNew	WindowCoverings	YearBuilt	Zoning	ZoningCompatibleYN	</COLUMNS>
+  <DATA>	foo &amp;#56324; bar		1999	00		</DATA>
+</RETS>
+EOF
+
 SAMPLE_PROPERTY_WITH_LOTS_OF_COLUMNS = <<EOF
 <RETS ReplyCode=\"0\" ReplyText=\"Operation Success.\">
   <DELIMITER value=\"09\" />
