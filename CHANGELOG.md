@@ -1,3 +1,7 @@
+### 0.10.1 / 2016-05-04
+
+* fix: handle invalid codepoints in character references
+
 ### 0.10.0 / 2016-02-29
 
 * fix: ensure cookie store exists #133

@@ -1,9 +1,9 @@
 # -*- encoding: utf-8 -*-
-# stub: rets 0.10.1.20160503204800 ruby lib
+# stub: rets 0.10.1.20160503205231 ruby lib
 
 Gem::Specification.new do |s|
   s.name = "rets"
-  s.version = "0.10.1.20160503204800"
+  s.version = "0.10.1.20160503205231"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.require_paths = ["lib"]
