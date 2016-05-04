@@ -86,9 +86,30 @@ class TestParserCompact < MiniTest::Test
     assert_equal "text with <tag>", rows.last["PublicRemarksNew"]
   end
 
+  def test_parse_doubly_encoded_bad_character_references
+    rows = Rets::Parser::Compact.parse_document(SAMPLE_COMPACT_WITH_DOUBLY_ENCODED_BAD_CHARACTER_REFERENCES)
+    assert_equal "foo  bar", rows.last["PublicRemarksNew"]
+  end
+
   def test_parse_property_with_lots_of_columns
     row = Rets::Parser::Compact.parse_document(SAMPLE_PROPERTY_WITH_LOTS_OF_COLUMNS).first
     assert_equal 800, row.keys.size
     assert_equal 800.times.map { |x| "K%03d" % x }, row.keys
+  end
+
+  def test_safely_decode_character_references!
+    assert_decoded "a", "&#97;"
+    assert_decoded "a", "&#097;"
+    assert_decoded "a", "&#x61;"
+    assert_decoded "a", "&#x061;"
+    assert_decoded "", "&#xDC04;"
+    assert_decoded "", "&#56324;"
+    assert_decoded "", "&#x2000FF;"
+  end
+
+
+  def assert_decoded(a, b)
+    recoded = Rets::Parser::Compact.safely_decode_character_references!(b)
+    assert_equal a, recoded
   end
 end
