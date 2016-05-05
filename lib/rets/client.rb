@@ -270,7 +270,7 @@ module Rets
                         "Type"   => "METADATA-#{type}",
                         "ID"     => "0"
                       })
-      clean_response(res.body)
+      clean_response(res).body
     end
 
     # The capabilies as provided by the RETS server during login.
