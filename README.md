@@ -7,6 +7,8 @@
 [![Build Status](https://secure.travis-ci.org/estately/rets.png?branch=master)](http://travis-ci.org/estately/rets)
 A pure-ruby library for fetching data from [RETS] servers.
 
+If you're looking for a slick CLI interface check out [retscli](https://github.com/summera/retscli), which is an awesome tool for exploring metadata or learning about RETS.
+
 [RETS]: http://www.rets.org
 
 ## REQUIREMENTS:
