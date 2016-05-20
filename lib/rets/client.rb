@@ -9,11 +9,13 @@ module Rets
 
     def initialize(options)
       @options = options
-      @capabilities = nil
       clean_setup
     end
 
     def clean_setup
+      if options.fetch(:login_after_error, false)
+        @capabilities = nil
+      end
       @metadata            = nil
       @tries               = nil
       @login_url           = options[:login_url]
