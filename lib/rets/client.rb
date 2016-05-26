@@ -13,7 +13,7 @@ module Rets
     end
 
     def clean_setup
-      if options.fetch(:login_after_error, false)
+      if options.fetch(:login_after_error, true)
         @capabilities = nil
       end
       @metadata            = nil
