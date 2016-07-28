@@ -13,7 +13,7 @@ Hoe.spec 'rets' do
   extra_deps << [ "http-cookie", "~> 1.0.0" ]
   extra_deps << [ "nokogiri",   "~> 1.5" ]
 
-  extra_dev_deps << [ "mocha", "~> 0.11" ]
+  extra_dev_deps << [ "mocha", "~> 1.1.0" ]
   extra_dev_deps << [ "vcr", "~> 2.2" ]
   extra_dev_deps << [ "webmock", "~> 1.8" ]
 
