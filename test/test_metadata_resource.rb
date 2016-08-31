@@ -53,12 +53,20 @@ class TestMetadataResource < MiniTest::Test
     assert_equal([rets_object], objects)
   end
 
+  def test_resource_build_objects_when_objects_were_not_loaded
+    resource_id = "id"
+    metadata    = {} # doesn't contain metadata for :object key
+
+    objects = Rets::Metadata::Resource.build_objects(resource_id, metadata)
+    assert_equal [], objects
+  end
+
   def test_resource_build
     fragment = { "ResourceID" => "test" }
 
     lookup_types = stub(:lookup_types)
     classes = stub(:classes)
-    objects = stub(:classes)
+    objects = stub(:objects)
     metadata = stub(:metadata)
 
     Rets::Metadata::Resource.stubs(:build_lookup_tree => lookup_types)

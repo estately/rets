@@ -29,7 +29,12 @@ module Rets
       end
 
       def self.find_rets_objects(metadata, resource_id)
-        metadata[:object].select { |object| object.resource == resource_id }.map(&:objects).flatten
+        objects = metadata[:object]
+        if objects
+          objects.select { |object| object.resource == resource_id }.map(&:objects).flatten
+        else
+          []
+        end
       end
 
       def self.build_lookup_tree(resource_id, metadata)
