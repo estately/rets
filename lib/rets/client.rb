@@ -86,7 +86,7 @@ module Rets
       find_with_given_retry(retries, opts)
     end
 
-    def find_with_given_retry(retries, opts)
+    def find_with_given_retry(retries, opts, original_exception = nil)
       begin
         find_every(opts)
       rescue NoRecordsFound => e
@@ -94,13 +94,13 @@ module Rets
           client_progress.no_records_found
           opts[:count] == COUNT.only ? 0 : []
         else
-          handle_find_failure(retries, opts, e)
+          handle_find_failure(retries, opts, original_exception || e)
         end
       rescue InvalidRequest, HttpError => e
-        handle_find_failure(retries, opts, e)
+        handle_find_failure(retries, opts, original_exception || e)
       rescue AuthorizationFailure => e
         login
-        handle_find_failure(retries, opts, e)
+        handle_find_failure(retries, opts, original_exception || e)
       end
     end
 
@@ -109,7 +109,7 @@ module Rets
         retries += 1
         client_progress.find_with_retries_failed_a_retry(e, retries)
         clean_setup
-        find_with_given_retry(retries, opts)
+        find_with_given_retry(retries, opts, e)
       else
         client_progress.find_with_retries_exceeded_retry_count(e)
         raise e
