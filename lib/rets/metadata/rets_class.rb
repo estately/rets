@@ -41,7 +41,7 @@ module Rets
       #
       # [out] The file to print to.  Defaults to $stdout.
       def print_tree(out = $stdout)
-        out.puts "  Class: #{name}"
+        out.puts "## Class: #{name}"
         out.puts "    Visible Name: #{visible_name}"
         out.puts "    Description : #{description}"
         tables.each do |table|

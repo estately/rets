@@ -85,7 +85,7 @@ module Rets
       #
       # [out] The file to print to.  Defaults to $stdout.
       def print_tree(out = $stdout)
-        out.puts "Resource: #{id} (Key Field: #{key_field})"
+        out.puts "# Resource: #{id} (Key Field: #{key_field})"
         rets_classes.each do |rets_class|
           rets_class.print_tree(out)
         end
