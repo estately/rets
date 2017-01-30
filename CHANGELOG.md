@@ -3,6 +3,7 @@
 * fix: fix retry logging
 * feature: allow retries to be configured for all query types in client settings
 * feature: allow configrable wait time between retries
+* feature: detect errors as error messages in a response body delivered with HTTP 200
 
 ### 0.10.1 / 2016-05-04
 
