@@ -1,15 +1,15 @@
 # -*- encoding: utf-8 -*-
-# stub: rets 0.10.1.20160503205231 ruby lib
+# stub: rets 0.11.0.20170130173054 ruby lib
 
 Gem::Specification.new do |s|
   s.name = "rets"
-  s.version = "0.10.1.20160503205231"
+  s.version = "0.11.0.20170130173054"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.require_paths = ["lib"]
   s.authors = ["Estately, Inc. Open Source"]
-  s.date = "2016-05-03"
-  s.description = "[![Build Status](https://secure.travis-ci.org/estately/rets.png?branch=master)](http://travis-ci.org/estately/rets)\nA pure-ruby library for fetching data from [RETS] servers.\n\n[RETS]: http://www.rets.org"
+  s.date = "2017-01-30"
+  s.description = "[![Build Status](https://secure.travis-ci.org/estately/rets.png?branch=master)](http://travis-ci.org/estately/rets)\nA pure-ruby library for fetching data from [RETS] servers.\n\nIf you're looking for a slick CLI interface check out [retscli](https://github.com/summera/retscli), which is an awesome tool for exploring metadata or learning about RETS.\n\n[RETS]: http://www.rets.org"
   s.email = ["opensource@estately.com"]
   s.executables = ["rets"]
   s.extra_rdoc_files = ["CHANGELOG.md", "Manifest.txt", "README.md"]
