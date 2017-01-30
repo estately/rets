@@ -105,7 +105,8 @@ module Rets
     end
 
     def handle_find_failure(retries, opts, e)
-      if retries < opts.fetch(:max_retries, 3)
+      max_retries = opts.fetch(:max_retries, options.fetch(:max_retries, 3))
+      if retries < max_retries
         retries += 1
         wait_before_next_request
         client_progress.find_with_retries_failed_a_retry(e, retries)
