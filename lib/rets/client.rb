@@ -107,12 +107,21 @@ module Rets
     def handle_find_failure(retries, opts, e)
       if retries < opts.fetch(:max_retries, 3)
         retries += 1
+        wait_before_next_request
         client_progress.find_with_retries_failed_a_retry(e, retries)
         clean_setup
         find_with_given_retry(retries, opts)
       else
         client_progress.find_with_retries_exceeded_retry_count(e)
         raise e
+      end
+    end
+
+    def wait_before_next_request
+      sleep_time = Float(options.fetch(:recoverable_error_wait_secs, 0))
+      if sleep_time > 0
+        logger.info "Waiting #{sleep_time} seconds before next attempt"
+        sleep sleep_time
       end
     end
 

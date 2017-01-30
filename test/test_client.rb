@@ -176,6 +176,13 @@ class TestClient < MiniTest::Test
     @client.find(:all, :foo => :bar)
   end
 
+  def test_find_waits_configured_time_before_next_request
+    @client.options[:recoverable_error_wait_secs] = 3.14
+    @client.expects(:sleep).with(3.14).times(3)
+    @client.stubs(:find_every).raises(Rets::MiscellaneousSearchError.new(0, 'Foo'))
+    @client.find(:all, :foo => :bar) rescue nil
+  end
+
   def test_find_eventually_reraises_errors
     @client.stubs(:find_every).raises(Rets::AuthorizationFailure.new(401, 'Not Authorized'))
     @client.stubs(:login)
