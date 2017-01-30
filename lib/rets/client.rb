@@ -132,7 +132,6 @@ module Rets
       params = {
         "SearchType"          => opts.fetch(:search_type),
         "Class"               => opts.fetch(:class),
-
         "Count"               => opts[:count],
         "Format"              => opts.fetch(:format, "COMPACT"),
         "Limit"               => opts[:limit],
