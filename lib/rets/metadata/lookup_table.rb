@@ -22,7 +22,7 @@ module Rets
       #
       # [out] The file to print to.  Defaults to $stdout.
       def print_tree(out = $stdout)
-        out.puts "    LookupTable: #{name}"
+        out.puts "### LookupTable: #{name}"
         out.puts "      Resource: #{resource_id}"
         out.puts "      Required: #{table_fragment['Required']}"
         out.puts "      Searchable: #{ table_fragment["Searchable"] }"
@@ -30,7 +30,7 @@ module Rets
         out.puts "      ShortName: #{ table_fragment["ShortName"] }"
         out.puts "      LongName: #{ long_name }"
         out.puts "      StandardName: #{ table_fragment["StandardName"] }"
-        out.puts "      Types:"
+        out.puts "####  Types:"
 
         lookup_types.each do |lookup_type|
           lookup_type.print_tree(out)

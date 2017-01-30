@@ -15,7 +15,7 @@ module Rets
       #
       # [out] The file to print to.  Defaults to $stdout.
       def print_tree(out = $stdout)
-        out.puts "    Table: #{name}"
+        out.puts "### Table: #{name}"
         out.puts "      Resource: #{resource_id}"
         out.puts "      ShortName: #{ table_fragment["ShortName"] }"
         out.puts "      LongName: #{ long_name }"
