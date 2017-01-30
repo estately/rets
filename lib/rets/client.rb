@@ -109,7 +109,7 @@ module Rets
       if retries < max_retries
         retries += 1
         wait_before_next_request
-        client_progress.find_with_retries_failed_a_retry(e, retries)
+        client_progress.find_with_retries_failed_a_retry(e, retries, max_retries)
         clean_setup
         find_with_given_retry(retries, opts)
       else
