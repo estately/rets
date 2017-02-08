@@ -21,20 +21,23 @@ class TestClient < MiniTest::Test
   end
 
   def test_capability_url_returns_parsed_url
-    client = Rets::Client.new(:login_url => "http://example.com", :capabilities => { "foo" => "/foo" })
+    client = Rets::Client.new(:capabilities => { "foo" => "http://example.com/foo" })
 
     assert_equal "http://example.com/foo", client.capability_url("foo")
   end
 
   def test_cached_capabilities_case_insensitive
-    client = Rets::Client.new(:login_url => "http://example.com", :capabilities => { "foo" => "/foo" })
+    client = Rets::Client.new(:capabilities => { "foo" => "http://example.com/foo" })
 
-    assert_equal client.capabilities.default_proc, Rets::Client::CASE_INSENSITIVE_PROC
+    assert_equal "http://example.com/foo", client.capability_url("FOO")
   end
 
-  def test_capabilities_calls_login_when_nil
-    @client.expects(:login)
-    @client.capabilities
+  def test_capabilities_set_from_login_when_nil
+    client = Rets::Client.new(
+      :login_url => "http://example.com/login",
+      :http_client  => MockHttpClient.new("http://example.com/login" => REAL_CAPABILITIES)
+    )
+    assert_equal client.capability_url("action"), "http://example.com/RETS/Action"
   end
 
   def test_capabilities_does_not_call_login_after_login
@@ -53,31 +56,30 @@ class TestClient < MiniTest::Test
   end
 
   def test_metadata_when_not_initialized_with_metadata
-    new_raw_metadata = stub(:new_raw_metadata)
+    client = Rets::Client.new(
+      :capabilities => { "GetMetadata" => "http://example.com/metadata" },
+      :http_client  => MockHttpClient.new("http://example.com/metadata" => "METADATA_CONTENT")
+    )
 
-    client = Rets::Client.new(:login_url => "http://example.com")
-    client.stubs(:retrieve_metadata).returns(new_raw_metadata)
-
-    assert_same new_raw_metadata, client.metadata.marshal_dump
+    assert_equal client.metadata(["SYSTEM"]).marshal_dump, {"SYSTEM"=>"METADATA_CONTENT"}
   end
 
   def test_initialize_with_old_metadata_cached_contstructs_new_metadata_from_request
-    metadata = stub(:current? => false)
-    new_raw_metadata = stub(:new_raw_metadata)
+    client = Rets::Client.new(
+      :capabilities => { "GetMetadata" => "http://example.com/metadata" },
+      :http_client  => MockHttpClient.new("http://example.com/metadata" => "NEW_METADATA_CONTENT"),
+      :metadata     => stub(:current? => false)
+    )
 
-    client = Rets::Client.new(:login_url => "http://example.com", :metadata => metadata)
-    client.stubs(:capabilities).returns({})
-    client.stubs(:retrieve_metadata).returns(new_raw_metadata)
-
-    assert_same new_raw_metadata, client.metadata.marshal_dump
+    assert_equal client.metadata(["SYSTEM"]).marshal_dump, {"SYSTEM"=>"NEW_METADATA_CONTENT"}
   end
 
   def test_initialize_with_current_metadata_cached_return_cached_metadata
-    metadata = stub(:current? => true)
-    client = Rets::Client.new(:login_url => "http://example.com", :metadata => metadata)
-    client.stubs(:capabilities => {})
+    cached_metadata = stub(:current? => true)
 
-    assert_same metadata, client.metadata
+    client = Rets::Client.new(:capabilities => {}, :metadata => cached_metadata)
+
+    assert_equal client.metadata, cached_metadata
   end
 
   def test_initialize_takes_logger

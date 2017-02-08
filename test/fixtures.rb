@@ -33,6 +33,14 @@ CAPABILITIES = <<-XML
 </RETS>
 XML
 
+REAL_CAPABILITIES = <<-XML
+<RETS ReplyCode="0" ReplyText="OK">
+  <RETS-RESPONSE>
+    Action = http://example.com/RETS/Action
+  </RETS-RESPONSE>
+</RETS>
+XML
+
 COUNT_ONLY = <<XML
 <RETS ReplyCode="0" ReplyText="Success">
 <COUNT Records="1234" />
