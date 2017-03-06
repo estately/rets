@@ -129,4 +129,9 @@ class CookieManagement < MiniTest::Test
     #check added cookie exists
     assert_equal "879392834723043209", client.http_cookie('RETS-Session-ID')
   end
+
+  def test_uses_locking_cookie_saver
+    client = Rets::HttpClient.from_options({}, @logger)
+    assert_equal Rets::LockingCookieSaver, client.http.cookie_manager.format
+  end
 end
