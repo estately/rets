@@ -273,14 +273,6 @@ class TestClient < MiniTest::Test
     assert_equal "foo", @client.object("1", :foo => :bar)
   end
 
-  def test_decorate_result_handles_bad_metadata
-    result = {'foo' => 'bar'}
-    rets_class = stub
-    rets_class.expects(:find_table).with('foo').returns(nil)
-    response = @client.decorate_result(result, rets_class)
-    assert_equal response, result
-  end
-
   def test_clean_setup_with_receive_timeout
    HTTPClient.any_instance.expects(:receive_timeout=).with(1234)
    @client = Rets::Client.new(

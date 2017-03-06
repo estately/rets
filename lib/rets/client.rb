@@ -5,7 +5,7 @@ module Rets
     COUNT = Struct.new(:exclude, :include, :only).new(0,1,2)
     CASE_INSENSITIVE_PROC = Proc.new { |h,k| h.key?(k.downcase) ? h[k.downcase] : nil }
 
-    attr_accessor :cached_metadata, :client_progress, :logger, :login_url, :options
+    attr_accessor :cached_metadata, :client_progress, :logger, :login_url, :options, :resolver
 
     def initialize(options)
       @options = options
@@ -23,6 +23,7 @@ module Rets
       @cached_capabilities = options[:capabilities]
       @logger              = options[:logger] || FakeLogger.new
       @client_progress     = ClientProgressReporter.new(logger, options[:stats_collector], options[:stats_prefix])
+      @resolver            = options.fetch(:resolver, DefaultResolver)
       @http_client         = Rets::HttpClient.from_options(options, logger)
       @caching             = Metadata::Caching.make(options)
     end
@@ -158,7 +159,7 @@ module Rets
         )
         if opts[:resolve]
           rets_class = find_rets_class(opts[:search_type], opts[:class])
-          decorate_results(results, rets_class)
+          resolver.resolve(results, rets_class, client_progress)
         else
           results
         end
@@ -167,24 +168,6 @@ module Rets
 
     def find_rets_class(resource_name, rets_class_name)
       metadata.tree[resource_name].find_rets_class(rets_class_name)
-    end
-
-    def decorate_results(results, rets_class)
-      results.map do |result|
-        decorate_result(result, rets_class)
-      end
-    end
-
-    def decorate_result(result, rets_class)
-      result.each do |key, value|
-        table = rets_class.find_table(key)
-        if table
-          result[key] = table.resolve(value.to_s)
-        else
-          #can't resolve just leave the value be
-          client_progress.could_not_resolve_find_metadata(key)
-        end
-      end
     end
 
     # Returns an array of all objects associated with the given resource.
