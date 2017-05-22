@@ -17,7 +17,7 @@ module Rets
       # deserialized, return nil.
       def load(file)
         Marshal.load(file)
-      rescue TypeError
+      rescue TypeError, ArgumentError
         nil
       end
       
