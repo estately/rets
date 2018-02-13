@@ -314,7 +314,7 @@ module Rets
         if val.downcase.match(/^https?:\/\//)
           uri = URI.parse(val)
         else
-          uri = URI.parse(login_url)
+          uri = URI.parse(login_url.to_s)
           uri.path = val
         end
       rescue URI::InvalidURIError
