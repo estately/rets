@@ -34,6 +34,8 @@ module Rets
       res = http_get(login_url)
       Parser::ErrorChecker.check(res)
 
+      client_progress.login
+
       new_capabilities = extract_capabilities(Nokogiri.parse(res.body))
       unless new_capabilities
         raise UnknownResponse, "Cannot read rets server capabilities."

@@ -44,5 +44,9 @@ module Rets
     def bad_cached_metadata(cached_metadata)
       @logger.info cached_metadata ? "Rets::Client: Cached metadata out of date" : "Rets::Client: Cached metadata unavailable"
     end
+
+    def login
+      @stats.count("#{@stats_prefix}login")
+    end
   end
 end
