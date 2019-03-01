@@ -43,7 +43,7 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<hoe>, ["~> 3.15"])
     end
   else
-    s.add_dependency(%q<httpclient>, ["~> 2.7.0"])
+    s.add_dependency(%q<httpclient>, ["~> 2.8.0"])
     s.add_dependency(%q<http-cookie>, ["~> 1.0.0"])
     s.add_dependency(%q<nokogiri>, ["~> 1.5"])
     s.add_dependency(%q<rdoc>, ["~> 4.0"])
