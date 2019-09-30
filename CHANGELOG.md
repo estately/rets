@@ -1,3 +1,7 @@
+### 0.11.2 / 2019-09-30
+
+* fix: fix broken 0.11.1 release
+
 ### 0.11.1 / 2019-09-30
 
 * feature: allow newer versions of httpclient to be used
