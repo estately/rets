@@ -1,5 +1,5 @@
 # -*- encoding: utf-8 -*-
-# stub: rets 0.11.0.20170130173054 ruby lib
+# stub: rets 0.11.1.20170130173054 ruby lib
 
 Gem::Specification.new do |s|
   s.name = "rets"

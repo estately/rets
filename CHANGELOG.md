@@ -1,4 +1,8 @@
-### 0.11.0 / NOT RELEASED YET
+### 0.11.1 / 2019-09-30
+
+* feature: allow newer versions of httpclient to be used
+
+### 0.11.0 / 2017-01-17
 
 * fix: fix retry logging
 * feature: allow retries to be configured for all query types in client settings
