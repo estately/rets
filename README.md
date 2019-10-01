@@ -68,7 +68,7 @@ as the built-in Metadata::FileCache class:
       # not be loaded.
       def load(&block)
       end
-      
+
     end
 
 By default, the metadata is serialized using Marshal.  You may select
@@ -100,8 +100,17 @@ To define your own serializer, create an object with this interface:
       # deserialized, return nil.
       def load(file)
       end
-      
+
     end
+
+## RELEASING A NEW VERSION:
+
+1. Update `VERSION` in `lib/rets.rb`
+    - Use [semantic versioning](https://semver.org) as a guide for which number to bump
+1. `rake gem:spec` to regenerate the gemspec
+1. Add an entry to `CHANGELOG.md` detailing the changes
+1. `rake release_sanity VERSION=x.y.z` to check for any problems that need to be addressed before releasing
+1. `rake release VERSION=x.y.z` to release the new version to RubyGems
 
 ## LICENSE:
 
