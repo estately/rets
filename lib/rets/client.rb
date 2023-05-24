@@ -74,7 +74,6 @@ module Rets
     # will be sent as +Offset+.
     #
     def find(quantity, opts = {})
-      binding.pry
       case quantity
         when :first  then find_with_retries(opts.merge(:limit => 1)).first
         when :all    then find_with_retries(opts)
